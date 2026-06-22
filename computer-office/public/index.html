@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fleet Office — vos agents en 3D</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A2%3C/text%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./style.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./vendor/three.module.js",
+          "three/addons/": "./vendor/addons/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <canvas id="scene"></canvas>
+    <div id="vignette"></div>
+    <div id="grade"></div>
+
+    <!-- HUD -->
+    <header id="topbar">
+      <div class="brand">
+        <span class="logo">🏢</span>
+        <div>
+          <h1>FLEET&nbsp;OFFICE</h1>
+          <p class="sub">vos agents Claude Code, en vrai, en 3D</p>
+        </div>
+      </div>
+      <div class="stats" id="stats"></div>
+      <button id="cto-btn" title="Dashboard CTO">📊 CTO</button>
+      <div class="conn" id="conn"><span class="dot"></span><span id="conn-label">connexion…</span></div>
+    </header>
+
+    <div id="cto-panel" class="hidden">
+      <button id="cto-close" aria-label="fermer">×</button>
+      <h2>📊 Dashboard CTO</h2>
+      <div id="cto-body"></div>
+    </div>
+
+    <aside id="roster">
+      <h2>Équipe <span id="roster-count">0</span><button id="add-team" title="Mission d'équipe">👥 Équipe</button><button id="add-agent" title="Recruter un agent">+ Agent</button></h2>
+      <input id="roster-search" type="search" placeholder="🔍 filtrer (nom, métier, statut…)" autocomplete="off" />
+      <div id="roster-list"></div>
+      <div id="roster-teams"></div>
+      <div class="legend">
+        <div><i class="sw work"></i> au travail</div>
+        <div><i class="sw cowork"></i> collabore</div>
+        <div><i class="sw done"></i> terminé</div>
+        <div><i class="sw idle"></i> repos / analyse</div>
+        <div><i class="sw blocked"></i> attente</div>
+        <div><i class="sw failed"></i> erreur</div>
+      </div>
+    </aside>
+
+    <section id="feed">
+      <h2>Activité</h2>
+      <div id="feed-list"></div>
+    </section>
+
+    <div id="detail" class="hidden">
+      <button id="detail-close" aria-label="fermer">×</button>
+      <h3 id="detail-name"></h3>
+      <div id="detail-role" class="pill"></div>
+      <dl id="detail-body"></dl>
+      <div id="detail-feed-title">💬 Live Claude Code <span class="live-dot"></span></div>
+      <div id="detail-feed"></div>
+      <div id="detail-control"></div>
+    </div>
+
+    <div id="spawn-modal" class="hidden">
+      <div class="spawn-card">
+        <button id="spawn-close" aria-label="fermer">×</button>
+        <h3>➕ Recruter un agent</h3>
+        <p class="spawn-sub">Lance un vrai process Claude Code dans un workspace dédié.</p>
+        <label>Nom<input id="sp-name" placeholder="Alex" /></label>
+        <label>Métier<input id="sp-role" placeholder="Backend Senior" /></label>
+        <label>📍 Machine (Tailscale)<select id="sp-host"><option value="local">cette machine · local</option></select></label>
+        <label>Workspace (dossier absolu)
+          <span class="cwd-row"><input id="sp-cwd" placeholder="/home/imhax0x90/Bureau/Projects/api" /><button type="button" class="fs-browse" data-target="sp-cwd" title="Parcourir…">…</button></span>
+        </label>
+        <label>Mission<textarea id="sp-prompt" rows="3" placeholder="Analyse le repo et propose un plan d'amélioration de l'API."></textarea></label>
+        <div class="spawn-row">
+          <label>Modèle<select id="sp-model"><option value="sonnet">Sonnet (rapide)</option><option value="opus">Opus (puissant)</option><option value="claude-fable-5">Fable 5</option><option value="haiku">Haiku (éco)</option></select></label>
+          <label>Permissions<select id="sp-perm">
+            <option value="acceptEdits">Édite fichiers (sûr)</option>
+            <option value="plan">Plan (lecture seule)</option>
+            <option value="default">Strict (tout demande validation)</option>
+          </select></label>
+        </div>
+        <label>Greffer à une équipe<select id="sp-team"><option value="">Aucune (autonome)</option></select></label>
+        <label>📎 Pièces jointes <small style="color:var(--muted);font-weight:400">(tous formats — livrées sur la machine de l'agent)</small>
+          <div id="sp-attach" class="dropzone">
+            <div id="sp-attach-list" class="ctrl-tray hidden"></div>
+            <div class="dz-hint">glisser-déposer ici, ou <button type="button" id="sp-clip" class="linkbtn">choisir des fichiers</button></div>
+          </div>
+          <input id="sp-file" type="file" multiple hidden />
+        </label>
+        <p class="spawn-note">🔒 Aucun mode ne permet à l'agent de pousser/merger/déployer sans validation — conforme au cahier des charges.</p>
+        <div id="spawn-err"></div>
+        <button id="spawn-go">🚀 Lancer la mission</button>
+      </div>
+    </div>
+
+    <div id="team-modal" class="hidden">
+      <div class="spawn-card">
+        <button id="team-close" aria-label="fermer">×</button>
+        <h3>👥 Mission d'équipe</h3>
+        <p class="spawn-sub">Plusieurs agents Claude Code collaborent sur le MÊME workspace, coordonnés via <code>TEAM_NOTES.md</code>.</p>
+        <label>Nom de l'équipe<input id="tm-name" placeholder="Team SaaS" /></label>
+        <label>Objectif commun<textarea id="tm-goal" rows="3" placeholder="Construire une API REST de todos avec front React et CI."></textarea></label>
+        <label>Workspace partagé (dossier absolu)
+          <span class="cwd-row"><input id="tm-cwd" placeholder="/home/imhax0x90/Bureau/Projects/saas" /><button type="button" class="fs-browse" data-target="tm-cwd" title="Parcourir…">…</button></span>
+        </label>
+        <label>Rôles de l'équipe</label>
+        <div id="tm-roles" class="tm-roles"></div>
+        <div class="addrole">
+          <input id="tm-newrole" placeholder="nouveau métier (ex. Data Scientist)" autocomplete="off" />
+          <button type="button" id="tm-addrole" class="linkbtn">＋ métier</button>
+        </div>
+        <label>👑 Chef d'équipe<select id="tm-chief"></select></label>
+        <div class="spawn-row">
+          <label>Modèle<select id="tm-model"><option value="sonnet">Sonnet</option><option value="opus">Opus</option><option value="claude-fable-5">Fable 5</option><option value="haiku">Haiku (éco)</option></select></label>
+          <label>Permissions<select id="tm-perm"><option value="acceptEdits">Édite fichiers (sûr)</option><option value="plan">Plan</option><option value="default">Strict</option></select></label>
+        </div>
+        <p class="spawn-note">🔒 Perms sûres : pas de push/merge/deploy sans validation.</p>
+        <div id="team-err"></div>
+        <button id="team-go">🚀 Lancer l'équipe</button>
+      </div>
+    </div>
+
+    <div id="fs-picker" class="hidden">
+      <div class="spawn-card" style="width:min(420px,92vw)">
+        <button id="fs-cancel" aria-label="fermer">×</button>
+        <h3>📁 Choisir un dossier</h3>
+        <div class="fs-path" id="fs-path"></div>
+        <div class="fs-list" id="fs-list"></div>
+        <button id="fs-pick">✓ Choisir ce dossier</button>
+      </div>
+    </div>
+
+    <div id="hint">glisser : pivoter · molette : zoom · clic : détails · <b>Y</b> : vue 1ʳᵉ personne</div>
+    <div id="fp-hint" class="hidden">🎮 Vue première personne · <b>ZQSD/WASD</b> bouger · souris regarder · <b>E</b> parler à un agent · <b>Y</b>/<b>Échap</b> sortir</div>
+
+    <!-- réticule de visée (vue 1re personne) -->
+    <div id="reticle" class="hidden"><span id="reticle-dot"></span><span id="reticle-prompt"></span></div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

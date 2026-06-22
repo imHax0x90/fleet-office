@@ -1,0 +1,33 @@
+# ── Dépendances ──────────────────────────────────────────────
+node_modules/
+**/node_modules/
+.venv/
+**/__pycache__/
+*.pyc
+
+# ── Build Android (Gradle / Capacitor) ───────────────────────
+.gradle/
+**/.gradle/
+android/build/
+android/app/build/
+android/capacitor-cordova-android-plugins/build/
+android/local.properties
+android/.idea/
+*.aab
+*.aar
+
+# On NE versionne PAS les APK générés à la volée…
+*.apk
+# …sauf l'APK debug distribuable, livré tel quel dans le repo :
+!mobile-controller/FleetCtrl-debug.apk
+
+# ── État runtime / journaux d'exploitation (non logiciels) ───
+computer-office/.admin-agent.json
+computer-office/OFFICE_LOG.md
+COORDINATION.md
+
+# ── Divers ───────────────────────────────────────────────────
+.DS_Store
+*.log
+.env
+.env.*

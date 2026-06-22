@@ -1,0 +1,50 @@
+{
+  "treadmill": {
+    "title": "Treadmill",
+    "author": "Google",
+    "license": "Public Domain",
+    "source": "https://poly.pizza/m/9hYy4Zmk67",
+    "glb": "https://static.poly.pizza/3e287848-b63e-4856-9aa8-f42fc18f9226.glb.br",
+    "bytes": 26412
+  },
+  "bench": {
+    "title": "Barbell",
+    "author": "dook",
+    "license": "Creative Commons Attribution",
+    "source": "https://poly.pizza/m/AX5jGlJZlk",
+    "glb": "https://static.poly.pizza/4915af72-c243-407c-960c-272a4ce73d97.glb.br",
+    "bytes": 135252
+  },
+  "kettlebell": {
+    "title": "Kettlebell",
+    "author": "Google",
+    "license": "Creative Commons Attribution",
+    "source": "https://poly.pizza/m/08Gs4e3L1N8",
+    "glb": "https://static.poly.pizza/9044238c-c3ef-47ae-a8e1-5a140cb64e78.glb.br",
+    "bytes": 28852
+  },
+  "dumbbell": {
+    "title": "Dumbbell",
+    "author": "dook",
+    "license": "Public Domain",
+    "source": "https://poly.pizza/m/PW9q10xh5g",
+    "glb": "https://static.poly.pizza/a9b5fb20-6ecb-4f20-996f-88743f2519da.glb.br",
+    "bytes": 43692
+  },
+  "barbell": {
+    "title": "Barbell",
+    "author": "dook",
+    "license": "Creative Commons Attribution",
+    "source": "https://poly.pizza/m/S3myL1W9d7",
+    "glb": "https://static.poly.pizza/49e1f458-3b13-44da-9b54-230c8860a08e.glb.br",
+    "bytes": 272836
+  },
+  "squat_rack": {
+    "title": "Treadmill",
+    "author": "Google",
+    "license": "Public Domain",
+    "source": "https://poly.pizza/m/9hYy4Zmk67",
+    "glb": "https://static.poly.pizza/3e287848-b63e-4856-9aa8-f42fc18f9226.glb.br",
+    "bytes": 26412
+  }
+}

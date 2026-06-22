@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#05030c" />
+  <title>Fleet Office — console</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9B%B0%EF%B8%8F%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./lite.css" />
+</head>
+<body>
+  <div class="grid-bg" aria-hidden="true"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <!-- ===== Barre supérieure ===== -->
+  <header id="top">
+    <div class="brand">
+      <span class="hex">⬢</span>
+      <div class="brand-txt">
+        <h1>FLEET<b>OFFICE</b></h1>
+        <button id="net" class="net" type="button"><span class="dot"></span><span id="net-label">connexion…</span></button>
+      </div>
+    </div>
+
+    <section id="stats" class="stats"></section>
+
+    <div class="top-actions">
+      <a class="ghost-btn" href="/3d" title="Ouvrir le bureau 3D">🏢 Bureau&nbsp;3D</a>
+      <button id="team-btn" class="ghost-btn" type="button" title="Lancer une équipe d'agents">👥 Équipe</button>
+      <button id="deploy-btn" class="cta-btn" type="button">＋ Déployer</button>
+    </div>
+  </header>
+
+  <!-- ===== Outils (recherche + filtres) ===== -->
+  <div id="toolbar" class="toolbar">
+    <div class="search">
+      <span class="s-ic">⌕</span>
+      <input id="q" type="search" placeholder="filtrer par nom, métier, projet, machine…" autocomplete="off" />
+    </div>
+    <div id="filters" class="filters">
+      <button class="chip sel" data-f="all">Tous</button>
+      <button class="chip" data-f="working">⚡ Actifs</button>
+      <button class="chip" data-f="idle">🧘 Au repos</button>
+      <button class="chip" data-f="attn">🙋 À voir</button>
+      <button class="chip" data-f="remote">📍 Distants</button>
+    </div>
+  </div>
+
+  <!-- ===== Équipes actives ===== -->
+  <section id="teams" class="teams"></section>
+
+  <!-- ===== Grille des agents ===== -->
+  <main id="roster" class="roster"></main>
+
+  <!-- ===== Inspecteur latéral (pilotage + live) ===== -->
+  <aside id="inspector" class="inspector hidden" aria-hidden="true">
+    <div class="insp-head">
+      <div class="insp-id">
+        <div id="i-av" class="i-av">?</div>
+        <div>
+          <h2 id="i-name">—</h2>
+          <div id="i-sub" class="insp-sub"></div>
+        </div>
+      </div>
+      <button class="icon-btn close" data-close="inspector" aria-label="fermer">✕</button>
+    </div>
+
+    <div id="i-meta" class="i-meta"></div>
+    <div id="i-perm" class="perm-note"></div>
+
+    <div class="feed-title">⬢ LIVE CLAUDE CODE <span id="i-live" class="live-dot"></span></div>
+    <div id="i-feed" class="feed"></div>
+
+    <div id="i-suggest" class="suggest hidden"></div>
+    <div class="pilot">
+      <div id="i-attach" class="tray hidden"></div>
+      <div class="pilot-row">
+        <button id="i-clip" class="clip" type="button" title="Joindre des fichiers (ou glisser-déposer / coller)">📎</button>
+        <textarea id="i-input" rows="1" autocomplete="off" placeholder="message / follow-up…   ( / = commandes,  📎/glisser/coller = fichiers )"></textarea>
+        <button id="i-send" class="send" aria-label="envoyer">➤</button>
+      </div>
+      <div id="i-slash" class="slash hidden"></div>
+      <div id="i-busy" class="busy hidden">⏳ l'agent réfléchit — ton message s'enchaîne</div>
+      <input id="i-file" type="file" multiple hidden />
+    </div>
+
+    <div class="actions">
+      <button id="i-stop" class="act warn hidden">⏹ stop</button>
+      <button id="i-train" class="act ok">🏋️ gym</button>
+      <button id="i-kill" class="act danger">✖ fermer</button>
+    </div>
+  </aside>
+
+  <!-- ===== Modale DÉPLOIEMENT ===== -->
+  <div id="spawn" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <div><h2>⊕ Déployer un agent</h2><div class="modal-sub">un vrai process Claude Code, local ou sur le réseau Tailscale</div></div>
+      <button class="icon-btn close" data-close="spawn" aria-label="fermer">✕</button>
+    </div>
+    <label class="fld">
+      <span class="fld-l">📍 Machine</span>
+      <div id="sp-hosts" class="hosts"></div>
+    </label>
+    <div class="fld-grid2">
+      <label class="fld"><span class="fld-l">Nom</span><input id="sp-name" placeholder="Aria" /></label>
+      <label class="fld"><span class="fld-l">Métier</span><input id="sp-role" placeholder="Backend Senior" /></label>
+    </div>
+    <label class="fld"><span class="fld-l">Workspace <small id="sp-cwd-hint"></small></span><input id="sp-cwd" placeholder="/home/user/projet" /></label>
+    <label class="fld"><span class="fld-l">Mission</span><textarea id="sp-prompt" rows="3" placeholder="Analyse le repo et propose un plan."></textarea></label>
+    <label class="fld">
+      <span class="fld-l">📎 Pièces jointes <small>(tous formats — livrées sur la machine de l'agent)</small></span>
+      <div id="sp-attach" class="dropzone">
+        <div id="sp-attach-list" class="tray hidden"></div>
+        <div class="dz-hint">glisser-déposer ici, ou <button type="button" id="sp-clip" class="linkbtn">choisir des fichiers</button></div>
+      </div>
+      <input id="sp-file" type="file" multiple hidden />
+    </label>
+    <div class="fld-grid2">
+      <label class="fld"><span class="fld-l">Modèle</span>
+        <select id="sp-model"><option value="sonnet">Sonnet</option><option value="opus">Opus</option><option value="claude-fable-5">Fable 5</option><option value="haiku">Haiku</option></select>
+      </label>
+      <label class="fld"><span class="fld-l">Permissions</span>
+        <select id="sp-perm"><option value="acceptEdits">Édite (sûr)</option><option value="plan">Plan (lecture)</option><option value="bypassPermissions">⚠ Bypass</option><option value="default">Strict</option></select>
+      </label>
+    </div>
+    <div id="sp-err" class="err"></div>
+    <button id="sp-go" class="go">🚀 Lancer la mission</button>
+  </div>
+
+  <!-- ===== Modale ÉQUIPE ===== -->
+  <div id="team" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <div><h2>👥 Mission d'équipe</h2><div class="modal-sub">plusieurs agents Claude Code collaborent sur le MÊME workspace, coordonnés via TEAM_NOTES.md</div></div>
+      <button class="icon-btn close" data-close="team" aria-label="fermer">✕</button>
+    </div>
+    <label class="fld"><span class="fld-l">Nom de l'équipe</span><input id="tm-name" placeholder="Team SaaS" /></label>
+    <label class="fld"><span class="fld-l">Objectif commun</span><textarea id="tm-goal" rows="3" placeholder="Construire une API REST de todos avec front React et CI."></textarea></label>
+    <label class="fld"><span class="fld-l">Workspace partagé <small id="tm-cwd-hint"></small></span><input id="tm-cwd" placeholder="/home/user/projet" /></label>
+    <label class="fld">
+      <span class="fld-l">Rôles de l'équipe</span>
+      <div id="tm-roles" class="tm-roles"></div>
+      <div class="addrole">
+        <input id="tm-newrole" placeholder="nouveau métier (ex. Data Scientist)" autocomplete="off" />
+        <button type="button" id="tm-addrole" class="linkbtn">＋ métier</button>
+      </div>
+    </label>
+    <label class="fld"><span class="fld-l">👑 Chef d'équipe</span><select id="tm-chief"></select></label>
+    <div class="fld-grid2">
+      <label class="fld"><span class="fld-l">Modèle</span>
+        <select id="tm-model"><option value="sonnet">Sonnet</option><option value="opus">Opus</option><option value="claude-fable-5">Fable 5</option><option value="haiku">Haiku</option></select>
+      </label>
+      <label class="fld"><span class="fld-l">Permissions</span>
+        <select id="tm-perm"><option value="acceptEdits">Édite (sûr)</option><option value="plan">Plan (lecture)</option><option value="default">Strict</option></select>
+      </label>
+    </div>
+    <div id="tm-err" class="err"></div>
+    <button id="tm-go" class="go">🚀 Lancer l'équipe</button>
+  </div>
+
+  <div id="backdrop" class="backdrop hidden"></div>
+  <div id="toast" class="toast"></div>
+
+  <script src="./lite.js"></script>
+</body>
+</html>

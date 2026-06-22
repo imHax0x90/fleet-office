@@ -1,0 +1,7 @@
+{
+  "appId": "dev.imhax.fleetctrl",
+  "appName": "FleetCtrl",
+  "webDir": "www",
+  "server": { "androidScheme": "http", "cleartext": true },
+  "android": { "allowMixedContent": true }
+}
