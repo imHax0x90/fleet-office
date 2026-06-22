@@ -367,7 +367,7 @@ function spawnClaude(rec) {
   const args = claudeArgs(rec);
   if (!isRemote(rec)) return spawn(CLAUDE_BIN, args, { cwd: rec.cwd, env: process.env, stdio: ["pipe", "pipe", "pipe"] });
   // `bash -lc` => login shell distant : charge le PATH user (ex. ~/.local/bin) sinon `claude`
-  // installé en natif (kali) est introuvable en SSH non-login. Voir COORDINATION.md (blocage #1).
+  // installé dans ~/.local/bin est introuvable en SSH non-login.
   const inner = 'export PATH="$HOME/.local/bin:$PATH"; cd ' + shq(rec.cwd || "~") + " && exec " + REMOTE_CLAUDE + " " + args.map(shq).join(" ");
   const remoteCmd = "bash -lc " + shq(inner);
   return spawn("ssh", [...SSH_OPTS, rec.host, remoteCmd], { env: process.env, stdio: ["pipe", "pipe", "pipe"] });
@@ -854,11 +854,17 @@ function agentFromJob(entry) {
 }
 
 // === MULTI-NŒUD : agrège les sessions Claude de TOUS les nœuds tailnet (via SSH, async) ===
-// Permet de voir dans le bureau les agents qui tournent sur kali, archlinux, debian-lab,
-// black-station… pas seulement ceux de la machine qui héberge l'orchestrateur.
+// Permet de voir dans le bureau les agents qui tournent sur d'autres nœuds du tailnet,
+// pas seulement ceux de la machine qui héberge l'orchestrateur.
 const REMOTE_SCAN_TTL = 5000;
 // Nœuds infra/proxy/services SANS agents Claude : on ne les scanne pas (évite SSH muets/hung).
-const REMOTE_SCAN_SKIP = new Set(["debians", "pve", "proxy", "jellyfin", "nextcloud", "orchestratorbe", "microservices", "pixel-8-pro", "nsa-hidden-van", "fleetoffice", "fitness-backend", "jarvis-screen"]);
+// Surchargeable via FLEET_SCAN_SKIP="hostA,hostB,…" (liste de hosts Tailscale à ignorer).
+const REMOTE_SCAN_SKIP = new Set(
+  (process.env.FLEET_SCAN_SKIP || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+);
 // commande distante : sort le JSON de chaque session dont le process est encore vivant (pid dans /proc)
 // Remonte les sessions VIVANTES + DORMANTES récentes (<6h), avec un flag _alive (pid dans /proc).
 // Les dormantes (terminal quitté) sont reprenables depuis l'app -> handoff PC<->tel.
