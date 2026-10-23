@@ -219,6 +219,17 @@ function toolLine(name, input) {
   if (name === "Bash") return "$ " + trunc(input.command, 160);
   return describeTool(name, input);
 }
+// Retire les blocs injectés par le harness dans les tours "user" (ne viennent pas de l'utilisateur) :
+// <system-reminder>, wrappers de slash-commands, tags de contenu collé. Renvoie "" s'il ne reste rien.
+function cleanPrompt(s) {
+  return String(s || "")
+    .replace(/<system-reminder>[\s\S]*?<\/system-reminder>/gi, "")
+    .replace(/<command-(?:message|name|args)>[\s\S]*?<\/command-[^>]*>/gi, "")
+    .replace(/<local-command-stdout>[\s\S]*?<\/local-command-stdout>/gi, "")
+    .replace(/<\/?pasted_content[^>]*>/gi, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
 // coeur du parsing JSONL -> feed d'affichage (partagé entre le tail "live" et le chargement d'historique)
 function parseTranscriptChunk(text) {
   const feed = [];
@@ -228,9 +239,9 @@ function parseTranscriptChunk(text) {
     const at = o.timestamp || null;
     if (o.type === "user" && o.message) {
       const c = o.message.content;
-      if (typeof c === "string") { if (c.trim()) feed.push({ kind: "prompt", text: clip(c, 20000), at }); }
+      if (typeof c === "string") { const t = cleanPrompt(c); if (t) feed.push({ kind: "prompt", text: clip(t, 20000), at }); }
       else if (Array.isArray(c)) for (const b of c) {
-        if (b.type === "text" && b.text.trim()) feed.push({ kind: "prompt", text: clip(b.text, 20000), at });
+        if (b.type === "text") { const t = cleanPrompt(b.text); if (t) feed.push({ kind: "prompt", text: clip(t, 20000), at }); }
         else if (b.type === "tool_result") { const t = clip(resultText(b.content), 8000); if (t) feed.push({ kind: "result", text: t, at }); }
       }
     } else if (o.type === "assistant" && o.message) {
