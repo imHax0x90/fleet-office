@@ -21,7 +21,7 @@ const fmtCost = (n) => { n = n || 0; return n >= 1 ? "$" + n.toFixed(0) : "$" + 
 const fmtTok = (n) => { n = n || 0; return n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e3 ? (n / 1e3).toFixed(0) + "k" : "" + n; };
 const initial = (s) => (String(s || "?").trim()[0] || "?").toUpperCase();
 const projectOf = (a) => a.project || (a.cwd ? (String(a.cwd).replace(/\/+$/, "").split("/").pop() || a.cwd) : "—");
-function mdToHtml(src) {
+function mdLegacy(src) {
   let s = esc(String(src == null ? "" : src));
   const blocks = [];
   s = s.replace(/```([\s\S]*?)```/g, (_, c) => { blocks.push(c.replace(/^\n/, "")); return "\u0000CB" + (blocks.length - 1) + "\u0000"; });
@@ -38,6 +38,7 @@ function mdToHtml(src) {
   s = s.replace(/\u0000CB(\d+)\u0000/g, (_, i) => "<pre><code>" + blocks[+i] + "</code></pre>");
   return s;
 }
+function mdToHtml(src) { if (window.FleetMD) { try { return FleetMD.render(src); } catch {} } return mdLegacy(src); }
 const ago = (ms) => { if (!ms) return ""; const s = (Date.now() - ms) / 1000; if (s < 60) return "à l'instant"; if (s < 3600) return Math.floor(s / 60) + " min"; if (s < 86400) return Math.floor(s / 3600) + " h"; return Math.floor(s / 86400) + " j"; };
 const MODELS = [{ v: "opus", l: "Opus 5" }, { v: "sonnet", l: "Sonnet 5" }, { v: "fable", l: "Fable 5" }, { v: "haiku", l: "Haiku 4.5" }];
 const chg = (c) => c ? `<span class="ac-stat"><span class="add">+${c.add || 0}</span> <span class="del">−${c.del || 0}</span></span>` : "";
