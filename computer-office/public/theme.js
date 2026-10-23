@@ -79,10 +79,12 @@
 
   const all = () => PRESETS.map((p) => ({ ...p, preset: true })).concat(state.custom.map((c) => ({ ...c, preset: false })));
   const find = (id) => all().find((p) => p.id === id);
+  let ov = null; // palette appliquée temporairement (par conversation), sans modifier le thème global
+  const effective = () => (ov && find(ov)) || find(state.id) || PRESETS[0];
   const FS = { s: "12.5px", m: "13.5px", l: "15px" };
 
   function apply(p) {
-    p = p || find(state.id) || PRESETS[0];
+    p = p || effective();
     const { vars, light } = derive(p);
     const root = document.documentElement;
     for (const k in vars) root.style.setProperty(k, vars[k]);
@@ -96,24 +98,30 @@
   const api = {
     presets: PRESETS,
     list: all,
-    current: () => find(state.id) || PRESETS[0],
+    current: () => effective(),
+    global: () => find(state.id) || PRESETS[0],
+    get: (id) => find(id) || null,
+    override(id) { const n = id && find(id) ? id : null; if (n === ov) return; ov = n; apply(); },
     fontSize: () => state.fs,
     use(id) { if (!find(id)) return; state.id = id; save(); apply(); },
     setFont(k) { if (!FS[k]) return; state.fs = k; save(); apply(); },
     // duplique la palette `fromId` en palette personnalisée et l'active
-    create(fromId) {
+    create(fromId, opts) {
       const base = find(fromId) || PRESETS[0];
       const n = state.custom.length + 1;
       const c = { id: "c" + Date.now().toString(36), name: "Perso " + n, bg: base.bg, ink: base.ink, acc: base.acc, mono: !!base.mono };
-      state.custom.push(c); state.id = c.id; save(); apply(); return c;
+      state.custom.push(c);
+      if (opts && opts.keep) { save(); return c; } // palette de conversation : on ne change pas le thème global
+      state.id = c.id; save(); apply(); return c;
     },
     update(id, patch) {
       const c = state.custom.find((x) => x.id === id); if (!c) return;
-      Object.assign(c, patch); save(); if (state.id === id) apply();
+      Object.assign(c, patch); save(); if (state.id === id || ov === id) apply();
     },
     remove(id) {
       state.custom = state.custom.filter((x) => x.id !== id);
       if (state.id === id) state.id = DEFAULT_ID;
+      if (ov === id) ov = null;
       save(); apply();
     },
     // thème xterm dérivé de la palette courante

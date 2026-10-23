@@ -408,3 +408,10 @@ body.resizing { cursor: col-resize; user-select: none; } body.resizing iframe { 
 .th-btns { display: flex; gap: 8px; margin-top: 12px; }
 .th-sec { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--mut2); margin: 16px 0 8px; }
 html[data-mono="1"] .sess-head .sh-av { filter: grayscale(1); }
+
+/* ===== palettes par conversation : marqueur visuel ===== */
+.tab.tcol::before { content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px; border-radius: 0 2px 2px 0; background: var(--tc); }
+.tab.tcol { box-shadow: inset 0 2px 0 color-mix(in srgb, var(--tc) 55%, transparent); }
+.tab.tcol.sel { box-shadow: inset 0 2px 0 var(--tc); }
+.acard.tcol, .bcard.tcol { border-left: 3px solid var(--tc); }
+#th-scope { margin: 0 0 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; } #th-scope .modal-sub { flex-basis: 100%; }

@@ -111,6 +111,16 @@ function relT(t) {
 const LSJ = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k) || ""); return v == null ? d : v; } catch { return d; } };
 const LSW = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
 let favs = new Set(LSJ("fleet.favs", [])), wsCollapsed = LSJ("fleet.wsCollapsed", {});
+// ---- palettes par conversation : marqueur visuel (onglets, sidebar, board) + thème appliqué à l'ouverture
+let sessThemes = LSJ("fleet.sessThemes", {}), thScope = "global";
+const sessPal = (id) => { const T = window.FleetTheme, pid = sessThemes[id]; return (T && pid && T.get(pid)) || null; };
+function applySessionTheme(id) { if (window.FleetTheme) FleetTheme.override(id && sessPal(id) ? sessThemes[id] : null); }
+function setSessionTheme(id, pid) {
+  if (pid) sessThemes[id] = pid; else delete sessThemes[id];
+  LSW("fleet.sessThemes", sessThemes); applySessionTheme(id);
+  renderTabbar._sig = null; renderTabbar(); renderSidebar(); if (view === "board" && !detailId) renderBoard();
+}
+const tcAttr = (id) => { const p = sessPal(id); return p ? ` tcol" style="--tc:${p.acc}` : ""; };
 function toggleFav(id) { favs.has(id) ? favs.delete(id) : favs.add(id); LSW("fleet.favs", [...favs]); renderSidebar(); }
 
 function agentCard(a) {
@@ -121,7 +131,7 @@ function agentCard(a) {
   const subs = (a.subAgents || []).length ? a.subAgents.map((s) => `<div class="subrow" data-sub="${esc(s.id)}"><span class="sd" style="background:${(STATUS[s.status] || STATUS.idle).c}"></span>${esc(s.name || s.role || "sous-agent")}</div>`).join("") : "";
   const badge = a.teamName ? `<span class="ac-badge" title="${esc(a.teamName)}">${a.chief ? "👑" : "👥"}</span>` : (a.fanoutId ? `<span class="ac-badge" title="fan-out">⑂</span>` : "");
   const proj = `<div class="ac-proj">${w.label && w.label.toLowerCase() !== String(a.name).toLowerCase() ? esc(w.label) + " · " : ""}${esc(relT(a.updatedAt) || "—")}</div>`;
-  return `<button class="acard ${detailId === a.id ? "sel" : ""} ${a.busy ? "working" : ""}" data-card="${esc(a.id)}">
+  return `<button class="acard ${detailId === a.id ? "sel" : ""} ${a.busy ? "working" : ""}${tcAttr(a.id)}" data-card="${esc(a.id)}">
     ${review ? `<span class="ac-review">à revoir</span>` : ""}
     <div class="ac-top"><span class="ac-dot" style="background:${st(a).c}"></span><span class="ac-name">${esc(a.name)}</span>${badge}<span class="ac-star ${fav ? "on" : ""}" data-star="${esc(a.id)}" title="${fav ? "Retirer des favoris" : "Épingler"}">${fav ? "★" : "☆"}</span></div>
     ${proj}${branch}
@@ -212,7 +222,7 @@ function boardCard(a, col) {
   const sub = (col !== "ws" ? w.ws + (lab ? " · " + lab : "") : lab) || "";
   const actions = col === "review"
     ? `<div class="bc-actions"><button class="review" data-review="${esc(a.id)}">Revoir</button><button class="merge" data-merge="${esc(a.id)}">Merger</button></div>` : "";
-  return `<div class="bcard" data-bcard="${esc(a.id)}">
+  return `<div class="bcard${tcAttr(a.id)}" data-bcard="${esc(a.id)}">
     <div class="bc-top"><span class="bc-dot" style="background:${st(a).c}"></span><span class="bc-name">${esc(a.name)}</span><span class="bc-model">${esc(a.model || "—")}</span></div>
     ${sub ? `<div class="bc-proj">${esc(sub)}</div>` : ""}${branch}
     <div class="bc-foot">${a.changes ? `<span class="bc-stat"><span class="add">+${a.changes.add || 0}</span> <span class="del">−${a.changes.del || 0}</span></span>` : `<span style="color:var(--mut2)">${esc(st(a).l)} · ${esc(relT(a.updatedAt) || "—")}</span>`}<span class="bc-host">${esc(a.host || "local")}</span></div>
@@ -222,7 +232,7 @@ function boardCard(a, col) {
 // ---- sélection / session ------------------------------------------------------
 function select(id) {
   const a = agentById(id); if (!a) return;
-  detailId = id; slashList = a.slashCommands || [];
+  detailId = id; applySessionTheme(id); slashList = a.slashCommands || [];
   centerTab = "conv"; diffData = null; pendingComments = []; openCommentKey = null;
   teardownTerminal();
   renderConv._html = null; updateQuickReplies._sig = null; $("c-quickreply").classList.add("hidden");
@@ -235,7 +245,7 @@ function select(id) {
   addTab(id); renderTabbar(); renderSidebar(); closeDrawers();
 }
 function clearDetail() {
-  detailId = null; centerTab = "conv"; diffData = null; teardownTerminal();
+  detailId = null; applySessionTheme(null); centerTab = "conv"; diffData = null; teardownTerminal();
   clearInterval(feedTimer); clearInterval(hostTimer);
   $("app").classList.remove("ctx-open");
   applyCenterVisibility(); renderSidebar(); renderTabbar();
@@ -253,10 +263,12 @@ function renderSessHead(a) {
       <div class="sh-sub">${dot}${esc(st(a).l)}${a.busy ? " · réfléchit" : ""} ${branch} <span class="sh-chip">${esc(a.model || "—")}${a.effort ? " · " + esc(a.effort) : ""}</span> ${prov} ${changes} <span class="sh-chip">🖥 ${esc(a.host || "local")}</span></div>
     </div>
     <div class="sh-act">
+      <button class="icon-btn" id="h-theme" title="palette de cette conversation">◐</button>
       <button class="icon-btn" id="h-refresh" title="rafraîchir">⟳</button>
       <button class="icon-btn" id="h-ctx" title="détails">ⓘ</button>
       <button class="icon-btn" id="h-team" title="équipe">👥</button>
     </div>`;
+  $("h-theme").onclick = () => { thScope = "conv"; openTheme(); };
   $("h-refresh").onclick = () => { pollFeed(); pollHost(a); if (centerTab === "diff") loadDiff(true); };
   $("h-ctx").onclick = () => { $("app").classList.toggle("ctx-open"); if ($("app").classList.contains("ctx-open")) renderCtx(a); };
   $("h-team").onclick = openTeam;
@@ -651,7 +663,7 @@ function wireFtree(el, rerenderFn) {
 
 // ---- vues (nav) ---------------------------------------------------------------
 function setView(v) {
-  view = v; detailId = null; teardownTerminal(); clearInterval(feedTimer); clearInterval(hostTimer);
+  view = v; detailId = null; applySessionTheme(null); teardownTerminal(); clearInterval(feedTimer); clearInterval(hostTimer);
   $("nav").querySelectorAll(".nav-item").forEach((b) => b.classList.toggle("sel", b.dataset.view === v));
   clearInterval(machTimer); applyCenterVisibility(); renderSidebar(); renderTabbar();
   if (v === "board") renderBoard();
@@ -911,6 +923,7 @@ function paletteSource() {
   items.push({ kind: "action", ic: "⑂", name: "Fan-out parallèle", sub: "N variantes à comparer", run: () => { closePalette(); openSpawn(); setSpawnMode("fanout"); } });
   items.push({ kind: "action", ic: "👥", name: "Lancer une équipe", run: () => { closePalette(); openTeam(); } });
   items.push({ kind: "action", ic: "◐", name: "Apparence — palettes", sub: "thème, couleurs, taille du texte", run: () => { closePalette(); openTheme(); } });
+  if (window.FleetTheme && detailId) FleetTheme.list().forEach((p) => items.push({ kind: "conversation", ic: "◐", name: "Palette de cette conversation : " + p.name, run: () => { closePalette(); setSessionTheme(detailId, p.id); } }));
   if (window.FleetTheme) FleetTheme.list().forEach((p) => items.push({ kind: "thème", ic: "◐", name: "Thème : " + p.name, run: () => { closePalette(); FleetTheme.use(p.id); } }));
   if (detailId) items.push({ kind: "action", ic: "×", name: "Fermer l'onglet courant", run: () => { closePalette(); closeTab(detailId); } });
   [["board", "Board"], ["machines", "Machines"], ["skills", "Skills"], ["audit", "Audit"], ["design", "Design"]].forEach(([v, l]) => items.push({ kind: "vue", ic: "›", name: "Aller à " + l, run: () => { closePalette(); setView(v); } }));
@@ -959,10 +972,10 @@ function renderTabbar() {
   if (ags.length) { const keep = openTabs.filter((id) => ags.some((a) => a.id === id)); if (keep.length !== openTabs.length) { openTabs = keep; saveTabs(); } }
   const [vi, vl] = VIEW_LABEL[view] || VIEW_LABEL.board;
   const tabs = openTabs.map(agentById).filter(Boolean);
-  const sig = [view, detailId, tabs.map((a) => a.id + a.name + a.status + (a.busy ? 1 : 0) + (isReview(a) ? 1 : 0)).join("|")].join("~");
+  const sig = [view, detailId, tabs.map((a) => a.id + a.name + (sessThemes[a.id] || "") + a.status + (a.busy ? 1 : 0) + (isReview(a) ? 1 : 0)).join("|")].join("~");
   if (renderTabbar._sig === sig) return; renderTabbar._sig = sig;
   el.innerHTML = `<div class="tab pin ${detailId ? "" : "sel"}" data-vtab><span class="tic">${vi}</span><span class="tn">${vl}</span></div>` +
-    tabs.map((a) => `<div class="tab ${detailId === a.id ? "sel" : ""} ${a.busy ? "work" : ""}" data-tab="${esc(a.id)}" draggable="true" title="${esc(a.name)}${a.branch ? " · " + esc(a.branch) : ""}"><span class="td" style="background:${st(a).c}"></span><span class="tn">${esc(a.name)}</span>${isReview(a) ? `<span class="tr" title="à revoir">◇</span>` : ""}<button class="tx" data-tx="${esc(a.id)}" type="button" aria-label="fermer l'onglet">×</button></div>`).join("") +
+    tabs.map((a) => `<div class="tab ${detailId === a.id ? "sel" : ""} ${a.busy ? "work" : ""}${tcAttr(a.id)}" data-tab="${esc(a.id)}" draggable="true" title="${esc(a.name)}${a.branch ? " · " + esc(a.branch) : ""}"><span class="td" style="background:${st(a).c}"></span><span class="tn">${esc(a.name)}</span>${isReview(a) ? `<span class="tr" title="à revoir">◇</span>` : ""}<button class="tx" data-tx="${esc(a.id)}" type="button" aria-label="fermer l'onglet">×</button></div>`).join("") +
     `<button class="tab-add" id="tab-add" type="button" title="Nouvelle tâche">＋</button><div class="tab-fill"></div>`;
   el.querySelector("[data-vtab]").onclick = () => setView(view);
   $("tab-add").onclick = () => openSpawn();
@@ -981,19 +994,27 @@ function renderTabbar() {
 }
 
 // ---- apparence : palettes -----------------------------------------------------
-function openTheme() { renderThemePanel(); openModal("theme"); }
+function openTheme() { if (!detailId) thScope = "global"; renderThemePanel(); openModal("theme"); }
 function renderThemePanel() {
   const T = window.FleetTheme; if (!T) return;
-  const cur = T.current(), list = T.list();
+  const sid = detailId, conv = thScope === "conv" && !!sid;
+  if (thScope === "conv" && !sid) thScope = "global";
+  const cur = conv ? (sessPal(sid) || T.global()) : T.global(), list = T.list();
+  let sc = $("th-scope"); if (!sc) { sc = document.createElement("div"); sc.id = "th-scope"; $("th-grid").parentNode.insertBefore(sc, $("th-grid")); }
+  sc.innerHTML = sid ? `<div class="segs"><button class="seg ${conv ? "" : "sel"}" data-scope="global" type="button">Global</button><button class="seg ${conv ? "sel" : ""}" data-scope="conv" type="button">Cette conversation</button></div>${conv && sessThemes[sid] ? `<button class="ghost-btn" id="th-inherit" type="button">↩ Hériter du global</button>` : ""}<div class="modal-sub" style="margin:8px 0 0">${conv ? "La palette s'applique quand cette conversation est ouverte et colore son onglet." : "Thème par défaut de l'app."}</div>` : "";
+  sc.querySelectorAll("[data-scope]").forEach((b) => (b.onclick = () => { thScope = b.dataset.scope; renderThemePanel(); }));
+  if ($("th-inherit")) $("th-inherit").onclick = () => { setSessionTheme(sid, null); renderThemePanel(); };
+  const pick = (id) => (conv ? setSessionTheme(sid, id) : T.use(id));
   const sw = (p) => { const d = T.derive(p).vars; return `<div class="th-sw"><i style="background:${d["--bg"]}"></i><i style="background:${d["--panel2"]}"></i><i style="background:${d["--ink"]}"></i><i style="background:${d["--acc"]}"></i></div>`; };
   $("th-grid").innerHTML = list.map((p) => `<button class="th-card ${p.id === cur.id ? "sel" : ""}" data-pal="${esc(p.id)}" type="button">${sw(p)}<div class="th-nm">${esc(p.name)}${p.preset ? "" : " <small>perso</small>"}</div></button>`).join("") +
     `<button class="th-card add" data-pal-new type="button">＋ Nouvelle palette</button>`;
-  $("th-grid").querySelectorAll("[data-pal]").forEach((b) => (b.onclick = () => { T.use(b.dataset.pal); renderThemePanel(); }));
-  $("th-grid").querySelector("[data-pal-new]").onclick = () => { T.create(cur.id); renderThemePanel(); };
+  $("th-grid").querySelectorAll("[data-pal]").forEach((b) => (b.onclick = () => { pick(b.dataset.pal); renderThemePanel(); }));
+  const dup = () => { const c = T.create(cur.id, conv ? { keep: true } : null); if (conv) setSessionTheme(sid, c.id); renderThemePanel(); };
+  $("th-grid").querySelector("[data-pal-new]").onclick = dup;
   const ed = $("th-edit");
   if (cur.preset) {
     ed.innerHTML = `<h3>${esc(cur.name)}</h3><div class="modal-sub" style="margin:0 0 10px">Palette intégrée. Duplique-la pour ajuster fond, texte et accent.</div><div class="th-btns"><button class="ghost-btn" id="th-dup" type="button">⎘ Dupliquer et personnaliser</button></div>`;
-    $("th-dup").onclick = () => { T.create(cur.id); renderThemePanel(); };
+    $("th-dup").onclick = dup;
   } else {
     ed.innerHTML = `<h3>Personnaliser</h3>
       <div class="th-row"><span>Nom</span><input type="text" id="th-name" value="${esc(cur.name)}" maxlength="24" /></div>
@@ -1019,7 +1040,7 @@ function refreshThemeSwatch(id, nameOnly) {
   const d = T.derive(p).vars, s = card.querySelectorAll(".th-sw i");
   [d["--bg"], d["--panel2"], d["--ink"], d["--acc"]].forEach((c, i) => { if (s[i]) s[i].style.background = c; });
 }
-$("open-theme").onclick = openTheme;
+$("open-theme").onclick = () => { thScope = "global"; openTheme(); };
 window.addEventListener("fleet-theme", () => { if (termInstance) { try { termInstance.options.theme = FleetTheme.xterm(); } catch {} } });
 
 // ---- barre mobile -------------------------------------------------------------
