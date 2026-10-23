@@ -3,168 +3,123 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#05030c" />
+  <meta name="theme-color" content="#0a0a0b" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>FleetCtrl</title>
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icon.svg" />
   <link rel="apple-touch-icon" href="./icon.svg" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./app.css" />
+  <style>
+    :root { --bg:#0a0a0b; --panel:#151517; --line:#2b2b2f; --ink:#ececed; --mut:#9b9ba1; --mut2:#64646b; --acc:#a51c22; --acc2:#c62f36; }
+    * { box-sizing: border-box; }
+    html, body { margin:0; height:100%; background:var(--bg); color:var(--ink); font-family:"Inter",system-ui,-apple-system,sans-serif; overflow:hidden; }
+    #frame { position:fixed; inset:0; width:100%; height:100%; border:0; background:var(--bg); }
+    /* bouton réglages flottant (respecte l'encoche) */
+    #gear { position:fixed; top:max(10px,env(safe-area-inset-top)); right:10px; z-index:10; width:40px; height:40px; border-radius:50%;
+      background:rgba(21,21,23,.82); backdrop-filter:blur(6px); border:1px solid var(--line); color:var(--ink); font-size:17px; cursor:pointer;
+      display:grid; place-items:center; box-shadow:0 6px 20px -8px rgba(0,0,0,.8); }
+    #gear:active { transform:scale(.92); }
+    /* splash / écran de connexion */
+    #splash { position:fixed; inset:0; z-index:20; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+      padding:30px calc(22px + env(safe-area-inset-right)) 30px calc(22px + env(safe-area-inset-left)); text-align:center;
+      background:radial-gradient(900px 520px at 80% -10%,#17090a,transparent 58%),var(--bg); transition:opacity .3s; }
+    #splash.hide { opacity:0; pointer-events:none; }
+    #splash .logo { width:60px; height:60px; border-radius:14px; display:grid; place-items:center; font-size:30px; background:#141416; border:1px solid var(--line); color:var(--acc2); }
+    #splash h1 { margin:6px 0 0; font-size:21px; letter-spacing:.14em; font-weight:700; } #splash h1 b { color:var(--acc2); }
+    #splash .sub { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--mut2); }
+    #splash .st { font-size:13px; color:var(--mut); margin-top:4px; min-height:18px; }
+    /* feuille réglages */
+    #sheet { position:fixed; inset:0; z-index:30; display:none; align-items:flex-end; background:rgba(0,0,0,.55); }
+    #sheet.open { display:flex; }
+    .sheet-card { width:100%; background:var(--panel); border-top:1px solid var(--line); border-radius:18px 18px 0 0; padding:20px 20px calc(24px + env(safe-area-inset-bottom)); box-shadow:0 -20px 50px -20px #000; }
+    .sheet-card h2 { margin:0 0 4px; font-size:17px; } .sheet-card p { margin:0 0 14px; font-size:12.5px; color:var(--mut2); }
+    .sheet-card label { display:block; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--mut2); margin:0 0 6px; }
+    .sheet-card input { width:100%; background:#0c0c0e; border:1px solid var(--line); border-radius:9px; color:var(--ink); font-size:15px; padding:12px 13px; font-family:"JetBrains Mono",ui-monospace,monospace; }
+    .presets { display:flex; flex-wrap:wrap; gap:7px; margin:11px 0 16px; }
+    .preset { padding:7px 12px; border-radius:18px; border:1px solid var(--line); background:#121214; color:var(--ink); font-size:12.5px; cursor:pointer; }
+    .preset:active { border-color:var(--acc2); }
+    .sheet-btns { display:flex; gap:10px; }
+    .sheet-btns button { flex:1; padding:14px; border-radius:11px; font-size:15px; font-weight:600; cursor:pointer; border:1px solid var(--line); background:#161618; color:var(--ink); }
+    .sheet-btns .go { background:linear-gradient(135deg,var(--acc),#6d0f13); border-color:var(--acc); color:#fff; }
+  </style>
 </head>
 <body>
-  <div class="grid-bg" aria-hidden="true"></div>
-  <div class="scanlines" aria-hidden="true"></div>
+  <iframe id="frame" allow="clipboard-read; clipboard-write; camera; microphone" referrerpolicy="no-referrer"></iframe>
+  <button id="gear" title="serveur" aria-label="réglages serveur">⚙</button>
 
-  <header id="top">
-    <div class="brand">
-      <span class="hex">⬢</span>
-      <div class="brand-txt">
-        <h1>FLEET<b>CTRL</b></h1>
-        <button id="net" class="net" type="button"><span class="dot"></span><span id="net-label">connexion…</span></button>
-      </div>
-    </div>
-    <div class="top-btns">
-      <button id="team-btn" class="icon-btn" aria-label="lancer une équipe" title="Équipe">👥</button>
-      <button id="set-btn" class="icon-btn" aria-label="réglages">⚙</button>
-    </div>
-  </header>
-
-  <section id="stats" class="stats"></section>
-
-  <section id="teams" class="teams"></section>
-
-  <main id="roster" class="roster"></main>
-
-  <button id="fab" class="fab" aria-label="déployer un agent">
-    <span>+</span>
-  </button>
-
-  <!-- ===== Feuille DÉTAIL / pilotage ===== -->
-  <div id="detail" class="sheet hidden" role="dialog" aria-modal="true">
-    <div class="sheet-grip"></div>
-    <div class="sheet-head">
-      <div>
-        <h2 id="d-name">—</h2>
-        <div id="d-sub" class="sheet-sub"></div>
-      </div>
-      <button class="icon-btn close" data-close="detail" aria-label="fermer">✕</button>
-    </div>
-    <div id="d-meta" class="d-meta"></div>
-
-    <div class="feed-title">⬢ LIVE CLAUDE CODE <span id="d-live" class="live-dot"></span></div>
-    <div id="d-feed" class="feed"></div>
-
-    <div id="d-suggest" class="suggest hidden"></div>
-    <div class="pilot">
-      <div id="d-attach" class="tray hidden"></div>
-      <div class="pilot-row">
-        <button id="d-clip" class="clip" type="button" aria-label="joindre des fichiers">📎</button>
-        <textarea id="d-input" rows="1" autocomplete="off" placeholder="message / follow-up…  ( / = commandes,  📎 = fichiers )"></textarea>
-        <button id="d-send" class="send" aria-label="envoyer">➤</button>
-      </div>
-      <div id="d-slash" class="slash hidden"></div>
-      <div id="d-busy" class="busy hidden">⏳ l'agent réfléchit — ton message s'enchaîne</div>
-      <input id="d-file" type="file" multiple hidden />
-    </div>
-
-    <div class="actions">
-      <button id="d-stop" class="act warn hidden">⏹ stop</button>
-      <button id="d-train" class="act ok">🏋️ gym</button>
-      <button id="d-kill" class="act danger">✖ fermer</button>
-    </div>
-    <div id="d-perm" class="perm-note"></div>
+  <div id="splash">
+    <div class="logo">⬢</div>
+    <h1>FLEET<b>CTRL</b></h1>
+    <div class="sub">AI Agent Command Center</div>
+    <div class="st" id="splash-st">connexion au serveur…</div>
   </div>
 
-  <!-- ===== Feuille DÉPLOIEMENT ===== -->
-  <div id="spawn" class="sheet hidden" role="dialog" aria-modal="true">
-    <div class="sheet-grip"></div>
-    <div class="sheet-head">
-      <div><h2>⊕ Déployer un agent</h2><div class="sheet-sub">un vrai process Claude Code, local ou sur le réseau</div></div>
-      <button class="icon-btn close" data-close="spawn" aria-label="fermer">✕</button>
-    </div>
-
-    <label class="fld">
-      <span class="fld-l">📍 Machine</span>
-      <div id="sp-hosts" class="hosts"></div>
-    </label>
-    <label class="fld"><span class="fld-l">Nom</span><input id="sp-name" placeholder="Aria" /></label>
-    <label class="fld"><span class="fld-l">Métier</span><input id="sp-role" placeholder="Backend Senior" /></label>
-    <label class="fld"><span class="fld-l">Workspace <small id="sp-cwd-hint"></small></span><input id="sp-cwd" placeholder="/home/user/projet" /></label>
-    <label class="fld"><span class="fld-l">Mission</span><textarea id="sp-prompt" rows="3" placeholder="Analyse le repo et propose un plan."></textarea></label>
-    <label class="fld">
-      <span class="fld-l">📎 Pièces jointes <small>tous formats</small></span>
-      <div id="sp-attach-list" class="tray hidden"></div>
-      <button type="button" id="sp-clip" class="go ghost">📎 Ajouter des fichiers</button>
-      <input id="sp-file" type="file" multiple hidden />
-    </label>
-    <div class="fld-grid">
-      <label class="fld"><span class="fld-l">Modèle</span>
-        <select id="sp-model"><option value="sonnet">Sonnet</option><option value="opus">Opus</option><option value="claude-fable-5">Fable 5</option><option value="haiku">Haiku</option></select>
-      </label>
-      <label class="fld"><span class="fld-l">Permissions</span>
-        <select id="sp-perm"><option value="acceptEdits">Édite (sûr)</option><option value="plan">Plan (lecture)</option><option value="bypassPermissions">⚠ Bypass</option><option value="default">Strict</option></select>
-      </label>
-    </div>
-    <div id="sp-err" class="err"></div>
-    <button id="sp-go" class="go">🚀 Lancer la mission</button>
-  </div>
-
-  <!-- ===== Feuille ÉQUIPE ===== -->
-  <div id="team" class="sheet hidden" role="dialog" aria-modal="true">
-    <div class="sheet-grip"></div>
-    <div class="sheet-head">
-      <div><h2>👥 Mission d'équipe</h2><div class="sheet-sub">des agents collaborent sur le MÊME workspace (coordonnés via TEAM_NOTES.md)</div></div>
-      <button class="icon-btn close" data-close="team" aria-label="fermer">✕</button>
-    </div>
-    <label class="fld"><span class="fld-l">Nom de l'équipe</span><input id="tm-name" placeholder="Team SaaS" /></label>
-    <label class="fld"><span class="fld-l">Objectif commun</span><textarea id="tm-goal" rows="3" placeholder="Construire une API REST avec front React et CI."></textarea></label>
-    <label class="fld"><span class="fld-l">Workspace partagé</span><input id="tm-cwd" placeholder="/home/user/projet" /></label>
-    <label class="fld">
-      <span class="fld-l">Rôles de l'équipe</span>
-      <div id="tm-roles" class="tm-roles"></div>
-      <div class="addrole">
-        <input id="tm-newrole" placeholder="nouveau métier (ex. Data Scientist)" autocomplete="off" />
-        <button type="button" id="tm-addrole" class="go ghost">＋ métier</button>
+  <div id="sheet">
+    <div class="sheet-card">
+      <h2>Serveur Fleet Office</h2>
+      <p>Adresse de l'orchestrateur sur ton réseau Tailscale (VPN). Le tél doit être connecté au tailnet.</p>
+      <label>URL du serveur</label>
+      <input id="srv" type="url" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="http://fleetoffice" />
+      <div class="presets" id="presets"></div>
+      <div class="sheet-btns">
+        <button id="cancel" type="button">Annuler</button>
+        <button id="save" class="go" type="button">Connecter</button>
       </div>
-    </label>
-    <label class="fld"><span class="fld-l">👑 Chef d'équipe</span><select id="tm-chief"></select></label>
-    <div class="fld-grid">
-      <label class="fld"><span class="fld-l">Modèle</span>
-        <select id="tm-model"><option value="sonnet">Sonnet</option><option value="opus">Opus</option><option value="claude-fable-5">Fable 5</option><option value="haiku">Haiku</option></select>
-      </label>
-      <label class="fld"><span class="fld-l">Permissions</span>
-        <select id="tm-perm"><option value="acceptEdits">Édite (sûr)</option><option value="plan">Plan (lecture)</option><option value="default">Strict</option></select>
-      </label>
     </div>
-    <div id="tm-err" class="err"></div>
-    <button id="tm-go" class="go">🚀 Lancer l'équipe</button>
   </div>
 
-  <!-- ===== Feuille RÉGLAGES ===== -->
-  <div id="settings" class="sheet hidden" role="dialog" aria-modal="true">
-    <div class="sheet-grip"></div>
-    <div class="sheet-head">
-      <div><h2>⚙ Réglages</h2><div class="sheet-sub">liaison à l'orchestrateur (computer-office)</div></div>
-      <button class="icon-btn close" data-close="settings" aria-label="fermer">✕</button>
-    </div>
-    <label class="fld">
-      <span class="fld-l">URL de l'orchestrateur</span>
-      <input id="st-url" placeholder="http://black-station:4173" inputmode="url" autocapitalize="off" autocorrect="off" />
-      <small class="hint">Adresse Tailscale de la machine qui fait tourner computer-office. Laisse vide si l'app est servie par son proxy.</small>
-    </label>
-    <div id="st-state" class="st-state"></div>
-    <button id="st-test" class="go ghost">⟳ Tester la connexion</button>
-    <button id="st-save" class="go">Enregistrer</button>
-    <div class="about">FLEET<b>CTRL</b> · pilotage de tes agents Claude Code sur ton mesh Tailscale/Proxmox.</div>
-  </div>
+  <script>
+    (function () {
+      var KEY = "fleet.server";
+      var DEFAULT = "http://fleetoffice";
+      var PRESETS = ["http://fleetoffice", "http://100.105.204.29", "http://microservices:4173/lite"];
+      var frame = document.getElementById("frame");
+      var splash = document.getElementById("splash");
+      var splashSt = document.getElementById("splash-st");
+      var sheet = document.getElementById("sheet");
+      var srv = document.getElementById("srv");
 
-  <div id="backdrop" class="backdrop hidden"></div>
-  <div id="toast" class="toast"></div>
+      function get() { try { return localStorage.getItem(KEY) || ""; } catch (e) { return ""; } }
+      function set(v) { try { localStorage.setItem(KEY, v); } catch (e) {} }
+      function norm(u) { u = (u || "").trim(); if (!u) return ""; if (!/^https?:\/\//i.test(u)) u = "http://" + u; return u.replace(/\/+$/, ""); }
 
-  <script src="./app.js"></script>
+      function load(url) {
+        url = norm(url); if (!url) return openSheet();
+        set(url);
+        splash.classList.remove("hide"); splashSt.textContent = "connexion à " + url + " …";
+        frame.src = url;
+        // l'iframe met parfois du temps / échoue silencieusement : on cache le splash au onload,
+        // et on propose les réglages si rien ne charge au bout de 8 s.
+        clearTimeout(load._t);
+        load._t = setTimeout(function () { splashSt.innerHTML = "ça traîne… vérifie le VPN ou <b>change de serveur</b> (⚙)."; }, 8000);
+      }
+      frame.addEventListener("load", function () {
+        if (!frame.src) return;
+        clearTimeout(load._t);
+        setTimeout(function () { splash.classList.add("hide"); }, 250);
+      });
+
+      function renderPresets() {
+        var box = document.getElementById("presets"); box.innerHTML = "";
+        PRESETS.forEach(function (p) {
+          var b = document.createElement("button"); b.className = "preset"; b.type = "button"; b.textContent = p;
+          b.onclick = function () { srv.value = p; };
+          box.appendChild(b);
+        });
+      }
+      function openSheet() { srv.value = get() || DEFAULT; renderPresets(); sheet.classList.add("open"); setTimeout(function () { srv.focus(); }, 100); }
+      function closeSheet() { sheet.classList.remove("open"); }
+
+      document.getElementById("gear").onclick = openSheet;
+      document.getElementById("cancel").onclick = function () { closeSheet(); if (!frame.src) splashSt.textContent = "aucun serveur configuré — appuie sur ⚙"; };
+      document.getElementById("save").onclick = function () { var u = norm(srv.value); if (!u) return; closeSheet(); load(u); };
+      srv.addEventListener("keydown", function (e) { if (e.key === "Enter") document.getElementById("save").click(); });
+
+      // boot : serveur mémorisé -> on charge ; sinon -> réglages (prérempli au défaut tailnet)
+      var saved = get();
+      if (saved) load(saved); else { splashSt.textContent = "premier lancement — choisis ton serveur"; openSheet(); }
+    })();
+  </script>
 </body>
 </html>

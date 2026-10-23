@@ -1862,6 +1862,34 @@ function spawnFanout({ name, cwd, prompt, host, perm, provider, effort, variants
   return { fanoutId, ids, name: label };
 }
 
+// ============================================================================
+// ORCA — DESIGN MODE : proxy d'aperçu + sélecteur d'élément.
+// On sert la page d'un serveur de dev (sur un nœud du tailnet) EN SAME-ORIGIN
+// depuis l'orchestrateur, avec <base href> (les assets chargent depuis l'origine)
+// et un script injecté : survol = surbrillance, clic = postMessage(outerHTML +
+// styles calculés) vers le parent, qui l'envoie à l'agent. Best-effort : parfait
+// pour du statique/SSR ; un SPA qui fait des fetch relatifs peut être limité (CORS).
+// ============================================================================
+const PICKER_JS = `(function(){var on=false,last=null,box=null;
+function mkbox(){if(box)return box;box=document.createElement('div');box.setAttribute('data-fleet-pick','1');box.style.cssText='position:fixed;z-index:2147483647;pointer-events:none;border:2px solid #c62f36;background:rgba(198,47,54,.14);border-radius:3px;box-shadow:0 0 0 1px rgba(198,47,54,.4)';document.documentElement.appendChild(box);return box;}
+function sel(el){if(!el||el===document.body)return 'body';var t=el.tagName.toLowerCase();if(el.id)return t+'#'+el.id;if(typeof el.className==='string'&&el.className.trim()){var c=el.className.trim().split(/\\s+/).slice(0,2).join('.');if(c)t+='.'+c;}return t;}
+function move(e){if(!on)return;var el=e.target;if(!el||el===last)return;last=el;var r=el.getBoundingClientRect();var b=mkbox();b.style.left=r.left+'px';b.style.top=r.top+'px';b.style.width=r.width+'px';b.style.height=r.height+'px';}
+function click(e){if(!on)return;e.preventDefault();e.stopPropagation();var el=e.target;var cs=getComputedStyle(el);var st={};['color','background-color','font-size','font-family','font-weight','padding','margin','border','border-radius','display'].forEach(function(k){st[k]=cs.getPropertyValue(k);});var r=el.getBoundingClientRect();try{parent.postMessage({__fleetPick:{selector:sel(el),tag:el.tagName.toLowerCase(),id:el.id||'',cls:(typeof el.className==='string'?el.className:''),text:(el.innerText||'').slice(0,240),html:el.outerHTML.slice(0,1400),styles:st,rect:{w:Math.round(r.width),h:Math.round(r.height)}}},'*');}catch(_){}}
+window.addEventListener('message',function(e){if(e.data&&typeof e.data.__fleetPickMode!=='undefined'){on=!!e.data.__fleetPickMode;if(!on&&box){box.style.width='0';box.style.height='0';}}},false);
+document.addEventListener('mousemove',move,true);document.addEventListener('click',click,true);
+})();`;
+function fetchHtmlDoc(u, cb, redirs) {
+  redirs = redirs || 0; if (redirs > 5) return cb(new Error("trop de redirections"));
+  let mod, parsed; try { parsed = new URL(u); mod = parsed.protocol === "https:" ? https : require("http"); } catch { return cb(new Error("url invalide")); }
+  const r = mod.get(u, { headers: { "User-Agent": "fleet-office-design", Accept: "text/html,*/*" }, timeout: 12000 }, (resp) => {
+    if (resp.statusCode >= 300 && resp.statusCode < 400 && resp.headers.location) { resp.resume(); try { return fetchHtmlDoc(new URL(resp.headers.location, u).toString(), cb, redirs + 1); } catch { return cb(new Error("redirection illisible")); } }
+    const ct = resp.headers["content-type"] || ""; const chunks = []; let len = 0;
+    resp.on("data", (d) => { len += d.length; if (len > 8 * 1024 * 1024) { resp.destroy(); } else chunks.push(d); });
+    resp.on("end", () => cb(null, { ct, body: Buffer.concat(chunks).toString("utf8"), finalUrl: u }));
+  });
+  r.on("error", (e) => cb(e)); r.on("timeout", () => { r.destroy(); cb(new Error("délai dépassé")); });
+}
+
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const p = url.pathname;
@@ -1959,6 +1987,24 @@ const server = http.createServer(async (req, res) => {
     const b = await readBody(req);
     try { const r = spawnFanout(b); broadcast(true); return sendJSON(res, 200, { ok: true, ...r }); }
     catch (e) { return sendJSON(res, 400, { ok: false, error: String(e.message || e) }); }
+  }
+  // Design mode : aperçu proxifié same-origin + script sélecteur injecté
+  if (p === "/api/proxy") {
+    const target = url.searchParams.get("url") || "";
+    if (!/^https?:\/\//i.test(target)) { res.writeHead(400, { "Content-Type": "text/plain; charset=utf-8" }); return res.end("url http(s) requise"); }
+    return fetchHtmlDoc(target, (err, r) => {
+      if (err) { res.writeHead(502, { "Content-Type": "text/html; charset=utf-8" }); return res.end(`<!doctype html><body style="font-family:system-ui;background:#0a0a0b;color:#bbb;padding:34px;line-height:1.6">⚠️ Impossible de charger cette page.<br><br><b style="color:#c62f36">${String(target).replace(/[<>&"]/g, "")}</b><br>${String(err.message || err).replace(/[<>&]/g, "")}<br><br><span style="color:#64646b">Le nœud est-il joignable depuis l'orchestrateur ? Le serveur de dev tourne-t-il ?</span>`); }
+      if (!/text\/html/i.test(r.ct)) { res.writeHead(200, { "Content-Type": r.ct || "application/octet-stream" }); return res.end(r.body); }
+      let html = r.body;
+      const base = '<base href="' + String(r.finalUrl).replace(/"/g, "&quot;") + '">';
+      const inject = "<scr" + "ipt>" + PICKER_JS + "</scr" + "ipt>";
+      if (/<head[^>]*>/i.test(html)) html = html.replace(/<head[^>]*>/i, (m) => m + base);
+      else if (/<html[^>]*>/i.test(html)) html = html.replace(/<html[^>]*>/i, (m) => m + "<head>" + base + "</head>");
+      else html = base + html;
+      html = /<\/body>/i.test(html) ? html.replace(/<\/body>/i, inject + "</body>") : html + inject;
+      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Content-Security-Policy": "frame-ancestors *" });
+      res.end(html);
+    });
   }
 
   if (p === "/api/ls") {

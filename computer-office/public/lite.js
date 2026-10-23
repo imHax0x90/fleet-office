@@ -663,12 +663,14 @@ function clearDetail() { detailId = null; centerTab = "conv"; diffData = null; p
 function setView(v) {
   view = v;
   $("nav").querySelectorAll(".nav-item").forEach((b) => b.classList.toggle("sel", b.dataset.view === v));
-  const isMach = v === "machines", isSkills = v === "skills", isAudit = v === "audit", isAgents = v === "agents";
+  const isMach = v === "machines", isSkills = v === "skills", isAudit = v === "audit", isAgents = v === "agents", isDesign = v === "design";
   $("mach").classList.toggle("hidden", !isMach);
   $("skills").classList.toggle("hidden", !isSkills);
   $("audit").classList.toggle("hidden", !isAudit);
+  $("design").classList.toggle("hidden", !isDesign);
   applyCenterVisibility();
   clearInterval(machTimer);
+  if (isDesign) { renderDesign(); $("center-head").innerHTML = `<div class="hid"><div class="hn">Design</div><div class="status">aperçu d'un serveur de dev · clique un élément → envoyé à l'agent</div></div>`; }
   if (isMach) { renderMachines(); machTimer = setInterval(renderMachines, 15000); $("center-head").innerHTML = `<div class="hid"><div class="hn">Machines</div><div class="status">nœuds Tailscale pilotables</div></div>`; }
   if (isSkills) { renderSkills(); $("center-head").innerHTML = `<div class="hid"><div class="hn">Bibliothèque de skills</div><div class="status">rangées par métier · installées dans ~/.claude/skills</div></div>`; }
   if (isAudit) { renderAudit(); $("center-head").innerHTML = `<div class="hid"><div class="hn">Audit</div><div class="status">journal des actions sur la flotte</div></div>`; }
@@ -1315,3 +1317,81 @@ document.addEventListener("keydown", (e) => {
 })();
 function closeDrawers() { const app = $("app"); if (app) app.classList.remove("rail-open", "ctx-open"); }
 function updateMobileTitle(a) { const t = $("mb-title"); if (t && a) t.innerHTML = esc(a.name) + "<small>" + esc(a.role || "") + (a.host ? " · " + esc(a.host) : "") + "</small>"; }
+
+// ---- DESIGN MODE : aperçu proxifié + sélecteur d'élément -> envoyé à l'agent ----
+let designUrl = (() => { try { return localStorage.getItem("fleet.designUrl") || ""; } catch { return ""; } })();
+let designPick = false, designTarget = null, lastPick = null;
+function designAgentOptions() {
+  const ags = (snap.agents || []).filter((a) => !a.internal);
+  if (!designTarget && detailId) designTarget = detailId;
+  if (!designTarget && ags[0]) designTarget = ags[0].id;
+  return ags.length ? ags.map((a) => `<option value="${esc(a.id)}" ${a.id === designTarget ? "selected" : ""}>${esc(a.name)} · ${esc(a.host || "local")}</option>`).join("") : `<option value="">(aucun agent)</option>`;
+}
+function renderDesign() {
+  const el = $("design");
+  if (!renderDesign._built) {
+    el.innerHTML = `
+      <div class="design-bar">
+        <input id="dz-url" class="dz-url" placeholder="http://<nœud>:3000  — serveur de dev sur le tailnet" value="${esc(designUrl)}" autocomplete="off" />
+        <button id="dz-load" class="dz-btn" type="button">Charger</button>
+        <button id="dz-pick" class="dz-btn" type="button">◉ Sélectionner</button>
+        <select id="dz-target" class="dz-target" title="agent destinataire"></select>
+      </div>
+      <div class="design-stage">
+        <iframe id="dz-frame" class="dz-frame" referrerpolicy="no-referrer"></iframe>
+        <div id="dz-empty" class="dz-empty"><span class="big">🎨</span>Entre l'URL d'un serveur de dev de ton tailnet (ex. <code>http://black-station:3000</code>) et clique <b>Charger</b>.<br><span style="color:var(--mut2);font-size:12px">Puis « ◉ Sélectionner » → clique un élément : son HTML + CSS calculés partent à l'agent choisi.</span></div>
+      </div>
+      <div id="dz-card" class="dz-card hidden"></div>`;
+    $("dz-load").onclick = loadDesign;
+    $("dz-url").onkeydown = (e) => { if (e.key === "Enter") loadDesign(); };
+    $("dz-pick").onclick = toggleDesignPick;
+    $("dz-target").onchange = (e) => { designTarget = e.target.value; };
+    renderDesign._built = true;
+    if (designUrl) loadDesign();
+  }
+  $("dz-target").innerHTML = designAgentOptions();
+}
+function loadDesign() {
+  const u = ($("dz-url").value || "").trim(); if (!u) return;
+  designUrl = /^https?:\/\//i.test(u) ? u : ("http://" + u);
+  try { localStorage.setItem("fleet.designUrl", designUrl); } catch { /* */ }
+  $("dz-empty").classList.add("hidden");
+  const f = $("dz-frame"); f.classList.add("show"); f.src = "/api/proxy?url=" + encodeURIComponent(designUrl);
+  designPick = false; $("dz-pick").classList.remove("on"); $("dz-card").classList.add("hidden");
+}
+function toggleDesignPick() {
+  designPick = !designPick; $("dz-pick").classList.toggle("on", designPick);
+  const f = $("dz-frame"); try { f.contentWindow.postMessage({ __fleetPickMode: designPick }, "*"); } catch { /* */ }
+  toast(designPick ? "◉ clique un élément dans l'aperçu" : "sélecteur désactivé");
+}
+window.addEventListener("message", (e) => {
+  const d = e.data; if (!d || !d.__fleetPick) return;
+  lastPick = d.__fleetPick; showPickCard(lastPick);
+});
+function showPickCard(pk) {
+  const card = $("dz-card"); if (!card) return;
+  const styles = Object.entries(pk.styles || {}).filter(([, v]) => v && v !== "none" && v !== "normal").map(([k, v]) => `<span class="dz-st"><b>${esc(k)}</b> ${esc(v)}</span>`).join("");
+  card.classList.remove("hidden");
+  card.innerHTML = `<div class="dz-card-h"><span class="dz-sel">${esc(pk.selector)}</span><span class="dz-sz">${pk.rect ? pk.rect.w + "×" + pk.rect.h + "px" : ""}</span><button class="dz-x" id="dz-close" type="button">✕</button></div>
+    <div class="dz-styles">${styles}</div>
+    <pre class="dz-html">${esc(pk.html)}</pre>
+    <textarea id="dz-note" class="dz-note" placeholder="Que changer sur cet élément ? (ex. « agrandis le bouton, fond rouge sang, coins arrondis »)"></textarea>
+    <button id="dz-send" class="dz-send" type="button">Envoyer à l'agent ➤</button>`;
+  $("dz-close").onclick = () => card.classList.add("hidden");
+  $("dz-send").onclick = sendDesign;
+  const n = $("dz-note"); if (n) n.focus();
+}
+function sendDesign() {
+  const id = $("dz-target").value || designTarget || detailId;
+  const a = agentById(id); if (!a) return toast("choisis un agent destinataire");
+  if (!lastPick) return;
+  const note = (($("dz-note") || {}).value || "").trim();
+  const styles = Object.entries(lastPick.styles || {}).map(([k, v]) => `${k}: ${v}`).join("; ");
+  let msg = `🎨 Design — élément \`${lastPick.selector}\` sur ${designUrl}` + (lastPick.rect ? ` (${lastPick.rect.w}×${lastPick.rect.h}px)` : "") + ` :\n\n\`\`\`html\n${lastPick.html}\n\`\`\`\nStyles calculés : ${styles}\n`;
+  if (note) msg += `\nDemande : ${note}`;
+  msg += `\n\nTrouve le code source correspondant dans ton workspace, applique le changement, puis committe sur ta branche.`;
+  post("/api/send", { id: a.id, prompt: msg, origin: "web" }).then((j) => {
+    if (!j.ok) return toast("Erreur : " + (j.error || ""));
+    toast("🎨 envoyé à " + a.name); $("dz-card").classList.add("hidden"); lastPick = null;
+  });
+}

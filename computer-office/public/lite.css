@@ -518,6 +518,31 @@ body.resizing .conv, body.resizing iframe { pointer-events: none; }
 .pal-foot { display: flex; gap: 16px; padding: 9px 16px; border-top: 1px solid var(--line); font-size: 11px; color: var(--mut2); }
 .pal-foot kbd { background: #1b1b1e; border: 1px solid var(--line2); border-radius: 4px; padding: 1px 5px; font-family: var(--mono); font-size: 10px; margin-right: 3px; }
 
+/* --- DESIGN MODE : aperçu proxifié + sélecteur --- */
+.design-wrap { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.design-bar { display: flex; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--line); background: var(--bg); align-items: center; }
+.dz-url { flex: 1; min-width: 0; background: #0c0c0e; border: 1px solid var(--line2); border-radius: 8px; color: var(--ink); font-family: var(--mono); font-size: 12.5px; padding: 9px 11px; }
+.dz-btn { padding: 9px 14px; border-radius: 8px; border: 1px solid var(--line2); background: #141416; color: var(--ink); font-size: 12.5px; cursor: pointer; white-space: nowrap; }
+.dz-btn:hover { border-color: var(--acc2); }
+.dz-btn.on { background: linear-gradient(135deg, var(--acc), var(--acc-deep)); border-color: var(--acc); color: #fff; }
+.dz-target { background: #0c0c0e; border: 1px solid var(--line2); border-radius: 8px; color: var(--ink); font-size: 12px; padding: 9px 10px; max-width: 200px; }
+.design-stage { flex: 1; position: relative; min-height: 0; background: #0c0c0e; }
+.dz-frame { width: 100%; height: 100%; border: 0; background: #fff; display: none; }
+.dz-frame.show { display: block; }
+.dz-empty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 12px; color: var(--mut); padding: 30px; }
+.dz-empty .big { font-size: 42px; opacity: .5; } .dz-empty code { background: #141416; padding: 1px 6px; border-radius: 5px; font-family: var(--mono); font-size: 12px; color: var(--acc2); }
+.dz-card { position: absolute; right: 16px; bottom: 16px; width: min(420px, calc(100% - 32px)); z-index: 6; background: #121214; border: 1px solid var(--line2); border-radius: 12px; box-shadow: var(--shadow); padding: 13px 14px; }
+.dz-card-h { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.dz-sel { font-family: var(--mono); font-size: 12.5px; color: var(--acc2); flex: 1; word-break: break-all; }
+.dz-sz { font-size: 11px; color: var(--mut2); }
+.dz-x { background: none; border: 0; color: var(--mut2); cursor: pointer; font-size: 14px; }
+.dz-styles { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 9px; max-height: 76px; overflow: auto; }
+.dz-st { font-family: var(--mono); font-size: 10.5px; color: var(--mut); background: #0c0c0e; border: 1px solid var(--line); border-radius: 5px; padding: 2px 6px; } .dz-st b { color: var(--mut2); font-weight: 500; }
+.dz-html { font-family: var(--mono); font-size: 11px; color: #b6b6bd; background: #0c0c0e; border: 1px solid var(--line); border-radius: 7px; padding: 9px; max-height: 120px; overflow: auto; white-space: pre-wrap; word-break: break-word; margin: 0 0 9px; }
+.dz-note { width: 100%; background: #0c0c0e; border: 1px solid var(--line2); border-radius: 7px; color: var(--ink); font-size: 12.5px; padding: 8px 10px; resize: vertical; min-height: 44px; margin-bottom: 9px; }
+.dz-send { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--acc); background: linear-gradient(135deg, var(--acc), var(--acc-deep)); color: #fff; font-weight: 600; font-size: 13px; cursor: pointer; }
+@media (max-width: 960px) { .dz-card { right: 8px; left: 8px; width: auto; bottom: 8px; } .dz-target { max-width: 120px; } }
+
 /* --- barre mobile (injectée) : hamburger + nom + contexte --- */
 .mbar { display: none; }
 
