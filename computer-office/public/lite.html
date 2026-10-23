@@ -2,122 +2,147 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#0a0e17" />
-  <title>Fleet Office — command center</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0d0f14" />
+  <title>Fleet Office — agent dev environment</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9B%B0%EF%B8%8F%3C/text%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.css" />
   <link rel="stylesheet" href="./lite.css" />
 </head>
 <body>
   <div id="app" class="app">
 
-    <!-- ===================== RAIL GAUCHE ===================== -->
+    <!-- ===================== SIDEBAR (gauche) ===================== -->
     <aside id="rail" class="rail">
-      <div class="rail-brand">
-        <div class="logo">⬢</div>
-        <div style="flex:1">
-          <h1>FLEET<b>OFFICE</b></h1>
-          <div class="sub">AI Agent Command Center</div>
-        </div>
-        <button id="net" class="net" type="button" title="état de la connexion temps réel"><span class="dot"></span><span id="net-label">…</span></button>
+      <div class="rail-top">
+        <div class="brand"><span class="logo">⬢</span><span class="bt">Fleet<b>Office</b></span></div>
+        <button id="net" class="net" type="button" title="connexion temps réel"><span class="dot"></span></button>
       </div>
 
-      <nav class="rail-nav" id="nav">
-        <button class="nav-item sel" data-view="agents"><span class="ic">▦</span> Agents <span class="count" id="nav-agents">0</span></button>
+      <button id="new-task" class="new-task" type="button">＋ Nouvelle tâche</button>
+
+      <nav id="nav" class="nav">
+        <button class="nav-item sel" data-view="board"><span class="ic">▦</span> Board <span class="count" id="nav-agents">0</span></button>
         <button class="nav-item" data-view="machines"><span class="ic">▤</span> Machines <span class="count" id="nav-machines">0</span></button>
         <button class="nav-item" data-view="skills"><span class="ic">◈</span> Skills <span class="count" id="nav-skills">0</span></button>
         <button class="nav-item" data-view="audit"><span class="ic">▧</span> Audit <span class="count" id="nav-audit">0</span></button>
         <button class="nav-item" data-view="design"><span class="ic">🎨</span> Design</button>
       </nav>
 
-      <div class="rail-search">
-        <div class="box"><span class="ic">⌕</span><input id="q" type="search" placeholder="rechercher un agent…" autocomplete="off" /></div>
+      <div class="rail-search"><span class="ic">⌕</span><input id="q" type="search" placeholder="rechercher…  (⌘K)" autocomplete="off" /></div>
+
+      <div class="rail-filter" id="rail-filter">
+        <button class="chip sel" data-filter="all">Tout</button>
+        <button class="chip" data-filter="active">Au travail</button>
+        <button class="chip" data-filter="review">En revue</button>
+        <button class="chip" data-filter="idle">Au repos</button>
       </div>
 
-      <div id="rail-groups" class="rail-groups"></div>
+      <div id="rail-list" class="rail-list"></div>
 
-      <div class="rail-user">
-        <div class="uav">🧑‍✈️</div>
-        <div style="flex:1"><div class="un">imHax0x90</div><div class="ur">Administrator</div></div>
-        <button id="deploy-btn" class="cta-btn" type="button" title="Déployer un agent">＋</button>
-      </div>
-      <div id="rail-resize" class="resize-handle resize-handle-r" title="glisser pour redimensionner"></div>
+      <div id="statusline" class="statusline"></div>
+      <div id="rail-resize" class="resize-handle resize-handle-r" title="redimensionner"></div>
     </aside>
 
-    <!-- ===================== CENTRE (conversation) ===================== -->
-    <main class="center">
-      <header id="center-head" class="center-head">
-        <div class="hid"><div class="hn">Fleet Office</div><div class="status">sélectionne un agent à gauche</div></div>
-        <div class="hact">
-          <button id="team-btn" class="ghost-btn" type="button" title="Lancer une équipe">👥 Équipe</button>
-          <a class="ghost-btn" href="/3d" title="Bureau 3D">🏢 3D</a>
+    <!-- ===================== MAIN (centre) ===================== -->
+    <main class="main">
+      <div id="mbar" class="mbar"></div>
+
+      <!-- Accueil -->
+      <div id="welcome" class="welcome">
+        <div class="wbig">🛰️</div>
+        <h1>Fleet Office</h1>
+        <p>L'environnement de dev pour une flotte d'agents — chacun dans son worktree git, sur n'importe quel nœud de ton tailnet.</p>
+        <div class="wactions">
+          <button id="w-new" class="primary" type="button">＋ Nouvelle tâche</button>
+          <button id="w-fanout" class="ghost-btn" type="button">⑂ Fan-out parallèle</button>
+          <button id="w-board" class="ghost-btn" type="button">▦ Ouvrir le board</button>
         </div>
-      </header>
-
-      <div id="center-tabs" class="center-tabs hidden">
-        <button class="ctab sel" data-ctab="conv" type="button">💬 Conversation</button>
-        <button class="ctab" data-ctab="diff" type="button">◇ Diff<span id="ctab-diff-n" class="ctab-n hidden">0</span></button>
-      </div>
-      <div id="fanout-bar" class="fanout-bar hidden"></div>
-
-      <div id="conv" class="conv">
-        <div class="empty"><span class="big">🛰️</span>Bienvenue dans le command center.<br>Sélectionne un agent à gauche, ou <b style="color:var(--acc2)">déploie</b>-en un nouveau.</div>
       </div>
 
-      <!-- vue DIFF (revue des changements de l'agent, style Orca) -->
-      <div id="diff" class="diff-wrap hidden"></div>
+      <!-- BOARD kanban -->
+      <div id="board" class="board hidden"></div>
 
-      <div id="composer" class="composer hidden">
-        <div id="c-attach" class="tray hidden"></div>
-        <div id="c-suggest" class="suggest hidden"></div>
-        <div id="c-quickreply" class="quickreply hidden"></div>
-        <div class="slash"><div id="c-slash" class="slash-dd hidden"></div></div>
-        <div class="cbox">
-          <textarea id="c-input" rows="1" placeholder="message / follow-up…   ( / = commandes,  📎 = fichiers )"></textarea>
-          <div class="crow">
-            <button id="c-clip" class="cbtn" type="button" title="Joindre des fichiers">📎</button>
-            <button id="c-term" class="cbtn" type="button" title="terminal — shell direct sur la machine de l'agent">▹_</button>
-            <span class="spacer"></span>
-            <span id="c-busy" class="busyline hidden">⏳ l'agent réfléchit — ton message s'enchaîne</span>
-            <button id="c-send" class="send-btn" type="button">Envoyer ➤</button>
+      <!-- SESSION (agent sélectionné) -->
+      <div id="session" class="session hidden">
+        <header id="sess-head" class="sess-head"></header>
+        <div id="sess-tabs" class="sess-tabs">
+          <button class="ctab sel" data-ctab="conv" type="button">💬 Conversation</button>
+          <button class="ctab" data-ctab="diff" type="button">◇ Diff<span id="ctab-diff-n" class="ctab-n hidden">0</span></button>
+          <button class="ctab" data-ctab="term" type="button">▹_ Terminal</button>
+          <button class="ctab" data-ctab="preview" type="button">◱ Aperçu</button>
+        </div>
+        <div id="fanout-bar" class="fanout-bar hidden"></div>
+
+        <div id="conv" class="conv"></div>
+
+        <div id="diff" class="diff-wrap hidden"></div>
+
+        <div id="termpanel" class="termpanel hidden">
+          <div class="term-topbar"><span id="term-sub" class="term-sub">—</span><span id="term-status" class="term-status">—</span></div>
+          <div id="term-body" class="term-body"></div>
+        </div>
+
+        <div id="preview" class="preview hidden">
+          <div class="design-bar">
+            <input id="pv-url" class="dz-url" placeholder="http://<nœud>:3000  — serveur de dev de l'agent" autocomplete="off" />
+            <button id="pv-load" class="dz-btn" type="button">Charger</button>
+            <button id="pv-pick" class="dz-btn" type="button">◉ Sélectionner</button>
           </div>
+          <div class="design-stage">
+            <iframe id="pv-frame" class="dz-frame" referrerpolicy="no-referrer"></iframe>
+            <div id="pv-empty" class="dz-empty"><span class="big">◱</span>Charge le serveur de dev de cet agent pour l'aperçu, puis « ◉ Sélectionner » un élément à lui envoyer.</div>
+          </div>
+          <div id="pv-card" class="dz-card hidden"></div>
         </div>
-        <input id="c-file" type="file" multiple hidden />
+
+        <div id="composer" class="composer">
+          <div id="c-attach" class="tray hidden"></div>
+          <div id="c-suggest" class="suggest hidden"></div>
+          <div id="c-quickreply" class="quickreply hidden"></div>
+          <div class="slash"><div id="c-slash" class="slash-dd hidden"></div></div>
+          <div class="cbox">
+            <textarea id="c-input" rows="1" placeholder="message / follow-up…   ( / = commandes,  📎 = fichiers )"></textarea>
+            <div class="crow">
+              <button id="c-clip" class="cbtn" type="button" title="Joindre des fichiers">📎</button>
+              <span class="spacer"></span>
+              <span id="c-busy" class="busyline hidden">⏳ l'agent réfléchit — ton message s'enchaîne</span>
+              <button id="c-send" class="send-btn" type="button">Envoyer ➤</button>
+            </div>
+          </div>
+          <input id="c-file" type="file" multiple hidden />
+        </div>
       </div>
 
-      <!-- vue Machines (masquée par défaut) -->
-      <div id="mach" class="mach-grid hidden"></div>
-      <!-- vue Skills (bibliothèque rangée + consultable) -->
-      <div id="skills" class="skills-wrap hidden"></div>
-      <!-- vue Audit (journal des actions : spawn/kill/renommage/entraînement/équipe/skills) -->
-      <div id="audit" class="skills-wrap hidden"></div>
-      <!-- vue Design (aperçu proxifié + sélecteur d'élément -> envoyé à l'agent) -->
-      <div id="design" class="design-wrap hidden"></div>
+      <!-- vues secondaires -->
+      <div id="mach" class="mach-grid view hidden"></div>
+      <div id="skills" class="skills-wrap view hidden"></div>
+      <div id="audit" class="skills-wrap view hidden"></div>
+      <div id="design" class="design-wrap view hidden"></div>
     </main>
 
-    <!-- ===================== CONTEXTE DROIT ===================== -->
+    <!-- ===================== CONTEXTE (slide-over) ===================== -->
     <aside id="ctx" class="ctx">
       <div class="ctx-head">
-        <h2>⟡ <span id="ctx-title">Contexte flotte</span></h2>
+        <h2>⟡ <span id="ctx-title">Détails</span></h2>
         <div class="ctx-tabs" id="ctx-tabs">
-          <button class="ctx-tab sel" data-tab="ctx">Contexte</button>
+          <button class="ctx-tab sel" data-tab="ctx">Infos</button>
           <button class="ctx-tab" data-tab="machine">Machine</button>
           <button class="ctx-tab" data-tab="logs">Logs</button>
         </div>
+        <button id="ctx-close" class="icon-btn" type="button" title="fermer">✕</button>
       </div>
       <div id="ctx-body" class="ctx-body"></div>
-      <div id="ctx-resize" class="resize-handle resize-handle-l" title="glisser pour redimensionner"></div>
     </aside>
   </div>
 
-  <!-- ===================== Modale DÉPLOIEMENT ===================== -->
+  <!-- ===================== Modale NOUVELLE TÂCHE (déploiement) ===================== -->
   <div id="spawn" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modal-head">
-      <div><h2>⊕ Déployer un agent</h2><div class="modal-sub">un vrai process Claude Code, local ou sur le réseau Tailscale</div></div>
+      <div><h2>⊕ Nouvelle tâche</h2><div class="modal-sub">un vrai agent Claude Code, dans son worktree git, local ou sur le tailnet</div></div>
       <button class="icon-btn close" data-close="spawn" aria-label="fermer">✕</button>
     </div>
     <div class="seg mode-seg" id="sp-mode">
@@ -125,7 +150,7 @@
       <button type="button" data-mode="fanout">⑂ Parallèle <small>(N variantes)</small></button>
     </div>
     <label class="fld"><span class="fld-l">📍 Machine</span><div id="sp-hosts" class="hosts"></div></label>
-    <label class="fld"><span class="fld-l">↩ Reprendre une session existante <small>(optionnel — reprend son contexte)</small></span>
+    <label class="fld"><span class="fld-l">↩ Reprendre une session <small>(optionnel)</small></span>
       <div id="sp-resume" class="resume-list"></div>
     </label>
     <div class="fld-grid2">
@@ -133,7 +158,7 @@
       <label class="fld"><span class="fld-l">Métier</span><input id="sp-role" placeholder="Backend Senior" /></label>
     </div>
     <label class="fld"><span class="fld-l">Workspace <small id="sp-cwd-hint"></small></span>
-      <div class="cwd-row"><input id="sp-cwd" placeholder="/home/user/projet" /><button type="button" id="sp-browse" class="browse-btn" title="explorateur">📁 Parcourir</button></div>
+      <div class="cwd-row"><input id="sp-cwd" placeholder="/home/user/projet" /><button type="button" id="sp-browse" class="browse-btn" title="explorateur">📁</button></div>
     </label>
     <label class="fld"><span class="fld-l">Mission</span><textarea id="sp-prompt" rows="3" placeholder="Analyse le repo et propose un plan."></textarea></label>
     <label class="fld">
@@ -151,14 +176,14 @@
       <label class="fld"><span class="fld-l">Modèle</span><select id="sp-model"></select></label>
       <label class="fld"><span class="fld-l">Effort</span><select id="sp-effort"><option value="">auto</option><option value="low">low</option><option value="medium">medium</option><option value="high">high</option></select></label>
     </div>
-    <label class="fld hidden" id="sp-variants-fld"><span class="fld-l">⑂ Variantes parallèles <small>(chacune dans son worktree git ; compare & garde la meilleure)</small></span>
+    <label class="fld hidden" id="sp-variants-fld"><span class="fld-l">⑂ Variantes parallèles <small>(chacune dans son worktree ; compare & garde la meilleure)</small></span>
       <div id="sp-variants" class="variants"></div>
       <button type="button" id="sp-addvar" class="linkbtn">＋ variante</button>
     </label>
     <label class="fld"><span class="fld-l">Permissions</span>
       <select id="sp-perm"><option value="bypassPermissions">⚡ Bypass (pleine capacité)</option><option value="acceptEdits">Édite (sûr)</option><option value="plan">Plan (lecture)</option><option value="default">Strict</option></select>
     </label>
-    <label class="fld chk-fld" id="sp-worktree-fld"><input type="checkbox" id="sp-worktree" checked /> <span>🌿 Worktree git isolé <small>(branche dédiée, diff revu puis mergé — recommandé sur un dépôt git)</small></span></label>
+    <label class="fld chk-fld" id="sp-worktree-fld"><input type="checkbox" id="sp-worktree" checked /> <span>🌿 Worktree git isolé <small>(branche dédiée, diff revu puis mergé — recommandé)</small></span></label>
     <div id="sp-err" class="err"></div>
     <button id="sp-go" class="go">🚀 Lancer la mission</button>
   </div>
@@ -172,7 +197,7 @@
     <label class="fld"><span class="fld-l">Nom de l'équipe</span><input id="tm-name" placeholder="Team SaaS" /></label>
     <label class="fld"><span class="fld-l">Objectif commun</span><textarea id="tm-goal" rows="3" placeholder="Construire une API REST avec front React et CI."></textarea></label>
     <label class="fld"><span class="fld-l">Workspace partagé <small id="tm-cwd-hint"></small></span>
-      <div class="cwd-row"><input id="tm-cwd" placeholder="/home/user/projet" /><button type="button" id="tm-browse" class="browse-btn" title="explorateur">📁 Parcourir</button></div>
+      <div class="cwd-row"><input id="tm-cwd" placeholder="/home/user/projet" /><button type="button" id="tm-browse" class="browse-btn" title="explorateur">📁</button></div>
     </label>
     <label class="fld"><span class="fld-l">Rôles</span><div id="tm-roles" class="tm-roles"></div>
       <div class="addrole"><input id="tm-newrole" placeholder="nouveau métier (ex. Data Scientist)" autocomplete="off" /><button type="button" id="tm-addrole" class="linkbtn">＋ métier</button></div>
@@ -189,10 +214,10 @@
     <button id="tm-go" class="go">🚀 Lancer l'équipe</button>
   </div>
 
-  <!-- ===================== Modale SKILL (lecture) ===================== -->
+  <!-- ===================== Modale SKILL ===================== -->
   <div id="skillview" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modal-head"><div><h2 id="sk-name">Skill</h2><div class="modal-sub" id="sk-meta"></div></div><button class="icon-btn close" data-close="skillview">✕</button></div>
-    <pre id="sk-body" style="white-space:pre-wrap;word-break:break-word;font-family:var(--mono);font-size:12px;color:#b6b6bd;background:#0c0c0e;border:1px solid var(--line2);border-radius:8px;padding:14px;max-height:64vh;overflow:auto"></pre>
+    <pre id="sk-body" class="sk-body"></pre>
   </div>
 
   <!-- ===================== Modale EXPLORATEUR ===================== -->
@@ -200,23 +225,13 @@
     <div class="modal-head"><div><h2>📁 Choisir un dossier</h2><div class="modal-sub" id="fx-host">local</div></div><button class="icon-btn close" data-close="fx">✕</button></div>
     <div id="fx-path" class="fx-path">/</div>
     <div id="fx-list" class="fx-list"></div>
-    <div class="fx-actions"><button type="button" id="fx-up" class="ghost-btn">⬆ Dossier parent</button><button type="button" id="fx-home" class="ghost-btn">🏠 Home</button><span style="flex:1"></span><button type="button" id="fx-pick" class="go" style="width:auto;padding:10px 20px">✓ Choisir ce dossier</button></div>
+    <div class="fx-actions"><button type="button" id="fx-up" class="ghost-btn">⬆ Parent</button><button type="button" id="fx-home" class="ghost-btn">🏠 Home</button><span style="flex:1"></span><button type="button" id="fx-pick" class="go" style="width:auto;padding:10px 20px">✓ Choisir</button></div>
   </div>
 
-  <!-- ===================== Modale TERMINAL (shell PTY direct) ===================== -->
-  <div id="term" class="modal term-modal hidden" role="dialog" aria-modal="true">
-    <div class="modal-head">
-      <div><h2>▹_ Terminal</h2><div class="modal-sub" id="term-sub">—</div></div>
-      <span id="term-status" class="term-status">connexion…</span>
-      <button class="icon-btn close" data-close="term">✕</button>
-    </div>
-    <div id="term-body" class="term-body"></div>
-  </div>
-
-  <!-- ===================== Command palette (⌘K / Ctrl-K) ===================== -->
+  <!-- ===================== Command palette ===================== -->
   <div id="palette" class="palette hidden" role="dialog" aria-modal="true">
     <div class="pal-box">
-      <div class="pal-in-wrap"><span class="pal-ic">⌕</span><input id="pal-input" class="pal-input" placeholder="Sauter à un agent, une machine, une skill — ou lancer une action…" autocomplete="off" /></div>
+      <div class="pal-in-wrap"><span class="pal-ic">⌕</span><input id="pal-input" class="pal-input" placeholder="Sauter à une session, une machine, une skill — ou lancer une action…" autocomplete="off" /></div>
       <div id="pal-list" class="pal-list"></div>
       <div class="pal-foot"><span><kbd>↑</kbd><kbd>↓</kbd> naviguer</span><span><kbd>↵</kbd> ouvrir</span><span><kbd>esc</kbd> fermer</span></div>
     </div>

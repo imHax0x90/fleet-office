@@ -982,6 +982,7 @@ function spawnAgent({ name, role, cwd, prompt, model, perm, teamId: joinTeamId, 
   });
   runClaude({ sessionId, cwd: workCwd, prompt: finalPrompt, model, perm, resume: false });
   if (!parentId) logAudit("spawn", { id: sessionId, name: name || projectName(cwd), role: role || "claude", host: remote ? host : "local", cwd, provider: provider === "bedrock" ? "bedrock" : "anthropic" });
+  if (wtMeta) setTimeout(() => { try { refreshWorktreeChanges(); } catch {} }, 4000);
   return sessionId;
 }
 function spawnTeam({ name, goal, cwd, model, perm, roles, chief, provider, effort }) {
@@ -1171,7 +1172,7 @@ function managedAgentObject(sid, m) {
     project: projectName(m.cwd), cwd: m.cwd, inFlightTasks: m.busy ? 1 : 0, queued: (m.queue && m.queue.length) || 0,
     childrenCount: 0, children: [], tempo: null, sessionStatus: m.status,
     provider: m.provider || "anthropic", effort: m.effort || null,
-    worktree: !!m.worktree, branch: m.branch || null, base: m.base || null, repoRoot: m.repoRoot || null, fanoutId: m.fanoutId || null, variant: m.variant || null,
+    worktree: !!m.worktree, branch: m.branch || null, base: m.base || null, repoRoot: m.repoRoot || null, fanoutId: m.fanoutId || null, variant: m.variant || null, changes: _wtChanges.get(sid) || null,
     busy: !!m.busy, denials: m.denials || 0, suggestion: m.suggestion || null, slashCommands: m.slashCommands || null, host: m.host || null,
     createdAt: m.startedAt, updatedAt: Date.now(), timeline: [],
     ...activityFields(sid),
@@ -1451,7 +1452,7 @@ function scanAgents() {
       a.managed = true; a.perm = m.perm; a.busy = !!m.busy; a.training = !!m.training; a.host = m.host || null;
       a.provider = m.provider || "anthropic"; a.effort = m.effort || null;
       a.worktree = !!m.worktree; a.branch = m.branch || null; a.base = m.base || null; a.repoRoot = m.repoRoot || null;
-      a.fanoutId = m.fanoutId || null; a.variant = m.variant || null;
+      a.fanoutId = m.fanoutId || null; a.variant = m.variant || null; a.changes = _wtChanges.get(sid) || null;
       a.suggestion = m.suggestion || null; a.slashCommands = m.slashCommands || a.slashCommands || null;
       a.name = m.name; a.role = m.role; // nom/rôle managés font foi (équipe, chef 👑…)
       a.cwd = m.cwd; a.project = projectName(m.cwd); // cwd piloté (cd) fait foi
@@ -1838,6 +1839,38 @@ function discardWorktree(id) {
   logAudit("discard", { id, name: rec.name, branch: rec.branch, host: host || "local" });
   return { ok: true };
 }
+// Résumé de diff LÉGER par agent worktree (pour les cartes + colonne « En revue » du board).
+// Calculé en ASYNCHRONE (jamais dans scanAgents/broadcast qui sont synchrones) et mis en cache ;
+// scanAgents lit juste le cache. Borné au nombre d'agents en worktree.
+const _wtChanges = new Map(); // id -> { files, add, del, untracked, at }
+function refreshWorktreeChanges() {
+  for (const [id, rec] of managed) {
+    if (!rec.worktree || !rec.repoRoot) { _wtChanges.delete(id); continue; }
+    const base = rec.base || "HEAD";
+    const cmd = "git -C " + shq(rec.cwd) + " --no-pager diff --shortstat " + shq(base) + " 2>/dev/null; echo '@@SEP@@'; git -C " + shq(rec.cwd) + " ls-files --others --exclude-standard 2>/dev/null | wc -l";
+    const remote = isRemote(rec);
+    let child;
+    try {
+      child = remote
+        ? spawn("ssh", [...SSH_OPTS, rec.host, cmd], { stdio: ["ignore", "pipe", "ignore"] })
+        : spawn("bash", ["-lc", cmd], { stdio: ["ignore", "pipe", "ignore"] });
+    } catch { continue; }
+    let buf = ""; child.stdout.on("data", (d) => (buf += d)); child.on("error", () => {});
+    child.on("close", () => {
+      const parts = buf.split("@@SEP@@"); const stat = parts[0] || "", unt = parts[1] || "";
+      const g = (re) => { const m = stat.match(re); return m ? +m[1] : 0; };
+      const files = g(/(\d+) files? changed/), add = g(/(\d+) insertion/), del = g(/(\d+) deletion/);
+      const untracked = parseInt(unt.trim(), 10) || 0;
+      const prev = _wtChanges.get(id);
+      const next = { files: files + untracked, add, del, untracked, at: Date.now() };
+      _wtChanges.set(id, next);
+      if (!prev || prev.files !== next.files || prev.add !== next.add || prev.del !== next.del) broadcast(false);
+    });
+    setTimeout(() => { try { child.kill(); } catch {} }, 12000);
+  }
+}
+setInterval(refreshWorktreeChanges, 15000).unref?.();
+
 // Fan-out : une mission -> N variantes en parallèle, chacune dans son worktree (modèles/efforts
 // différents). Tag commun fanoutId pour la vue comparative. Les worktrees isolent les variantes.
 function spawnFanout({ name, cwd, prompt, host, perm, provider, effort, variants }) {
