@@ -44,6 +44,8 @@ const MODELS = [{ v: "opus", l: "Opus 5" }, { v: "sonnet", l: "Sonnet 5" }, { v:
 
 let snap = { agents: [], teams: [], cto: {} };
 let detailId = null, view = "agents", ctxTab = "ctx", query = "";
+let centerTab = "conv", diffData = null, pendingComments = [], diffLoading = false; // vue Diff (Orca)
+let spawnMode = "solo", variantRows = []; // déploiement solo vs fan-out parallèle
 let feedTimer = null, hostTimer = null, machTimer = null, railHostsTimer = null;
 let slashList = [];
 // rail gauche : carte du sous-réseau tailnet (railView="nodes") ou arborescence d'UNE machine (railView="tree")
@@ -81,7 +83,7 @@ function onSnapshot() {
     // le centre (en-tête/composer) ne se rafraîchit QUE si on regarde la vue Agents — sinon ça
     // écraserait à chaque tick SSE (~1,5 s) l'écran Machines/Skills qu'on est en train de consulter.
     // Le panneau contexte (droite), lui, continue de suivre l'agent sélectionné en permanence.
-    if (a) { if (view === "agents") { updateHead(a); updateComposer(a); } if (ctxTab === "ctx") renderCtx(a); }
+    if (a) { if (view === "agents") { updateHead(a); updateComposer(a); } if (ctxTab === "ctx") renderCtx(a); updateFanoutBar(a); updateMobileTitle(a); }
   } else if (view === "agents") { renderFleetCtx(); }
 }
 const agentById = (id) => (snap.agents || []).find((x) => x.id === id) ||
@@ -212,7 +214,8 @@ function select(id) {
   detailId = id;
   setView("agents");
   slashList = a.slashCommands || [];
-  $("conv").classList.remove("hidden"); $("composer").classList.remove("hidden");
+  centerTab = "conv"; diffData = null; pendingComments = []; // vue diff propre à chaque agent
+  applyCenterVisibility(); updateFanoutBar(a); closeDrawers();
   renderConv._html = null; updateQuickReplies._sig = null; $("c-quickreply").classList.add("hidden");
   resetHistoryState(); // fenêtre d'historique propre à chaque agent
   updateHead(a); updateComposer(a); renderCtx(a);
@@ -654,7 +657,7 @@ function renderFleetCtx() {
       <div class="kv"><span class="k">AWS Bedrock</span><span class="v ${snap.bedrock ? "grn" : ""}">${snap.bedrock ? "clés Askeal prêtes" : "non configuré"}</span></div>
     </div>`;
 }
-function clearDetail() { detailId = null; clearInterval(feedTimer); clearInterval(hostTimer); $("conv").innerHTML = `<div class="empty"><span class="big">🛰️</span>Sélectionne un agent à gauche.</div>`; $("composer").classList.add("hidden"); $("center-head").innerHTML = `<div class="hid"><div class="hn">Fleet Office</div><div class="status">sélectionne un agent</div></div><div class="hact"><button id="team-btn2" class="ghost-btn" type="button">👥 Équipe</button><a class="ghost-btn" href="/3d">🏢 3D</a></div>`; const t = $("team-btn2"); if (t) t.onclick = openTeam; renderFleetCtx(); renderRail(); }
+function clearDetail() { detailId = null; centerTab = "conv"; diffData = null; pendingComments = []; $("center-tabs").classList.add("hidden"); $("diff").classList.add("hidden"); $("fanout-bar").classList.add("hidden"); clearInterval(feedTimer); clearInterval(hostTimer); $("conv").innerHTML = `<div class="empty"><span class="big">🛰️</span>Sélectionne un agent à gauche.</div>`; $("conv").classList.remove("hidden"); $("composer").classList.add("hidden"); $("center-head").innerHTML = `<div class="hid"><div class="hn">Fleet Office</div><div class="status">sélectionne un agent</div></div><div class="hact"><button id="team-btn2" class="ghost-btn" type="button">👥 Équipe</button><a class="ghost-btn" href="/3d">🏢 3D</a></div>`; const t = $("team-btn2"); if (t) t.onclick = openTeam; renderFleetCtx(); renderRail(); }
 
 // ---- vues (nav) ---------------------------------------------------------------
 function setView(v) {
@@ -664,8 +667,7 @@ function setView(v) {
   $("mach").classList.toggle("hidden", !isMach);
   $("skills").classList.toggle("hidden", !isSkills);
   $("audit").classList.toggle("hidden", !isAudit);
-  $("conv").classList.toggle("hidden", !isAgents || !detailId);
-  $("composer").classList.toggle("hidden", !isAgents || !detailId);
+  applyCenterVisibility();
   clearInterval(machTimer);
   if (isMach) { renderMachines(); machTimer = setInterval(renderMachines, 15000); $("center-head").innerHTML = `<div class="hid"><div class="hn">Machines</div><div class="status">nœuds Tailscale pilotables</div></div>`; }
   if (isSkills) { renderSkills(); $("center-head").innerHTML = `<div class="hid"><div class="hn">Bibliothèque de skills</div><div class="status">rangées par métier · installées dans ~/.claude/skills</div></div>`; }
@@ -862,6 +864,8 @@ function provSeg(segId, cur, set) {
 }
 async function openSpawn() {
   openModal("spawn"); $("sp-err").textContent = ""; fillModels();
+  if (!variantRows.length) variantRows = [{ model: "opus" }, { model: "sonnet" }];
+  setSpawnMode("solo"); renderVariants();
   attS.length = 0; renderTray($("sp-attach-list"), attS);
   resumeId = null; renderResumeList();
   spawnProv = "anthropic"; provSeg("sp-prov", spawnProv, (v) => (spawnProv = v));
@@ -889,7 +893,21 @@ async function doSpawn() {
     toast("↩ session reprise"); $("sp-prompt").value = ""; resumeId = null;
     setTimeout(() => select(rid), 300); return;
   }
-  const body = { host: spawnHost, name: $("sp-name").value.trim(), role: $("sp-role").value.trim(), cwd: $("sp-cwd").value.trim(), prompt, model: $("sp-model").value, effort: $("sp-effort").value, perm: $("sp-perm").value, provider: spawnProv, attachments: readyIds(attS) };
+  // mode PARALLÈLE (fan-out) : N variantes, chacune dans son worktree, à comparer
+  if (spawnMode === "fanout") {
+    const cwd = $("sp-cwd").value.trim();
+    if (!cwd || !prompt) { $("sp-err").textContent = "Workspace et mission requis."; return; }
+    if (variantRows.length < 2) { $("sp-err").textContent = "Au moins 2 variantes."; return; }
+    $("sp-go").disabled = true; $("sp-err").textContent = "";
+    const j = await post("/api/fanout", { name: $("sp-name").value.trim(), host: spawnHost, cwd, prompt, perm: $("sp-perm").value, provider: spawnProv, variants: variantRows.map((v) => ({ model: v.model, effort: v.effort || "" })) });
+    $("sp-go").disabled = false;
+    if (!j.ok) { $("sp-err").textContent = j.error || "échec du fan-out"; return; }
+    closeModal("spawn"); toast("⑂ fan-out lancé — " + (j.ids ? j.ids.length : 0) + " variantes en parallèle");
+    $("sp-name").value = $("sp-cwd").value = $("sp-prompt").value = "";
+    if (j.ids && j.ids[0]) setTimeout(() => select(j.ids[0]), 500);
+    return;
+  }
+  const body = { host: spawnHost, name: $("sp-name").value.trim(), role: $("sp-role").value.trim(), cwd: $("sp-cwd").value.trim(), prompt, model: $("sp-model").value, effort: $("sp-effort").value, perm: $("sp-perm").value, provider: spawnProv, worktree: $("sp-worktree").checked, attachments: readyIds(attS) };
   if (!body.cwd || !body.prompt) { $("sp-err").textContent = "Workspace et mission requis."; return; }
   $("sp-go").disabled = true; $("sp-err").textContent = "";
   const j = await post("/api/spawn", body); $("sp-go").disabled = false;
@@ -1045,3 +1063,255 @@ wireResize($("ctx-resize"), "--ctx-w", { min: 260, max: 560, storeKey: "fleetoff
 clampPanelWidths(); // les 2 largeurs restaurées peuvent, ensemble, dépasser la fenêtre -> reclampe
 let _resizeT = null;
 window.addEventListener("resize", () => { clearTimeout(_resizeT); _resizeT = setTimeout(clampPanelWidths, 120); });
+
+// =====================================================================
+// ORCA UX — onglets centre, revue de diff, fan-out, palette ⌘K, mobile
+// =====================================================================
+
+// Qui est visible au centre : onglets (Conversation/Diff) seulement en vue Agents avec un agent.
+function applyCenterVisibility() {
+  const onAgents = view === "agents", has = !!detailId;
+  $("center-tabs").classList.toggle("hidden", !(onAgents && has));
+  const conv = onAgents && has && centerTab === "conv", diff = onAgents && has && centerTab === "diff";
+  $("conv").classList.toggle("hidden", !conv);
+  $("composer").classList.toggle("hidden", !conv);
+  $("diff").classList.toggle("hidden", !diff);
+  if (!(onAgents && has)) { $("fanout-bar").classList.add("hidden"); }
+}
+function setCenterTab(t) {
+  if (!detailId) return;
+  centerTab = t;
+  $("center-tabs").querySelectorAll(".ctab").forEach((b) => b.classList.toggle("sel", b.dataset.ctab === t));
+  applyCenterVisibility();
+  if (t === "diff") loadDiff(true);
+}
+$("center-tabs").querySelectorAll(".ctab").forEach((b) => (b.onclick = () => setCenterTab(b.dataset.ctab)));
+
+// ---- revue de diff (style Orca) ----
+async function loadDiff(fresh) {
+  const a = agentById(detailId); if (!a) return;
+  const el = $("diff");
+  if (fresh || !diffData) el.innerHTML = `<div class="empty" style="padding:48px">chargement du diff…</div>`;
+  diffLoading = true;
+  let j; try { j = await getJSON("/api/diff?id=" + encodeURIComponent(a.id)); } catch { j = { git: false, error: "diff inaccessible" }; }
+  diffLoading = false; diffData = j;
+  const n = (j.files || []).length;
+  const badge = $("ctab-diff-n"); if (badge) { badge.textContent = n; badge.classList.toggle("hidden", !n); }
+  if (centerTab === "diff") renderDiff(a, j);
+}
+function parsePatch(patch) {
+  const files = []; let cur = null, oldno = 0, newno = 0;
+  for (const ln of String(patch || "").split("\n")) {
+    if (ln.startsWith("diff --git")) { cur = { path: (ln.match(/ b\/(.+)$/) || [])[1] || "?", hunks: [], binary: false }; files.push(cur); continue; }
+    if (!cur) continue;
+    if (ln.startsWith("Binary ")) { cur.binary = true; continue; }
+    if (ln.startsWith("+++ ")) { const m = ln.match(/^\+\+\+ b\/(.+)$/) || ln.match(/^\+\+\+ (.+)$/); if (m && m[1] !== "/dev/null") cur.path = m[1]; continue; }
+    if (ln.startsWith("--- ") || ln.startsWith("index ") || ln.startsWith("new file") || ln.startsWith("deleted file") || ln.startsWith("old mode") || ln.startsWith("new mode") || ln.startsWith("rename ") || ln.startsWith("similarity")) continue;
+    const hm = ln.match(/^@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@(.*)$/);
+    if (hm) { oldno = +hm[1]; newno = +hm[2]; cur.hunks.push({ head: ln, lines: [] }); continue; }
+    const h = cur.hunks[cur.hunks.length - 1]; if (!h) continue;
+    const c = ln[0];
+    if (c === "+") { h.lines.push({ type: "add", newno, text: ln.slice(1) }); newno++; }
+    else if (c === "-") { h.lines.push({ type: "del", oldno, text: ln.slice(1) }); oldno++; }
+    else if (c === "\\") { /* \ No newline */ }
+    else { h.lines.push({ type: "ctx", oldno, newno, text: ln.slice(1) }); oldno++; newno++; }
+  }
+  return files;
+}
+let openCommentKey = null;
+const commentKey = (f, l) => f + "::" + l;
+function renderDiff(a, j) {
+  const el = $("diff");
+  if (!j || !j.git) {
+    el.innerHTML = `<div class="empty" style="padding:48px"><span class="big">◇</span>${esc((j && j.error) || "Ce workspace n'est pas un dépôt git — rien à comparer.")}<br><span style="color:var(--mut2);font-size:12px">Déploie l'agent avec « 🌿 worktree » sur un dépôt git pour revoir puis merger ses changements ici.</span></div>`;
+    return;
+  }
+  const files = parsePatch(j.patch);
+  const totAdd = (j.files || []).reduce((n, f) => n + (f.additions || 0), 0);
+  const totDel = (j.files || []).reduce((n, f) => n + (f.deletions || 0), 0);
+  const wt = j.worktree;
+  const actions = `<button class="refresh" id="diff-refresh">⟳ Rafraîchir</button>` +
+    (wt ? `<button class="discard" id="diff-discard">🗑 Jeter</button><button class="merge" id="diff-merge">✓ Merger dans ${esc(j.base)}</button>` : "");
+  let html = `<div class="diff-head">
+      <div class="diff-branch">${wt ? `🌿 <b>${esc(j.branch)}</b> → ${esc(j.base)}` : `📄 modifications non committées · ${esc(j.base)}`}</div>
+      <div class="diff-stat"><span class="add">+${totAdd}</span> <span class="del">−${totDel}</span> · ${(j.files || []).length} fichier${(j.files || []).length > 1 ? "s" : ""}</div>
+      <div class="diff-actions">${actions}</div>
+    </div>`;
+  if (pendingComments.length) html += `<div class="diff-pending">💬 <b>${pendingComments.length}</b> commentaire${pendingComments.length > 1 ? "s" : ""} en attente <button id="diff-sendcomments">Envoyer à l'agent ➤</button></div>`;
+  html += `<div class="diff-files">`;
+  if (!files.length) html += `<div class="empty" style="padding:30px">Aucun changement pour l'instant — l'agent n'a encore rien modifié sur sa branche.</div>`;
+  for (const f of files) {
+    const fstat = (j.files || []).find((x) => x.path === f.path) || {};
+    html += `<div class="dfile"><div class="dfile-h" data-dfile="${esc(f.path)}"><span class="dchev">▾</span><span class="dpath">${esc(f.path)}</span><span class="dnum"><span class="add">+${fstat.additions || 0}</span> <span class="del">−${fstat.deletions || 0}</span></span></div><div class="dfile-body">`;
+    if (f.binary) html += `<div class="dline ctx"><span class="gut"></span><span class="code">(fichier binaire)</span></div>`;
+    for (const h of f.hunks) {
+      html += `<div class="dline hunk"><span class="gut">⋯</span><span class="code">${esc(h.head)}</span></div>`;
+      for (const l of h.lines) {
+        const commentable = l.type === "add" || l.type === "ctx";
+        const key = commentKey(f.path, l.newno);
+        const gut = l.type === "add" ? ("+" + l.newno) : l.type === "del" ? ("−" + l.oldno) : (l.newno || "");
+        const has = commentable && pendingComments.some((c) => c.file === f.path && c.line === l.newno);
+        html += `<div class="dline ${l.type}${commentable ? " commentable" : ""}"${commentable ? ` data-cl="${esc(f.path)}" data-ln="${l.newno}"` : ""}><span class="gut">${esc(String(gut))}</span><span class="code">${esc(l.text) || "&nbsp;"}${has ? ' <span style="color:var(--acc2)">💬</span>' : ""}</span></div>`;
+        if (commentable && openCommentKey === key) {
+          html += `<div class="dcomment"><textarea id="dc-ta" placeholder="Commentaire pour l'agent sur cette ligne…"></textarea><button id="dc-add">Ajouter</button></div>`;
+        }
+      }
+    }
+    html += `</div></div>`;
+  }
+  html += `</div>`;
+  el.innerHTML = html;
+  const r = $("diff-refresh"); if (r) r.onclick = () => loadDiff(true);
+  const mg = $("diff-merge"); if (mg) mg.onclick = () => doMerge(a);
+  const dc = $("diff-discard"); if (dc) dc.onclick = () => doDiscard(a);
+  const sc = $("diff-sendcomments"); if (sc) sc.onclick = () => sendComments(a);
+  el.querySelectorAll("[data-dfile]").forEach((hh) => (hh.onclick = () => { const b = hh.nextElementSibling; const open = b.style.display !== "none"; b.style.display = open ? "none" : ""; hh.querySelector(".dchev").textContent = open ? "▸" : "▾"; }));
+  el.querySelectorAll("[data-cl]").forEach((ln) => (ln.onclick = () => {
+    const key = commentKey(ln.dataset.cl, +ln.dataset.ln);
+    openCommentKey = openCommentKey === key ? null : key;
+    renderDiff(a, diffData);
+    const ta = $("dc-ta"); if (ta) ta.focus();
+  }));
+  const add = $("dc-add"); if (add) add.onclick = () => {
+    const ta = $("dc-ta"); const txt = ta ? ta.value.trim() : ""; if (!txt) return;
+    const [file, lineS] = openCommentKey.split("::"); const line = +lineS;
+    const snippet = (() => { const files2 = parsePatch(diffData.patch); for (const f of files2) if (f.path === file) for (const h of f.hunks) for (const l of h.lines) if ((l.type === "add" || l.type === "ctx") && l.newno === line) return l.text; return ""; })();
+    pendingComments.push({ file, line, text: txt, snippet });
+    openCommentKey = null; renderDiff(a, diffData);
+  };
+}
+function sendComments(a) {
+  if (!pendingComments.length) return;
+  let msg = `Revue du diff${diffData && diffData.branch ? " (branche " + diffData.branch + ")" : ""} — commentaires ligne à ligne :\n\n`;
+  msg += pendingComments.map((c) => `• \`${c.file}:${c.line}\`${c.snippet ? "  — sur : `" + c.snippet.trim().slice(0, 120) + "`" : ""}\n  ${c.text}`).join("\n\n");
+  msg += `\n\nMerci de corriger en conséquence et de committer sur ta branche.`;
+  post("/api/send", { id: a.id, prompt: msg, origin: "web" }).then((j) => {
+    if (!j.ok) return toast("Erreur : " + (j.error || ""));
+    pendingComments = []; openCommentKey = null; toast("💬 commentaires envoyés"); setCenterTab("conv");
+  });
+}
+function doMerge(a) {
+  if (!confirm("Merger la branche de « " + a.name + " » dans « " + (diffData.base || "base") + " » ?")) return;
+  toast("⏳ merge en cours…");
+  post("/api/merge", { id: a.id }).then((j) => {
+    if (!j.ok) return alert("Merge impossible :\n\n" + (j.error || "erreur inconnue"));
+    toast("✓ mergé dans " + j.base); loadDiff(true);
+  });
+}
+function doDiscard(a) {
+  if (!confirm("Jeter le travail de « " + a.name + " » (worktree + branche supprimés, agent fermé) ? Irréversible.")) return;
+  post("/api/discard", { id: a.id, kill: true }).then((j) => {
+    if (!j.ok && j.error) return toast("Erreur : " + j.error);
+    toast("🗑 travail jeté"); if (detailId === a.id) clearDetail();
+  });
+}
+// barre comparative fan-out : une puce par variante, clic = bascule ; en diff, bouton « garder »
+function updateFanoutBar(a) {
+  const bar = $("fanout-bar"); if (!bar) return;
+  if (!a || !a.fanoutId) { bar.classList.add("hidden"); bar.innerHTML = ""; return; }
+  const sibs = (snap.agents || []).filter((x) => x.fanoutId === a.fanoutId);
+  if (sibs.length < 2) { bar.classList.add("hidden"); return; }
+  bar.classList.remove("hidden");
+  bar.innerHTML = `<span class="fo-l">⑂ Fan-out · ${sibs.length} variantes</span>` +
+    sibs.map((s) => `<button class="fo-chip ${s.id === a.id ? "sel" : ""}" data-fo="${esc(s.id)}"><span class="fo-dot" style="background:${st(s).c}"></span>${esc(s.variant || s.name)}</button>`).join("") +
+    (a.worktree ? `<button class="fo-chip" id="fo-keep" title="merger cette variante et jeter les autres"><span class="fo-win">★</span> garder celle-ci</button>` : "");
+  bar.querySelectorAll("[data-fo]").forEach((b) => (b.onclick = () => select(b.dataset.fo)));
+  const keep = $("fo-keep"); if (keep) keep.onclick = () => keepVariant(a);
+}
+async function keepVariant(a) {
+  const sibs = (snap.agents || []).filter((x) => x.fanoutId === a.fanoutId && x.id !== a.id);
+  if (!confirm("Garder « " + (a.variant || a.name) + " » : merger sa branche puis JETER les " + sibs.length + " autres variantes ?")) return;
+  toast("⏳ merge de la variante gagnante…");
+  const j = await post("/api/merge", { id: a.id });
+  if (!j.ok) return alert("Merge impossible :\n\n" + (j.error || "erreur"));
+  for (const s of sibs) await post("/api/discard", { id: s.id, kill: true });
+  toast("★ variante gardée & mergée dans " + j.base); loadDiff(true);
+}
+
+// ---- déploiement : mode solo / parallèle + variantes ----
+function setSpawnMode(mode) {
+  spawnMode = mode;
+  $("sp-mode").querySelectorAll("button").forEach((b) => b.classList.toggle("sel", b.dataset.mode === mode));
+  const fan = mode === "fanout";
+  $("sp-solo-model").classList.toggle("hidden", fan);
+  $("sp-worktree-fld").classList.toggle("hidden", fan);
+  $("sp-variants-fld").classList.toggle("hidden", !fan);
+  $("sp-go").textContent = fan ? "⑂ Lancer les variantes" : "🚀 Lancer la mission";
+}
+function renderVariants() {
+  const box = $("sp-variants"); if (!box) return;
+  box.innerHTML = variantRows.map((v, i) => `<div class="vrow">
+      <select data-vm="${i}">${MODELS.map((m) => `<option value="${m.v}" ${v.model === m.v ? "selected" : ""}>${m.l}</option>`).join("")}</select>
+      <select data-ve="${i}"><option value="">effort auto</option>${["low", "medium", "high"].map((e) => `<option value="${e}" ${v.effort === e ? "selected" : ""}>${e}</option>`).join("")}</select>
+      ${variantRows.length > 2 ? `<button type="button" class="vx" data-vx="${i}" title="retirer">✕</button>` : ""}
+    </div>`).join("");
+  box.querySelectorAll("[data-vm]").forEach((s) => (s.onchange = () => (variantRows[+s.dataset.vm].model = s.value)));
+  box.querySelectorAll("[data-ve]").forEach((s) => (s.onchange = () => (variantRows[+s.dataset.ve].effort = s.value)));
+  box.querySelectorAll("[data-vx]").forEach((b) => (b.onclick = () => { variantRows.splice(+b.dataset.vx, 1); renderVariants(); }));
+}
+$("sp-mode").querySelectorAll("button").forEach((b) => (b.onclick = () => setSpawnMode(b.dataset.mode)));
+$("sp-addvar").onclick = () => { if (variantRows.length >= 6) return toast("6 variantes max"); variantRows.push({ model: "sonnet" }); renderVariants(); };
+
+// ---- command palette (⌘K / Ctrl-K) ----
+let palItems = [], palSel = 0, palOpen = false;
+function paletteSource() {
+  const items = [];
+  items.push({ kind: "action", ic: "＋", name: "Déployer un agent", sub: "solo", run: () => { closePalette(); openSpawn(); } });
+  items.push({ kind: "action", ic: "⑂", name: "Fan-out parallèle", sub: "N variantes à comparer", run: () => { closePalette(); openSpawn(); setSpawnMode("fanout"); } });
+  items.push({ kind: "action", ic: "👥", name: "Lancer une équipe", run: () => { closePalette(); openTeam(); } });
+  [["agents", "Agents"], ["machines", "Machines"], ["skills", "Skills"], ["audit", "Audit"]].forEach(([v, l]) => items.push({ kind: "vue", ic: "›", name: "Aller à " + l, run: () => { closePalette(); setView(v); } }));
+  (snap.agents || []).forEach((a) => items.push({ kind: "agent", ic: "🤖", name: a.name, sub: (a.role || "") + " · " + (a.host || "local") + (a.worktree ? " · 🌿" : ""), dot: st(a).c, run: () => { closePalette(); select(a.id); } }));
+  (railHostsCache || []).forEach((h) => items.push({ kind: "machine", ic: "🖥️", name: h.label || h.id, sub: h.ip || "", run: () => { closePalette(); railHost = h.id; railView = "tree"; renderRail(); setView("machines"); } }));
+  if (_skillsData && _skillsData.categories) _skillsData.categories.forEach((c) => c.skills.forEach((s) => items.push({ kind: "skill", ic: "◈", name: s.name, sub: c.category, run: () => { closePalette(); setView("skills"); setTimeout(() => openSkill(s.path), 150); } })));
+  return items;
+}
+function openPalette() { palOpen = true; $("palette").classList.remove("hidden"); const i = $("pal-input"); i.value = ""; buildPalette(""); i.focus(); }
+function closePalette() { palOpen = false; $("palette").classList.add("hidden"); }
+function buildPalette(q) {
+  q = (q || "").toLowerCase().trim();
+  let items = paletteSource();
+  if (q) items = items.filter((it) => (it.name + " " + (it.sub || "") + " " + it.kind).toLowerCase().includes(q));
+  palItems = items.slice(0, 40); palSel = 0; renderPalette();
+}
+function renderPalette(keepScroll) {
+  const box = $("pal-list");
+  if (!palItems.length) { box.innerHTML = `<div class="pal-item" style="cursor:default;color:var(--mut2)">Aucun résultat</div>`; return; }
+  box.innerHTML = palItems.map((it, i) => `<div class="pal-item ${i === palSel ? "sel" : ""}" data-pi="${i}">
+      <span class="pi-ic">${it.dot ? `<span class="pi-dot" style="background:${it.dot}"></span>` : it.ic}</span>
+      <div class="pi-main"><div class="pi-name">${esc(it.name)}</div>${it.sub ? `<div class="pi-sub">${esc(it.sub)}</div>` : ""}</div>
+      <span class="pi-kind">${esc(it.kind)}</span>
+    </div>`).join("");
+  box.querySelectorAll("[data-pi]").forEach((d) => { d.onmouseenter = () => { palSel = +d.dataset.pi; box.querySelectorAll(".pal-item").forEach((x, i) => x.classList.toggle("sel", i === palSel)); }; d.onclick = () => palRun(+d.dataset.pi); });
+  if (!keepScroll) box.scrollTop = 0;
+  const sel = box.querySelector(".pal-item.sel"); if (sel && keepScroll) sel.scrollIntoView({ block: "nearest" });
+}
+function palRun(i) { const it = palItems[i]; if (it && it.run) it.run(); }
+$("pal-input").oninput = (e) => buildPalette(e.target.value);
+$("palette").onclick = (e) => { if (e.target === $("palette")) closePalette(); };
+document.addEventListener("keydown", (e) => {
+  if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) { e.preventDefault(); palOpen ? closePalette() : openPalette(); return; }
+  if (!palOpen) return;
+  if (e.key === "Escape") { e.preventDefault(); closePalette(); }
+  else if (e.key === "ArrowDown") { e.preventDefault(); palSel = Math.min(palSel + 1, palItems.length - 1); renderPalette(true); }
+  else if (e.key === "ArrowUp") { e.preventDefault(); palSel = Math.max(palSel - 1, 0); renderPalette(true); }
+  else if (e.key === "Enter") { e.preventDefault(); palRun(palSel); }
+});
+
+// ---- barre mobile (hamburger rail + nom + contexte) : injectée, visible < 960px via CSS ----
+(function mobileBar() {
+  const center = document.querySelector(".center"); if (!center) return;
+  const bar = document.createElement("div"); bar.className = "mbar";
+  bar.innerHTML = `<button id="mb-rail" title="agents">☰</button><div class="mtitle" id="mb-title">Fleet Office<small>command center</small></div><button id="mb-palette" title="recherche">⌕</button><button id="mb-ctx" title="contexte">⟡</button>`;
+  center.prepend(bar);
+  $("mb-rail").onclick = () => { $("app").classList.toggle("rail-open"); $("app").classList.remove("ctx-open"); };
+  $("mb-ctx").onclick = () => { $("app").classList.toggle("ctx-open"); $("app").classList.remove("rail-open"); };
+  $("mb-palette").onclick = openPalette;
+  // tap sur l'overlay (zone hors tiroir) => ferme
+  document.addEventListener("click", (e) => {
+    const app = $("app"); if (!app.classList.contains("rail-open") && !app.classList.contains("ctx-open")) return;
+    if (e.target.closest(".rail") || e.target.closest(".ctx") || e.target.closest(".mbar")) return;
+    app.classList.remove("rail-open", "ctx-open");
+  });
+})();
+function closeDrawers() { const app = $("app"); if (app) app.classList.remove("rail-open", "ctx-open"); }
+function updateMobileTitle(a) { const t = $("mb-title"); if (t && a) t.innerHTML = esc(a.name) + "<small>" + esc(a.role || "") + (a.host ? " · " + esc(a.host) : "") + "</small>"; }

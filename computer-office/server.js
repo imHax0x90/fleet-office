@@ -1795,8 +1795,11 @@ function createWorktree(host, cwd, name, sessionId) {
 // Diff d'un agent vs sa base (worktree -> branche de base ; direct -> HEAD). Inclut les fichiers
 // non suivis via `add -N` (intent-to-add, réversible). Renvoie numstat + patch unifié brut.
 function agentDiff(id) {
-  const rec = managed.get(id); if (!rec) throw new Error("agent introuvable");
+  // ensureManaged adopte aussi les sessions interactives/distantes -> le diff marche pour TOUT agent
+  // dans un dépôt git (pas seulement ceux spawnés par l'orchestrateur).
+  const rec = managed.get(id) || ensureManaged(id); if (!rec) throw new Error("agent introuvable");
   const host = rec.host, dir = rec.cwd;
+  if (!dir || dir === "~" || dir === "-") return { git: false, cwd: dir || "~", host: host || "local" };
   const info = detectRepo(host, dir);
   if (!info) return { git: false, cwd: dir, host: host || "local" };
   const cmp = rec.worktree ? (rec.base || info.base) : "HEAD";

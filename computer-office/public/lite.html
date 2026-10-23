@@ -57,9 +57,18 @@
         </div>
       </header>
 
-      <div id="conv" class="conv">
-        <div class="empty"><span class="big">🛰️</span>Bienvenue dans le command center.<br>Sélectionne un agent à gauche, ou <b style="color:var(--cyan)">déploie</b>-en un nouveau.</div>
+      <div id="center-tabs" class="center-tabs hidden">
+        <button class="ctab sel" data-ctab="conv" type="button">💬 Conversation</button>
+        <button class="ctab" data-ctab="diff" type="button">◇ Diff<span id="ctab-diff-n" class="ctab-n hidden">0</span></button>
       </div>
+      <div id="fanout-bar" class="fanout-bar hidden"></div>
+
+      <div id="conv" class="conv">
+        <div class="empty"><span class="big">🛰️</span>Bienvenue dans le command center.<br>Sélectionne un agent à gauche, ou <b style="color:var(--acc2)">déploie</b>-en un nouveau.</div>
+      </div>
+
+      <!-- vue DIFF (revue des changements de l'agent, style Orca) -->
+      <div id="diff" class="diff-wrap hidden"></div>
 
       <div id="composer" class="composer hidden">
         <div id="c-attach" class="tray hidden"></div>
@@ -108,6 +117,10 @@
       <div><h2>⊕ Déployer un agent</h2><div class="modal-sub">un vrai process Claude Code, local ou sur le réseau Tailscale</div></div>
       <button class="icon-btn close" data-close="spawn" aria-label="fermer">✕</button>
     </div>
+    <div class="seg mode-seg" id="sp-mode">
+      <button type="button" class="sel" data-mode="solo">👤 Solo</button>
+      <button type="button" data-mode="fanout">⑂ Parallèle <small>(N variantes)</small></button>
+    </div>
     <label class="fld"><span class="fld-l">📍 Machine</span><div id="sp-hosts" class="hosts"></div></label>
     <label class="fld"><span class="fld-l">↩ Reprendre une session existante <small>(optionnel — reprend son contexte)</small></span>
       <div id="sp-resume" class="resume-list"></div>
@@ -131,13 +144,18 @@
         <button type="button" data-prov="bedrock">AWS Bedrock (Askeal)</button>
       </div>
     </label>
-    <div class="fld-grid2">
+    <div class="fld-grid2" id="sp-solo-model">
       <label class="fld"><span class="fld-l">Modèle</span><select id="sp-model"></select></label>
       <label class="fld"><span class="fld-l">Effort</span><select id="sp-effort"><option value="">auto</option><option value="low">low</option><option value="medium">medium</option><option value="high">high</option></select></label>
     </div>
+    <label class="fld hidden" id="sp-variants-fld"><span class="fld-l">⑂ Variantes parallèles <small>(chacune dans son worktree git ; compare & garde la meilleure)</small></span>
+      <div id="sp-variants" class="variants"></div>
+      <button type="button" id="sp-addvar" class="linkbtn">＋ variante</button>
+    </label>
     <label class="fld"><span class="fld-l">Permissions</span>
       <select id="sp-perm"><option value="bypassPermissions">⚡ Bypass (pleine capacité)</option><option value="acceptEdits">Édite (sûr)</option><option value="plan">Plan (lecture)</option><option value="default">Strict</option></select>
     </label>
+    <label class="fld chk-fld" id="sp-worktree-fld"><input type="checkbox" id="sp-worktree" checked /> <span>🌿 Worktree git isolé <small>(branche dédiée, diff revu puis mergé — recommandé sur un dépôt git)</small></span></label>
     <div id="sp-err" class="err"></div>
     <button id="sp-go" class="go">🚀 Lancer la mission</button>
   </div>
@@ -190,6 +208,15 @@
       <button class="icon-btn close" data-close="term">✕</button>
     </div>
     <div id="term-body" class="term-body"></div>
+  </div>
+
+  <!-- ===================== Command palette (⌘K / Ctrl-K) ===================== -->
+  <div id="palette" class="palette hidden" role="dialog" aria-modal="true">
+    <div class="pal-box">
+      <div class="pal-in-wrap"><span class="pal-ic">⌕</span><input id="pal-input" class="pal-input" placeholder="Sauter à un agent, une machine, une skill — ou lancer une action…" autocomplete="off" /></div>
+      <div id="pal-list" class="pal-list"></div>
+      <div class="pal-foot"><span><kbd>↑</kbd><kbd>↓</kbd> naviguer</span><span><kbd>↵</kbd> ouvrir</span><span><kbd>esc</kbd> fermer</span></div>
+    </div>
   </div>
 
   <div id="backdrop" class="backdrop hidden"></div>
