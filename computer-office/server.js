@@ -925,7 +925,7 @@ function runClaude({ sessionId, cwd, prompt, model, perm, resume }) {
   sendToProc(rec, prompt, null);
 }
 
-function spawnAgent({ name, role, cwd, prompt, model, perm, teamId: joinTeamId, host, id: fixedId, attachments, provider, effort, parentId }) {
+function spawnAgent({ name, role, cwd, prompt, model, perm, teamId: joinTeamId, host, id: fixedId, attachments, provider, effort, parentId, worktree, fanoutId, variant }) {
   const remote = !!(host && host !== "local");
   if (!cwd || !String(cwd).trim()) throw new Error("workspace requis");
   if (!remote) {
@@ -936,6 +936,14 @@ function spawnAgent({ name, role, cwd, prompt, model, perm, teamId: joinTeamId, 
   // id fixe optionnel (ex. watchdog d'un agent permanent) -> la conversation reste joignable après respawn
   const sessionId = (fixedId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(fixedId)) ? fixedId : crypto.randomUUID();
   hidden.delete(sessionId); // un (re)spawn dé-masque (ex. watchdog JARVIS)
+  // Worktree git dédié (Orca) : l'agent bosse sur une branche isolée. Best-effort — si le cwd n'est
+  // pas un dépôt git ou que git échoue, on retombe silencieusement sur le cwd direct.
+  let workCwd = cwd, wtMeta = null;
+  if (worktree) {
+    const wt = createWorktree(remote ? host : "local", cwd, name || role, sessionId);
+    if (wt && !wt.error) { workCwd = wt.path; wtMeta = wt; }
+    else if (wt && wt.error) console.error("[worktree] " + sessionId + " : " + wt.error);
+  }
   let finalPrompt = prompt, teamId = null, teamGoal = null, teamName = null;
   // greffe explicite à une équipe existante (choisie dans l'UI)
   const teamPeers = joinTeamId ? [...managed.values()].filter((m) => m.teamId === joinTeamId) : [];
@@ -944,8 +952,9 @@ function spawnAgent({ name, role, cwd, prompt, model, perm, teamId: joinTeamId, 
     const peerDesc = teamPeers.map((m) => `${m.name} (${m.role})`).join(", ");
     finalPrompt = `Tu REJOINS une équipe en cours sur cet objectif : « ${teamGoal} ». Coéquipiers : ${peerDesc}.\nAvant d'agir : lis TEAM_NOTES.md + les fichiers récents, coordonne-toi, évite les conflits, et ajoute une ligne « [${role || "agent"}] … » dans TEAM_NOTES.md. Utilise git (branches, pull avant push).\n\nTa mission : ${prompt}`;
   } else {
-    // auto-coordination : si d'autres agents bossent sur le même répertoire, on les met en équipe
-    const coord = remote ? null : coordinateWorkspace(cwd, sessionId);
+    // auto-coordination : si d'autres agents bossent sur le même répertoire, on les met en équipe.
+    // Un worktree isole l'agent (cwd unique) -> on NE coordonne PAS (fan-out = variantes indépendantes).
+    const coord = (remote || wtMeta) ? null : coordinateWorkspace(cwd, sessionId);
     if (coord) {
       teamId = coord.teamId; teamGoal = "Collaboration — " + projectName(cwd);
       const peerDesc = coord.peers.map((m) => `${m.name} (${m.role})`).join(", ");
@@ -954,20 +963,24 @@ function spawnAgent({ name, role, cwd, prompt, model, perm, teamId: joinTeamId, 
   }
   researchSkills(role, remote ? host : "local"); // skills du métier : téléchargées, rangées, installées sur le nœud de l'agent
   finalPrompt += `\n\n💡 Des skills réelles pour ton métier (${role || "agent"}) sont téléchargées depuis des repos réputés dans ${skillsFileFor(role || "agent")} (et le dossier voisin ${path.join(SKILLS_DIR, String(role || "agent").toLowerCase().replace(/[^a-z0-9]+/gi, "-"))}/) — consulte-les dès qu'elles existent et applique celles qui t'aident.`;
+  if (wtMeta) finalPrompt += `\n\n🌿 Tu travailles dans un WORKTREE GIT dédié : branche « ${wtMeta.branch} » (basée sur « ${wtMeta.base} »), dossier ${wtMeta.path}. Committe régulièrement ton travail SUR CETTE BRANCHE — il sera revu (diff), puis mergé ou jeté depuis le command center. Ne touche pas aux autres branches.`;
   // pièces jointes de la mission initiale → livrées dans l'inbox de la session, sur la machine de l'agent
   if (Array.isArray(attachments) && attachments.length) {
     try { finalPrompt += attachBlock(deliverAttachments(sessionId, attachments, remote ? host : null)); }
     catch (e) { console.error("[attach] spawn:", e.message); }
   }
   managed.set(sessionId, {
-    id: sessionId, name: name || projectName(cwd), role: role || "claude", cwd, host: remote ? host : null,
+    id: sessionId, name: name || projectName(cwd), role: role || "claude", cwd: workCwd, host: remote ? host : null,
     model: model || "sonnet", perm: SAFE_PERMS.includes(perm) ? perm : DEFAULT_PERM,
     status: "working", startedAt: Date.now(), lastPrompt: prompt, costUsd: 0, teamId, teamGoal, teamName,
     provider: provider === "bedrock" ? "bedrock" : "anthropic", effort: effort || null,
+    // worktree git dédié (Orca) + appartenance à un fan-out (variantes parallèles)
+    worktree: !!wtMeta, repoRoot: wtMeta ? wtMeta.root : null, branch: wtMeta ? wtMeta.branch : null, base: wtMeta ? wtMeta.base : null,
+    fanoutId: fanoutId || null, variant: variant || null,
     // sous-agent créé PAR un autre agent (Task tool / spawn API) -> masqué du roster, géré par le parent
     parentId: (parentId && managed.has(parentId)) ? parentId : null,
   });
-  runClaude({ sessionId, cwd, prompt: finalPrompt, model, perm, resume: false });
+  runClaude({ sessionId, cwd: workCwd, prompt: finalPrompt, model, perm, resume: false });
   if (!parentId) logAudit("spawn", { id: sessionId, name: name || projectName(cwd), role: role || "claude", host: remote ? host : "local", cwd, provider: provider === "bedrock" ? "bedrock" : "anthropic" });
   return sessionId;
 }
@@ -1158,6 +1171,7 @@ function managedAgentObject(sid, m) {
     project: projectName(m.cwd), cwd: m.cwd, inFlightTasks: m.busy ? 1 : 0, queued: (m.queue && m.queue.length) || 0,
     childrenCount: 0, children: [], tempo: null, sessionStatus: m.status,
     provider: m.provider || "anthropic", effort: m.effort || null,
+    worktree: !!m.worktree, branch: m.branch || null, base: m.base || null, repoRoot: m.repoRoot || null, fanoutId: m.fanoutId || null, variant: m.variant || null,
     busy: !!m.busy, denials: m.denials || 0, suggestion: m.suggestion || null, slashCommands: m.slashCommands || null, host: m.host || null,
     createdAt: m.startedAt, updatedAt: Date.now(), timeline: [],
     ...activityFields(sid),
@@ -1436,6 +1450,8 @@ function scanAgents() {
       const a = bySession.get(sid);
       a.managed = true; a.perm = m.perm; a.busy = !!m.busy; a.training = !!m.training; a.host = m.host || null;
       a.provider = m.provider || "anthropic"; a.effort = m.effort || null;
+      a.worktree = !!m.worktree; a.branch = m.branch || null; a.base = m.base || null; a.repoRoot = m.repoRoot || null;
+      a.fanoutId = m.fanoutId || null; a.variant = m.variant || null;
       a.suggestion = m.suggestion || null; a.slashCommands = m.slashCommands || a.slashCommands || null;
       a.name = m.name; a.role = m.role; // nom/rôle managés font foi (équipe, chef 👑…)
       a.cwd = m.cwd; a.project = projectName(m.cwd); // cwd piloté (cd) fait foi
@@ -1734,6 +1750,115 @@ function attachBlock(items) {
     items.map((f) => `- ${f.absPath}  (${fmtSize(f.size)})`).join("\n");
 }
 
+// ============================================================================
+// ORCA UX — worktrees git, revue de diff, merge/discard, fan-out parallèle.
+// Chaque agent peut tourner dans SON worktree git isolé (branche dédiée), local
+// ou sur n'importe quel nœud Tailscale (via SSH, Bedrock inclus). On expose son
+// diff vs la branche de base, un merge/discard, et le lancement de N variantes
+// en parallèle (fan-out) chacune dans son worktree, pour comparer et garder la
+// meilleure. Tout est best-effort : un échec git ne bloque jamais un spawn.
+// ============================================================================
+function posixDirname(p) { const s = String(p).replace(/\/+$/, ""); const i = s.lastIndexOf("/"); return i <= 0 ? "/" : s.slice(0, i); }
+// Exécute une commande shell sur l'hôte de l'agent (local=bash, distant=ssh). Ne throw jamais.
+function runAt(host, cmd) {
+  const remote = !!(host && host !== "local");
+  try {
+    const out = remote
+      ? execSync("ssh " + SSH_OPTS.join(" ") + " " + shq(host) + " " + shq(cmd), { encoding: "utf8", timeout: 30000, maxBuffer: 64 * 1024 * 1024 })
+      : execSync(cmd, { encoding: "utf8", timeout: 30000, maxBuffer: 64 * 1024 * 1024, shell: "/bin/bash", stdio: ["ignore", "pipe", "pipe"] });
+    return { ok: true, out: out || "", err: "", code: 0 };
+  } catch (e) { return { ok: false, out: (e.stdout || "").toString(), err: (e.stderr || e.message || "").toString(), code: e.status || 1 }; }
+}
+function gitAt(host, dir, args) { return runAt(host, "git -C " + shq(dir) + " " + args.map(shq).join(" ")); }
+// Repère la racine du dépôt + la branche de base (courante), sur l'hôte de l'agent.
+function detectRepo(host, dir) {
+  const r = gitAt(host, dir, ["rev-parse", "--show-toplevel"]);
+  if (!r.ok) return null;
+  const root = r.out.trim(); if (!root) return null;
+  const b = gitAt(host, root, ["rev-parse", "--abbrev-ref", "HEAD"]);
+  const base = (b.ok && b.out.trim() && b.out.trim() !== "HEAD") ? b.out.trim() : "HEAD";
+  return { root, base };
+}
+// Crée un worktree dédié (branche fleet/<slug>-<id6>) à côté du dépôt. null = pas un dépôt git ;
+// { error } = échec git (le caller retombe sur le cwd direct, sans jamais bloquer).
+function createWorktree(host, cwd, name, sessionId) {
+  const info = detectRepo(host, cwd); if (!info) return null;
+  const slug = (vslug(name || "agent") || "agent").slice(0, 24);
+  const short = String(sessionId).slice(0, 6);
+  const branch = "fleet/" + slug + "-" + short;
+  const repoName = info.root.replace(/\/+$/, "").split("/").pop() || "repo";
+  const wtPath = posixDirname(info.root) + "/.fleet-wt/" + repoName + "__" + slug + "-" + short;
+  const r = runAt(host, "mkdir -p " + shq(posixDirname(info.root) + "/.fleet-wt") + " && git -C " + shq(info.root) + " worktree add -b " + shq(branch) + " " + shq(wtPath) + " " + shq(info.base));
+  if (!r.ok) return { error: (r.err || "worktree add a échoué").slice(0, 400) };
+  return { root: info.root, base: info.base, branch, path: wtPath };
+}
+// Diff d'un agent vs sa base (worktree -> branche de base ; direct -> HEAD). Inclut les fichiers
+// non suivis via `add -N` (intent-to-add, réversible). Renvoie numstat + patch unifié brut.
+function agentDiff(id) {
+  const rec = managed.get(id); if (!rec) throw new Error("agent introuvable");
+  const host = rec.host, dir = rec.cwd;
+  const info = detectRepo(host, dir);
+  if (!info) return { git: false, cwd: dir, host: host || "local" };
+  const cmp = rec.worktree ? (rec.base || info.base) : "HEAD";
+  runAt(host, "git -C " + shq(dir) + " add -N -- . >/dev/null 2>&1");
+  const num = gitAt(host, dir, ["--no-pager", "diff", "--numstat", cmp]);
+  const patch = gitAt(host, dir, ["--no-pager", "diff", "--no-color", cmp]);
+  const files = (num.ok ? num.out : "").trim().split("\n").filter(Boolean).map((l) => {
+    const m = l.split("\t"); const bin = m[0] === "-";
+    return { additions: bin ? 0 : (+m[0] || 0), deletions: bin ? 0 : (+m[1] || 0), binary: bin, path: m[2] || "" };
+  }).filter((f) => f.path);
+  return { git: true, worktree: !!rec.worktree, base: cmp, branch: rec.branch || info.base, root: info.root, cwd: dir, host: host || "local", files, patch: (patch.ok ? patch.out : "").slice(0, 700000) };
+}
+// Merge la branche du worktree dans la base (depuis le dépôt principal). Honnête sur les échecs
+// (dépôt sale, conflit) : ne détruit jamais la branche, on peut résoudre à la main.
+function mergeWorktree(id) {
+  const rec = managed.get(id); if (!rec) throw new Error("agent introuvable");
+  if (!rec.worktree || !rec.repoRoot) throw new Error("cet agent ne tourne pas dans un worktree dédié");
+  const host = rec.host, root = rec.repoRoot, branch = rec.branch, base = rec.base, wt = rec.cwd;
+  runAt(host, "cd " + shq(wt) + " && git add -A && (git diff --cached --quiet || git commit -q -m " + shq("fleet: travaux de " + (rec.name || "agent")) + ")");
+  const dirty = gitAt(host, root, ["status", "--porcelain"]);
+  if (dirty.ok && dirty.out.trim()) return { ok: false, error: "le dépôt principal (" + root + ") a des modifications non committées — commit/stash avant de merger" };
+  const co = gitAt(host, root, ["checkout", base]);
+  if (!co.ok) return { ok: false, error: "impossible de basculer sur « " + base + " » : " + co.err.slice(0, 300) };
+  const mg = gitAt(host, root, ["merge", "--no-ff", "-m", "fleet: merge " + branch, branch]);
+  if (!mg.ok) return { ok: false, error: "merge en conflit — résous à la main dans " + root + " : " + mg.err.slice(0, 300) };
+  logAudit("merge", { id, name: rec.name, branch, base, root, host: host || "local" });
+  return { ok: true, base, branch, root };
+}
+// Supprime le worktree + sa branche (travail jeté). À n'appeler qu'après confirmation UI.
+function discardWorktree(id) {
+  const rec = managed.get(id); if (!rec) throw new Error("agent introuvable");
+  if (!rec.worktree || !rec.repoRoot) return { ok: false, error: "pas de worktree à nettoyer" };
+  const host = rec.host, root = rec.repoRoot;
+  runAt(host, "git -C " + shq(root) + " worktree remove --force " + shq(rec.cwd));
+  runAt(host, "git -C " + shq(root) + " branch -D " + shq(rec.branch));
+  logAudit("discard", { id, name: rec.name, branch: rec.branch, host: host || "local" });
+  return { ok: true };
+}
+// Fan-out : une mission -> N variantes en parallèle, chacune dans son worktree (modèles/efforts
+// différents). Tag commun fanoutId pour la vue comparative. Les worktrees isolent les variantes.
+function spawnFanout({ name, cwd, prompt, host, perm, provider, effort, variants }) {
+  if (!cwd || !String(cwd).trim()) throw new Error("workspace requis");
+  if (!prompt || !String(prompt).trim()) throw new Error("mission requise");
+  const list = (Array.isArray(variants) && variants.length) ? variants : [{ model: "opus" }, { model: "sonnet" }];
+  if (list.length < 2) throw new Error("le fan-out demande au moins 2 variantes");
+  if (list.length > 6) throw new Error("6 variantes maximum");
+  const fanoutId = crypto.randomUUID().slice(0, 8);
+  const label = (name && String(name).trim()) || projectName(cwd);
+  const ids = [];
+  list.forEach((v, i) => {
+    const vlabel = (v.label && String(v.label).trim()) || (v.model ? (v.model[0].toUpperCase() + v.model.slice(1)) : ("Variante " + (i + 1)));
+    const id = spawnAgent({
+      name: label + " · " + vlabel, role: "variante", cwd, prompt, host,
+      perm, provider: v.provider || provider, model: v.model || "sonnet", effort: v.effort || effort,
+      worktree: true, fanoutId, variant: vlabel,
+    });
+    ids.push(id);
+  });
+  logAudit("fanout", { id: fanoutId, name: label, cwd, variants: list.length, host: host || "local" });
+  return { fanoutId, ids, name: label };
+}
+
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const p = url.pathname;
@@ -1809,6 +1934,28 @@ const server = http.createServer(async (req, res) => {
   if (req.method === "POST" && p === "/api/stop") {
     const b = await readBody(req);
     const ok = stopAgent(b.id); return sendJSON(res, 200, { ok });
+  }
+
+  // ---- ORCA : revue de diff, merge/discard, fan-out parallèle ----
+  if (p === "/api/diff") {
+    const id = url.searchParams.get("id") || "";
+    try { return sendJSON(res, 200, agentDiff(id)); }
+    catch (e) { return sendJSON(res, 400, { git: false, error: String(e.message || e) }); }
+  }
+  if (req.method === "POST" && p === "/api/merge") {
+    const b = await readBody(req);
+    try { const r = mergeWorktree(b.id); broadcast(true); return sendJSON(res, r.ok ? 200 : 409, r); }
+    catch (e) { return sendJSON(res, 400, { ok: false, error: String(e.message || e) }); }
+  }
+  if (req.method === "POST" && p === "/api/discard") {
+    const b = await readBody(req);
+    try { const r = discardWorktree(b.id); if (b.kill) { killAgent(b.id); } broadcast(true); return sendJSON(res, 200, r); }
+    catch (e) { return sendJSON(res, 400, { ok: false, error: String(e.message || e) }); }
+  }
+  if (req.method === "POST" && p === "/api/fanout") {
+    const b = await readBody(req);
+    try { const r = spawnFanout(b); broadcast(true); return sendJSON(res, 200, { ok: true, ...r }); }
+    catch (e) { return sendJSON(res, 400, { ok: false, error: String(e.message || e) }); }
   }
 
   if (p === "/api/ls") {
