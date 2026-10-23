@@ -15,7 +15,7 @@ const STATUS = {
   failed: { c: "var(--s-fail)", l: "erreur" },
 };
 const st = (a) => STATUS[a && a.status] || STATUS.idle;
-const AVPAL = ["#2b3a63", "#3a2b5a", "#1f3a4a", "#30324a", "#213a2f", "#3a3156", "#243246", "#39294a"];
+const AVPAL = [0, 1, 2, 3, 4, 5, 6, 7].map((i) => `var(--av${i})`);
 const hashc = (s) => { let h = 0; for (let i = 0; i < (s || "").length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return AVPAL[h % AVPAL.length]; };
 const fmtCost = (n) => { n = n || 0; return n >= 1 ? "$" + n.toFixed(0) : "$" + n.toFixed(2); };
 const fmtTok = (n) => { n = n || 0; return n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e3 ? (n / 1e3).toFixed(0) + "k" : "" + n; };
@@ -70,7 +70,7 @@ function onSnapshot() {
   const ags = snap.agents || [];
   $("nav-agents").textContent = ags.length;
   $("nav-machines").textContent = new Set(ags.map((a) => a.host).filter(Boolean)).size + 1;
-  renderSidebar(); renderStatusline();
+  renderSidebar(); renderStatusline(); renderTabbar();
   if (view === "board" && !detailId) renderBoard();
   if (view === "machines") renderMachines();
   if (detailId) {
@@ -176,13 +176,13 @@ function select(id) {
   $("conv").innerHTML = `<div class="empty">chargement du flux…</div>`;
   clearInterval(feedTimer); pollFeed(); feedTimer = setInterval(pollFeed, 1500);
   clearInterval(hostTimer); pollHost(a); hostTimer = setInterval(() => pollHost(agentById(detailId)), 15000);
-  renderSidebar(); closeDrawers();
+  addTab(id); renderTabbar(); renderSidebar(); closeDrawers();
 }
 function clearDetail() {
   detailId = null; centerTab = "conv"; diffData = null; teardownTerminal();
   clearInterval(feedTimer); clearInterval(hostTimer);
   $("app").classList.remove("ctx-open");
-  applyCenterVisibility(); renderSidebar();
+  applyCenterVisibility(); renderSidebar(); renderTabbar();
 }
 function renderSessHead(a) {
   const col = hashc((a.role || "") + (a.name || ""));
@@ -224,7 +224,7 @@ $("sess-tabs").querySelectorAll(".ctab").forEach((b) => (b.onclick = () => setCe
 function setCenterTab(t) {
   if (!detailId) return;
   if (centerTab === "term" && t !== "term") teardownTerminal();
-  centerTab = t; renderSessTabs(); applyCenterVisibility();
+  centerTab = t; lastCenter[detailId] = t; renderSessTabs(); applyCenterVisibility();
   if (t === "diff") loadDiff(true);
   else if (t === "term") openTermTab();
   else if (t === "preview") initPreview();
@@ -397,7 +397,7 @@ function openTermTab() {
   $("term-sub").textContent = (agent.name || "agent") + " · " + (agent.host || "local") + " · " + (agent.cwd || "~");
   const statusEl = $("term-status"); statusEl.textContent = "connexion…"; statusEl.className = "term-status";
   const body = $("term-body"); body.innerHTML = "";
-  const term = new Terminal({ fontFamily: "JetBrains Mono, ui-monospace, monospace", fontSize: 13, cursorBlink: true, theme: { background: "#08090d", foreground: "#e6e9ef", cursor: "#7aa2f7", selectionBackground: "#2a3140" } });
+  const term = new Terminal({ fontFamily: "JetBrains Mono, ui-monospace, monospace", fontSize: 13, cursorBlink: true, theme: window.FleetTheme ? FleetTheme.xterm() : undefined });
   const fit = new FitAddon.FitAddon(); term.loadAddon(fit); term.open(body); setTimeout(() => { try { fit.fit(); } catch {} }, 40);
   termInstance = term;
   const proto = location.protocol === "https:" ? "wss:" : "ws:";
@@ -597,7 +597,7 @@ function wireFtree(el, rerenderFn) {
 function setView(v) {
   view = v; detailId = null; teardownTerminal(); clearInterval(feedTimer); clearInterval(hostTimer);
   $("nav").querySelectorAll(".nav-item").forEach((b) => b.classList.toggle("sel", b.dataset.view === v));
-  clearInterval(machTimer); applyCenterVisibility(); renderSidebar();
+  clearInterval(machTimer); applyCenterVisibility(); renderSidebar(); renderTabbar();
   if (v === "board") renderBoard();
   if (v === "machines") { renderMachines(); machTimer = setInterval(renderMachines, 15000); }
   if (v === "skills") renderSkills();
@@ -854,6 +854,9 @@ function paletteSource() {
   items.push({ kind: "action", ic: "＋", name: "Nouvelle tâche", sub: "solo", run: () => { closePalette(); openSpawn(); } });
   items.push({ kind: "action", ic: "⑂", name: "Fan-out parallèle", sub: "N variantes à comparer", run: () => { closePalette(); openSpawn(); setSpawnMode("fanout"); } });
   items.push({ kind: "action", ic: "👥", name: "Lancer une équipe", run: () => { closePalette(); openTeam(); } });
+  items.push({ kind: "action", ic: "◐", name: "Apparence — palettes", sub: "thème, couleurs, taille du texte", run: () => { closePalette(); openTheme(); } });
+  if (window.FleetTheme) FleetTheme.list().forEach((p) => items.push({ kind: "thème", ic: "◐", name: "Thème : " + p.name, run: () => { closePalette(); FleetTheme.use(p.id); } }));
+  if (detailId) items.push({ kind: "action", ic: "×", name: "Fermer l'onglet courant", run: () => { closePalette(); closeTab(detailId); } });
   [["board", "Board"], ["machines", "Machines"], ["skills", "Skills"], ["audit", "Audit"], ["design", "Design"]].forEach(([v, l]) => items.push({ kind: "vue", ic: "›", name: "Aller à " + l, run: () => { closePalette(); setView(v); } }));
   (snap.agents || []).filter((a) => !a.internal).forEach((a) => items.push({ kind: "session", ic: "🤖", name: a.name, sub: (a.worktree && a.branch ? "⑂ " + a.branch + " · " : "") + (a.host || "local"), dot: st(a).c, run: () => { closePalette(); select(a.id); } }));
   (railHostsCache || []).forEach((h) => items.push({ kind: "machine", ic: "🖥", name: h.label || h.id, sub: h.ip || "", run: () => { closePalette(); machSelectedHost = h.id; setView("machines"); } }));
@@ -876,8 +879,92 @@ $("palette").onclick = (e) => { if (e.target === $("palette")) closePalette(); }
 document.addEventListener("keydown", (e) => {
   if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) { e.preventDefault(); palOpen ? closePalette() : openPalette(); return; }
   if (palOpen) { if (e.key === "Escape") { e.preventDefault(); closePalette(); } else if (e.key === "ArrowDown") { e.preventDefault(); palSel = Math.min(palSel + 1, palItems.length - 1); renderPalette(true); } else if (e.key === "ArrowUp") { e.preventDefault(); palSel = Math.max(palSel - 1, 0); renderPalette(true); } else if (e.key === "Enter") { e.preventDefault(); palRun(palSel); } return; }
-  if (e.key === "Escape") { for (const m of ["fx", "skillview", "spawn", "team"]) if (!$(m).classList.contains("hidden")) { closeModal(m); return; } if ($("app").classList.contains("ctx-open")) $("app").classList.remove("ctx-open"); }
+  if (e.key === "Escape") { for (const m of ["fx", "skillview", "spawn", "team", "theme"]) if (!$(m).classList.contains("hidden")) { closeModal(m); return; } if ($("app").classList.contains("ctx-open")) $("app").classList.remove("ctx-open"); }
 });
+
+
+// ---- onglets de sessions (façon Orca) ------------------------------------------
+const TABS_KEY = "fleet.tabs";
+let openTabs = (() => { try { const a = JSON.parse(localStorage.getItem(TABS_KEY) || "[]"); return Array.isArray(a) ? a.filter((x) => typeof x === "string") : []; } catch { return []; } })();
+const lastCenter = {};
+let tabDrag = null;
+function saveTabs() { try { localStorage.setItem(TABS_KEY, JSON.stringify(openTabs)); } catch {} }
+function addTab(id) { if (!openTabs.includes(id)) { openTabs.push(id); saveTabs(); } }
+function closeTab(id) {
+  const i = openTabs.indexOf(id); if (i < 0) return;
+  openTabs.splice(i, 1); saveTabs();
+  if (detailId === id) { const next = openTabs[i] || openTabs[i - 1]; if (next && agentById(next)) select(next); else setView(view); }
+  else renderTabbar();
+}
+const VIEW_LABEL = { board: ["▦", "Board"], machines: ["▤", "Machines"], skills: ["◈", "Skills"], audit: ["▧", "Audit"], design: ["🎨", "Design"] };
+function renderTabbar() {
+  const el = $("tabbar"); if (!el || tabDrag) return;
+  const ags = snap.agents || [];
+  if (ags.length) { const keep = openTabs.filter((id) => ags.some((a) => a.id === id)); if (keep.length !== openTabs.length) { openTabs = keep; saveTabs(); } }
+  const [vi, vl] = VIEW_LABEL[view] || VIEW_LABEL.board;
+  const tabs = openTabs.map(agentById).filter(Boolean);
+  const sig = [view, detailId, tabs.map((a) => a.id + a.name + a.status + (a.busy ? 1 : 0) + (isReview(a) ? 1 : 0)).join("|")].join("~");
+  if (renderTabbar._sig === sig) return; renderTabbar._sig = sig;
+  el.innerHTML = `<div class="tab pin ${detailId ? "" : "sel"}" data-vtab><span class="tic">${vi}</span><span class="tn">${vl}</span></div>` +
+    tabs.map((a) => `<div class="tab ${detailId === a.id ? "sel" : ""} ${a.busy ? "work" : ""}" data-tab="${esc(a.id)}" draggable="true" title="${esc(a.name)}${a.branch ? " · " + esc(a.branch) : ""}"><span class="td" style="background:${st(a).c}"></span><span class="tn">${esc(a.name)}</span>${isReview(a) ? `<span class="tr" title="à revoir">◇</span>` : ""}<button class="tx" data-tx="${esc(a.id)}" type="button" aria-label="fermer l'onglet">×</button></div>`).join("") +
+    `<button class="tab-add" id="tab-add" type="button" title="Nouvelle tâche">＋</button><div class="tab-fill"></div>`;
+  el.querySelector("[data-vtab]").onclick = () => setView(view);
+  $("tab-add").onclick = () => openSpawn();
+  el.querySelectorAll("[data-tab]").forEach((t) => {
+    const id = t.dataset.tab;
+    t.onclick = () => { if (detailId === id) return; const lc = lastCenter[id]; select(id); if (lc && lc !== "conv") setCenterTab(lc); };
+    t.onauxclick = (e) => { if (e.button === 1) { e.preventDefault(); closeTab(id); } };
+    t.ondragstart = (e) => { tabDrag = id; e.dataTransfer.effectAllowed = "move"; try { e.dataTransfer.setData("text/plain", id); } catch {} };
+    t.ondragover = (e) => { if (tabDrag && tabDrag !== id) { e.preventDefault(); t.classList.add("dragover"); } };
+    t.ondragleave = () => t.classList.remove("dragover");
+    t.ondrop = (e) => { e.preventDefault(); const from = openTabs.indexOf(tabDrag), to = openTabs.indexOf(id); if (from >= 0 && to >= 0 && from !== to) { openTabs.splice(to, 0, openTabs.splice(from, 1)[0]); saveTabs(); } tabDrag = null; renderTabbar._sig = null; renderTabbar(); };
+    t.ondragend = () => { tabDrag = null; renderTabbar._sig = null; renderTabbar(); };
+  });
+  el.querySelectorAll("[data-tx]").forEach((b) => (b.onclick = (e) => { e.stopPropagation(); closeTab(b.dataset.tx); }));
+  const sel = el.querySelector(".tab.sel"); if (sel && sel.scrollIntoView) sel.scrollIntoView({ block: "nearest", inline: "nearest" });
+}
+
+// ---- apparence : palettes -----------------------------------------------------
+function openTheme() { renderThemePanel(); openModal("theme"); }
+function renderThemePanel() {
+  const T = window.FleetTheme; if (!T) return;
+  const cur = T.current(), list = T.list();
+  const sw = (p) => { const d = T.derive(p).vars; return `<div class="th-sw"><i style="background:${d["--bg"]}"></i><i style="background:${d["--panel2"]}"></i><i style="background:${d["--ink"]}"></i><i style="background:${d["--acc"]}"></i></div>`; };
+  $("th-grid").innerHTML = list.map((p) => `<button class="th-card ${p.id === cur.id ? "sel" : ""}" data-pal="${esc(p.id)}" type="button">${sw(p)}<div class="th-nm">${esc(p.name)}${p.preset ? "" : " <small>perso</small>"}</div></button>`).join("") +
+    `<button class="th-card add" data-pal-new type="button">＋ Nouvelle palette</button>`;
+  $("th-grid").querySelectorAll("[data-pal]").forEach((b) => (b.onclick = () => { T.use(b.dataset.pal); renderThemePanel(); }));
+  $("th-grid").querySelector("[data-pal-new]").onclick = () => { T.create(cur.id); renderThemePanel(); };
+  const ed = $("th-edit");
+  if (cur.preset) {
+    ed.innerHTML = `<h3>${esc(cur.name)}</h3><div class="modal-sub" style="margin:0 0 10px">Palette intégrée. Duplique-la pour ajuster fond, texte et accent.</div><div class="th-btns"><button class="ghost-btn" id="th-dup" type="button">⎘ Dupliquer et personnaliser</button></div>`;
+    $("th-dup").onclick = () => { T.create(cur.id); renderThemePanel(); };
+  } else {
+    ed.innerHTML = `<h3>Personnaliser</h3>
+      <div class="th-row"><span>Nom</span><input type="text" id="th-name" value="${esc(cur.name)}" maxlength="24" /></div>
+      <div class="th-row"><span>Fond</span><code class="hexv">${cur.bg}</code><input type="color" data-k="bg" value="${cur.bg}" /></div>
+      <div class="th-row"><span>Texte</span><code class="hexv">${cur.ink}</code><input type="color" data-k="ink" value="${cur.ink}" /></div>
+      <div class="th-row"><span>Accent</span><code class="hexv">${cur.acc}</code><input type="color" data-k="acc" value="${cur.acc}" /></div>
+      <div class="th-row"><span>Statuts monochromes <small style="color:var(--mut2)">(gris + accent, sans vert/jaune/cyan)</small></span><input type="checkbox" id="th-mono" ${cur.mono ? "checked" : ""} /></div>
+      <div class="th-btns"><button class="ghost-btn" id="th-del" type="button" style="color:var(--del)">🗑 Supprimer</button></div>`;
+    ed.querySelectorAll("input[type=color]").forEach((i) => {
+      i.oninput = () => { T.update(cur.id, { [i.dataset.k]: i.value }); i.previousElementSibling.textContent = i.value; refreshThemeSwatch(cur.id); };
+    });
+    $("th-name").oninput = (e) => { T.update(cur.id, { name: e.target.value || "Perso" }); refreshThemeSwatch(cur.id, true); };
+    $("th-mono").onchange = (e) => { T.update(cur.id, { mono: e.target.checked }); renderThemePanel(); };
+    $("th-del").onclick = () => { T.remove(cur.id); renderThemePanel(); };
+  }
+  $("th-fs").querySelectorAll("button").forEach((b) => { b.classList.toggle("sel", b.dataset.fs === T.fontSize()); b.onclick = () => { T.setFont(b.dataset.fs); renderThemePanel(); }; });
+}
+// met à jour la pastille de la palette en cours d'édition sans reconstruire le panneau (garde le focus du color-picker)
+function refreshThemeSwatch(id, nameOnly) {
+  const T = window.FleetTheme, p = T.list().find((x) => x.id === id), card = $("th-grid").querySelector(`[data-pal="${id}"]`); if (!p || !card) return;
+  const nm = card.querySelector(".th-nm"); if (nm) nm.innerHTML = `${esc(p.name)} <small>perso</small>`;
+  if (nameOnly) return;
+  const d = T.derive(p).vars, s = card.querySelectorAll(".th-sw i");
+  [d["--bg"], d["--panel2"], d["--ink"], d["--acc"]].forEach((c, i) => { if (s[i]) s[i].style.background = c; });
+}
+$("open-theme").onclick = openTheme;
+window.addEventListener("fleet-theme", () => { if (termInstance) { try { termInstance.options.theme = FleetTheme.xterm(); } catch {} } });
 
 // ---- barre mobile -------------------------------------------------------------
 (function mobileBar() {

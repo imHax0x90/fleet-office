@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.css" />
+  <script src="./theme.js"></script>
   <link rel="stylesheet" href="./lite.css" />
 </head>
 <body>
@@ -19,6 +20,7 @@
     <aside id="rail" class="rail">
       <div class="rail-top">
         <div class="brand"><span class="logo">⬢</span><span class="bt">Fleet<b>Office</b></span></div>
+        <button id="open-theme" class="gear" type="button" title="Apparence — palettes">◐</button>
         <button id="net" class="net" type="button" title="connexion temps réel"><span class="dot"></span></button>
       </div>
 
@@ -50,6 +52,7 @@
     <!-- ===================== MAIN (centre) ===================== -->
     <main class="main">
       <div id="mbar" class="mbar"></div>
+      <div id="tabbar" class="tabbar"></div>
 
       <!-- Accueil -->
       <div id="welcome" class="welcome">
@@ -212,6 +215,15 @@
     </div>
     <div id="tm-err" class="err"></div>
     <button id="tm-go" class="go">🚀 Lancer l'équipe</button>
+  </div>
+
+  <!-- ===================== Modale APPARENCE ===================== -->
+  <div id="theme" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-head"><div><h2>◐ Apparence</h2><div class="modal-sub">palettes — enregistrées sur cet appareil (web et app)</div></div><button class="icon-btn close" data-close="theme" aria-label="fermer">✕</button></div>
+    <div id="th-grid" class="th-grid"></div>
+    <div id="th-edit" class="th-edit"></div>
+    <div class="th-sec">Taille du texte</div>
+    <div class="seg" id="th-fs"><button type="button" data-fs="s">Compact</button><button type="button" data-fs="m">Normal</button><button type="button" data-fs="l">Grand</button></div>
   </div>
 
   <!-- ===================== Modale SKILL ===================== -->
