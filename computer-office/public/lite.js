@@ -11,10 +11,57 @@ const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": 
 const STATUS = {
   working: { c: "var(--s-work)", l: "au travail" }, coworking: { c: "var(--s-cowork)", l: "collabore" },
   done: { c: "var(--s-done)", l: "terminé" }, idle: { c: "var(--s-idle)", l: "au repos" },
-  queued: { c: "var(--s-idle)", l: "en file" }, blocked: { c: "var(--s-review)", l: "en attente" },
+  queued: { c: "var(--s-idle)", l: "en file" }, blocked: { c: "var(--s-ask)", l: "en attente" },
   failed: { c: "var(--s-fail)", l: "erreur" },
 };
 const st = (a) => STATUS[a && a.status] || STATUS.idle;
+// ---- icônes (jeu Lucide, ISC — celui d'Orca) -----------------------------------
+const IP = {
+  board: '<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>',
+  zap: '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>',
+  server: '<rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/>',
+  book: '<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+  file: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+  palette: '<circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>',
+  folder: '<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>',
+  branch: '<line x1="6" x2="6" y1="3" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/>',
+  plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
+  search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  sliders: '<line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/>',
+  chevD: '<path d="m6 9 6 6 6-6"/>', chevR: '<path d="m9 18 6-6-6-6"/>',
+  x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  star: '<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>',
+  users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+  refresh: '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
+  term: '<polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/>',
+  msg: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  diff: '<path d="M12 3v14"/><path d="M5 10h14"/><path d="M5 21h14"/>',
+  globe: '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
+  clip: '<path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/>',
+  up: '<path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>',
+  help: '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+  xc: '<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>',
+  checkc: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+  pencil: '<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/>',
+  gear: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+  clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  play: '<polygon points="6 3 20 12 6 21 6 3"/>',
+  trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+  logo: '<path d="M2 18c2.5-4 5-6 8-6s4 3 7 3 3.5-2 5-5"/><path d="M5 6c1-1.5 2.5-2 4-1.5"/><circle cx="17" cy="6.5" r="1.2" fill="currentColor"/>',
+};
+const ico = (n, s = 16) => `<svg class="i" viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IP[n] || ""}</svg>`;
+function hydrateIcons(root) { (root || document).querySelectorAll("[data-ico]").forEach((e) => { if (!e.dataset.done) { e.innerHTML = ico(e.dataset.ico, +e.dataset.s || 16); e.dataset.done = "1"; } }); }
+// indicateur d'état façon Orca : anneau qui tourne (travaille), « ? » orange (attend), check (terminé), point gris (repos)
+function stGlyph(a, big) {
+  const s = a && a.status, cls = "gl" + (big ? " lg" : ""), z = big ? 15 : 13;
+  if (a && (a.busy || s === "working")) return `<span class="${cls}" title="au travail"><span class="spin"></span></span>`;
+  if (s === "blocked") return `<span class="${cls} ask" title="attend une réponse">${ico("help", z)}</span>`;
+  if (s === "failed") return `<span class="${cls} fail" title="erreur">${ico("xc", z)}</span>`;
+  if (a && isReview(a)) return `<span class="${cls} rev" title="à revoir">${ico("diff", z - 1)}</span>`;
+  if (s === "done") return `<span class="${cls} done" title="terminé">${ico("checkc", z)}</span>`;
+  return `<span class="${cls}" title="${esc(st(a).l)}"><i class="dot"></i></span>`;
+}
 const AVPAL = [0, 1, 2, 3, 4, 5, 6, 7].map((i) => `var(--av${i})`);
 const hashc = (s) => { let h = 0; for (let i = 0; i < (s || "").length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return AVPAL[h % AVPAL.length]; };
 const fmtCost = (n) => { n = n || 0; return n >= 1 ? "$" + n.toFixed(0) : "$" + n.toFixed(2); };
@@ -126,17 +173,16 @@ function toggleFav(id) { favs.has(id) ? favs.delete(id) : favs.add(id); LSW("fle
 
 function agentCard(a) {
   const review = isReview(a), w = wsOf(a), fav = favs.has(a.id);
-  const branch = a.worktree && a.branch ? `<div class="ac-branch"><span class="gi">⑂</span>${esc(a.branch)}</div>` : "";
-  const intent = a.busy ? (a.intent || a.lastPrompt || "réfléchit…") : "";
-  const statusLine = intent ? `<div class="ac-status-line">${esc(String(intent).slice(0, 80))}</div>` : "";
-  const subs = (a.subAgents || []).length ? a.subAgents.map((s) => `<div class="subrow" data-sub="${esc(s.id)}"><span class="sd" style="background:${(STATUS[s.status] || STATUS.idle).c}"></span>${esc(s.name || s.role || "sous-agent")}</div>`).join("") : "";
-  const badge = a.teamName ? `<span class="ac-badge" title="${esc(a.teamName)}">${a.chief ? "👑" : "👥"}</span>` : (a.fanoutId ? `<span class="ac-badge" title="fan-out">⑂</span>` : "");
-  const proj = `<div class="ac-proj">${w.label && w.label.toLowerCase() !== String(a.name).toLowerCase() ? esc(w.label) + " · " : ""}${esc(relT(a.updatedAt) || "—")}</div>`;
-  return `<button class="acard ${detailId === a.id ? "sel" : ""} ${a.busy ? "working" : ""}${tcAttr(a.id)}" data-card="${esc(a.id)}">
-    ${review ? `<span class="ac-review">à revoir</span>` : ""}
-    <div class="ac-top"><span class="ac-dot" style="background:${st(a).c}"></span><span class="ac-name">${esc(a.name)}</span>${badge}<span class="ac-star ${fav ? "on" : ""}" data-star="${esc(a.id)}" title="${fav ? "Retirer des favoris" : "Épingler"}">${fav ? "★" : "☆"}</span></div>
-    ${proj}${branch}
-    <div class="ac-meta"><span class="ac-chip">${esc(a.model || "—")}</span>${a.changes ? chg(a.changes) : ""}<span class="ac-host">${esc(a.host || "local")}</span></div>
+  const lab = w.label && w.label.toLowerCase() !== String(a.name).toLowerCase() ? w.label : "";
+  const second = a.worktree && a.branch ? `<span class="ac-branch">${ico("branch", 11)}<span>${esc(a.branch)}</span></span>` : `<span class="ac-lab">${esc(lab || w.ws)}</span>`;
+  const intent = a.busy ? (a.intent || a.lastPrompt || "") : "";
+  const statusLine = intent ? `<div class="ac-status-line">${esc(String(intent).slice(0, 90))}</div>` : "";
+  const sa = a.subAgents || [];
+  const subs = sa.length ? `<div class="ac-subs"><div class="ac-subs-h">${sa.length} agent${sa.length > 1 ? "s" : ""}</div>${sa.map((s) => `<div class="subrow" data-sub="${esc(s.id)}">${stGlyph(s)}<span class="sn">${esc(s.name || s.role || "sous-agent")}</span></div>`).join("")}</div>` : "";
+  const badge = a.teamName ? `<span class="ac-badge" title="${esc(a.teamName)}">${ico("users", 11)}</span>` : (a.fanoutId ? `<span class="ac-badge" title="fan-out">${ico("branch", 11)}</span>` : "");
+  return `<button class="acard ${detailId === a.id ? "sel" : ""} ${a.busy ? "working" : ""}${tcAttr(a.id)}" data-card="${esc(a.id)}" title="${esc((a.model || "") + (a.host ? " · " + a.host : ""))}">
+    <div class="ac-top">${stGlyph(a)}<span class="ac-name">${esc(a.name)}</span>${badge}${review ? `<span class="ac-pill">à revoir</span>` : ""}${a.changes ? chg(a.changes) : ""}<span class="ac-star ${fav ? "on" : ""}" data-star="${esc(a.id)}" title="${fav ? "Retirer des favoris" : "Épingler"}">${ico("star", 12)}</span></div>
+    <div class="ac-sub">${second}<span class="ac-right"><span class="ac-host">${esc(a.host || "local")}</span><span class="ac-time">${esc(relT(a.updatedAt) || "")}</span></span></div>
     ${statusLine}${subs}
   </button>`;
 }
@@ -148,7 +194,7 @@ function renderSidebar() {
   const pinned = ags.filter((a) => favs.has(a.id)).sort(recency);
   const groups = {};
   for (const a of ags) if (!favs.has(a.id)) { const w = wsOf(a).ws; (groups[w] = groups[w] || []).push(a); }
-  let html = pinned.length ? `<div class="proj-group fav"><div class="proj-h static"><span class="pname">★ Favoris</span><span class="pn">${pinned.length}</span></div>${pinned.map(agentCard).join("")}</div>` : "";
+  let html = pinned.length ? `<div class="proj-group fav"><div class="proj-h static"><span class="pi">${ico("star", 14)}</span><span class="pname">Favoris</span><span class="pn">${pinned.length}</span></div>${pinned.map(agentCard).join("")}</div>` : "";
   const names = Object.keys(groups).sort((x, y) => {
     const ax = groups[x].some(isActive), ay = groups[y].some(isActive);
     if (ax !== ay) return ax ? -1 : 1;
@@ -159,7 +205,7 @@ function renderSidebar() {
     const list = groups[w].sort(recency), nAct = list.filter(isActive).length, hasSel = list.some((a) => a.id === detailId);
     const def = !(nAct || hasSel || list.length <= 3);
     const col = !query && (w in wsCollapsed ? wsCollapsed[w] : def) && !hasSel;
-    return `<div class="proj-group ${col ? "collapsed" : ""}"><div class="proj-h" data-ws="${esc(w)}"><span class="chev">${col ? "▸" : "▾"}</span><span class="pname">${esc(w)}</span>${nAct ? `<span class="pact" title="${nAct} au travail">●${nAct}</span>` : ""}<span class="pn">${list.length}</span></div>${col ? "" : list.map(agentCard).join("")}</div>`;
+    return `<div class="proj-group ${col ? "collapsed" : ""}"><div class="proj-h" data-ws="${esc(w)}"><span class="pi">${ico(w === "Infra & perso" ? "server" : "folder", 15)}</span><span class="pname">${esc(w)}</span>${nAct ? `<span class="pact" title="${nAct} au travail"><span class="spin"></span>${nAct}</span>` : ""}<span class="pn">${list.length}</span><span class="chev">${ico(col ? "chevR" : "chevD", 12)}</span></div>${col ? "" : list.map(agentCard).join("")}</div>`;
   }).join("");
   el.innerHTML = html;
   wireSidebar(el);
@@ -203,8 +249,8 @@ function renderBoard() {
       { key: "idle", label: "Au repos · à reprendre", dot: "var(--s-idle)", items: idle, more: !boardIdleAll && idle.length > IDLE_CAP },
     ];
   }
-  const seg = (m, l) => `<button class="seg ${boardMode === m ? "sel" : ""}" data-bmode="${m}">${l}</button>`;
-  el.innerHTML = `<div class="board-bar"><div class="segs">${seg("status", "Par statut")}${seg("project", "Par projet")}</div><span class="bb-sum">${ags.filter(isActive).length} au travail · ${ags.length} sessions</span></div>
+  const seg = (m, l) => `<button class="pseg ${boardMode === m ? "sel" : ""}" data-bmode="${m}">${l}</button>`;
+  el.innerHTML = `<div class="board-bar"><div class="psegs">${seg("status", "Par statut")}${seg("project", "Par projet")}</div><span class="bb-sum">${ags.filter(isActive).length} au travail · ${ags.length} sessions</span></div>
   <div class="board-cols">${cols.map((c) => {
     const shown = c.more ? c.items.slice(0, IDLE_CAP) : c.items;
     return `<div class="bcol"><div class="bcol-h"><span class="bdot" style="background:${c.dot}"></span>${esc(c.label)}<span class="bn">${c.items.length}</span></div>
@@ -218,13 +264,13 @@ function renderBoard() {
 }
 function boardCard(a, col) {
   const w = wsOf(a);
-  const branch = a.worktree && a.branch ? `<div class="bc-branch"><span class="gi">⑂</span>${esc(a.branch)}</div>` : "";
+  const branch = a.worktree && a.branch ? `<div class="bc-branch">${ico("branch", 11)}<span>${esc(a.branch)}</span></div>` : "";
   const lab = w.label && w.label.toLowerCase() !== String(a.name).toLowerCase() ? w.label : "";
   const sub = (col !== "ws" ? w.ws + (lab ? " · " + lab : "") : lab) || "";
   const actions = col === "review"
     ? `<div class="bc-actions"><button class="review" data-review="${esc(a.id)}">Revoir</button><button class="merge" data-merge="${esc(a.id)}">Merger</button></div>` : "";
   return `<div class="bcard${tcAttr(a.id)}" data-bcard="${esc(a.id)}">
-    <div class="bc-top"><span class="bc-dot" style="background:${st(a).c}"></span><span class="bc-name">${esc(a.name)}</span><span class="bc-model">${esc(a.model || "—")}</span></div>
+    <div class="bc-top">${stGlyph(a)}<span class="bc-name">${esc(a.name)}</span><span class="bc-model">${esc(a.model || "—")}</span></div>
     ${sub ? `<div class="bc-proj">${esc(sub)}</div>` : ""}${branch}
     <div class="bc-foot">${a.changes ? `<span class="bc-stat"><span class="add">+${a.changes.add || 0}</span> <span class="del">−${a.changes.del || 0}</span></span>` : `<span style="color:var(--mut2)">${esc(st(a).l)} · ${esc(relT(a.updatedAt) || "—")}</span>`}<span class="bc-host">${esc(a.host || "local")}</span></div>
     ${actions}</div>`;
@@ -252,22 +298,17 @@ function clearDetail() {
   applyCenterVisibility(); renderSidebar(); renderTabbar();
 }
 function renderSessHead(a) {
-  const col = hashc((a.role || "") + (a.name || ""));
-  const dot = `<span class="d" style="background:${st(a).c};box-shadow:0 0 7px ${st(a).c}"></span>`;
-  const branch = a.worktree && a.branch ? `<span class="sh-branch">⑂ ${esc(a.branch)}</span>` : "";
+  const branch = a.worktree && a.branch ? `<span class="sh-chip br">${ico("branch", 11)}${esc(a.branch)}</span>` : "";
   const prov = a.provider === "bedrock" ? `<span class="sh-chip bedrock">Bedrock</span>` : "";
   const changes = a.changes && a.changes.files ? `<span class="sh-chip"><span style="color:var(--ok)">+${a.changes.add || 0}</span> <span style="color:var(--del)">−${a.changes.del || 0}</span></span>` : "";
   $("sess-head").innerHTML = `
-    <div class="sh-av" style="background:${col}">${esc(initial(a.name))}</div>
-    <div class="sh-id">
-      <div class="sh-name"><span id="h-name-txt">${esc(a.name)}</span><button class="rename-btn" id="h-rename" title="renommer">✎</button></div>
-      <div class="sh-sub">${dot}${esc(st(a).l)}${a.busy ? " · réfléchit" : ""} ${branch} <span class="sh-chip">${esc(a.model || "—")}${a.effort ? " · " + esc(a.effort) : ""}</span> ${prov} ${changes} <span class="sh-chip">🖥 ${esc(a.host || "local")}</span></div>
-    </div>
+    <div class="sh-l">${stGlyph(a, true)}<span class="sh-name" id="h-name-txt">${esc(a.name)}</span><button class="rename-btn" id="h-rename" title="renommer">${ico("pencil", 12)}</button></div>
+    <div class="sh-meta"><span class="sh-st">${esc(st(a).l)}${a.busy ? " · réfléchit" : ""}</span>${branch}${a.model ? `<span class="sh-chip">${esc(a.model)}${a.effort ? " · " + esc(a.effort) : ""}</span>` : ""}${prov}${changes}<span class="sh-chip host">${ico("server", 11)}${esc(a.host || "local")}</span></div>
     <div class="sh-act">
-      <button class="icon-btn" id="h-theme" title="palette de cette conversation">◐</button>
-      <button class="icon-btn" id="h-refresh" title="rafraîchir">⟳</button>
-      <button class="icon-btn" id="h-ctx" title="détails">ⓘ</button>
-      <button class="icon-btn" id="h-team" title="équipe">👥</button>
+      <button class="icon-btn" id="h-theme" title="palette de cette conversation">${ico("palette", 15)}</button>
+      <button class="icon-btn" id="h-refresh" title="rafraîchir">${ico("refresh", 15)}</button>
+      <button class="icon-btn" id="h-ctx" title="détails">${ico("info", 15)}</button>
+      <button class="icon-btn" id="h-team" title="équipe">${ico("users", 15)}</button>
     </div>`;
   $("h-theme").onclick = () => { thScope = "conv"; openTheme(); };
   $("h-refresh").onclick = () => { pollFeed(); pollHost(a); if (centerTab === "diff") loadDiff(true); };
@@ -393,7 +434,7 @@ function renderConv(feed, opts) {
     const e = feed[i];
     if (e.kind === "tool") {
       const key = toolKey(e.text), open = expandedTools.has(key), firstLine = String(e.text || "").split("\n")[0];
-      let box = `<div class="tool ${open ? "open" : ""}"><div class="th" data-tool="${key}"><span class="chev">${open ? "▾" : "▸"}</span><span class="ok">✓</span> Outil<span class="tool-sum">${esc(firstLine)}</span></div>`;
+      let box = `<div class="tool ${open ? "open" : ""}"><div class="th" data-tool="${key}"><span class="chev">${ico(open ? "chevD" : "chevR", 12)}</span><span class="tool-sum">${esc(firstLine)}</span><span class="ok">${feed[i + 1] && feed[i + 1].kind === "result" ? ico("checkc", 13) : ""}</span></div>`;
       if (open) box += `<pre>${esc(e.text)}</pre>`;
       const hasResult = feed[i + 1] && feed[i + 1].kind === "result";
       if (open && hasResult) box += `<div class="res"><pre>${esc(feed[i + 1].text)}</pre></div>`;
@@ -403,7 +444,7 @@ function renderConv(feed, opts) {
       html += `<div class="msg result"><div class="mh"><span class="mav">↳</span><span class="mwho">Résultat</span></div><div class="mbody md">${mdToHtml(e.text)}</div></div>`; i++;
     } else {
       const who = e.kind === "prompt" ? "Vous" : (e.kind === "think" ? "Réflexion" : "Agent");
-      const cls = e.kind === "prompt" ? "you" : "agent";
+      const cls = e.kind === "prompt" ? "you" : (e.kind === "think" ? "agent think" : "agent");
       const bodyHtml = e.kind === "say" ? `<div class="mbody md">${mdToHtml(e.text)}</div>` : `<div class="mbody"${e.kind === "think" ? ' style="color:var(--mut)"' : ""}>${esc(e.text)}</div>`;
       html += `<div class="msg ${cls}"><div class="mh"><span class="mav">${AV[e.kind] || "🤖"}</span><span class="mwho">${who}</span></div>${bodyHtml}</div>`; i++;
     }
@@ -966,18 +1007,18 @@ function closeTab(id) {
   if (detailId === id) { const next = openTabs[i] || openTabs[i - 1]; if (next && agentById(next)) select(next); else setView(view); }
   else renderTabbar();
 }
-const VIEW_LABEL = { board: ["▦", "Board"], machines: ["▤", "Machines"], skills: ["◈", "Skills"], audit: ["▧", "Audit"], design: ["🎨", "Design"] };
+const VIEW_LABEL = { board: ["board", "Board"], auto: ["zap", "Automations"], machines: ["server", "Machines"], skills: ["book", "Skills"], audit: ["file", "Audit"], design: ["palette", "Design"] };
 function renderTabbar() {
   const el = $("tabbar"); if (!el || tabDrag) return;
   const ags = snap.agents || [];
   if (ags.length) { const keep = openTabs.filter((id) => ags.some((a) => a.id === id)); if (keep.length !== openTabs.length) { openTabs = keep; saveTabs(); } }
   const [vi, vl] = VIEW_LABEL[view] || VIEW_LABEL.board;
   const tabs = openTabs.map(agentById).filter(Boolean);
-  const sig = [view, detailId, tabs.map((a) => a.id + a.name + (sessThemes[a.id] || "") + a.status + (a.busy ? 1 : 0) + (isReview(a) ? 1 : 0)).join("|")].join("~");
+  const sig = [view, detailId, tabs.map((a) => a.id + a.name + (sessThemes[a.id] || "") + a.status + (a.busy ? 1 : 0) + (isReview(a) ? 1 : 0) + (a.busy ? "w" : "")).join("|")].join("~");
   if (renderTabbar._sig === sig) return; renderTabbar._sig = sig;
-  el.innerHTML = `<div class="tab pin ${detailId ? "" : "sel"}" data-vtab><span class="tic">${vi}</span><span class="tn">${vl}</span></div>` +
-    tabs.map((a) => `<div class="tab ${detailId === a.id ? "sel" : ""} ${a.busy ? "work" : ""}${tcAttr(a.id)}" data-tab="${esc(a.id)}" draggable="true" title="${esc(a.name)}${a.branch ? " · " + esc(a.branch) : ""}"><span class="td" style="background:${st(a).c}"></span><span class="tn">${esc(a.name)}</span>${isReview(a) ? `<span class="tr" title="à revoir">◇</span>` : ""}<button class="tx" data-tx="${esc(a.id)}" type="button" aria-label="fermer l'onglet">×</button></div>`).join("") +
-    `<button class="tab-add" id="tab-add" type="button" title="Nouvelle tâche">＋</button><div class="tab-fill"></div>`;
+  el.innerHTML = `<div class="tab pin ${detailId ? "" : "sel"}" data-vtab><span class="tic">${ico(vi, 14)}</span><span class="tn">${vl}</span></div>` +
+    tabs.map((a) => `<div class="tab ${detailId === a.id ? "sel" : ""} ${a.busy ? "work" : ""}${tcAttr(a.id)}" data-tab="${esc(a.id)}" draggable="true" title="${esc(a.name)}${a.branch ? " · " + esc(a.branch) : ""}"><span class="tgl">${stGlyph(a)}</span><span class="tn">${esc(a.name)}</span><button class="tx" data-tx="${esc(a.id)}" type="button" aria-label="fermer l'onglet">${ico("x", 12)}</button></div>`).join("") +
+    `<button class="tab-add" id="tab-add" type="button" title="Nouvelle tâche">${ico("plus", 15)}</button><div class="tab-fill"></div>`;
   el.querySelector("[data-vtab]").onclick = () => setView(view);
   $("tab-add").onclick = () => openSpawn();
   el.querySelectorAll("[data-tab]").forEach((t) => {
@@ -1002,7 +1043,7 @@ function renderThemePanel() {
   if (thScope === "conv" && !sid) thScope = "global";
   const cur = conv ? (sessPal(sid) || T.global()) : T.global(), list = T.list();
   let sc = $("th-scope"); if (!sc) { sc = document.createElement("div"); sc.id = "th-scope"; $("th-grid").parentNode.insertBefore(sc, $("th-grid")); }
-  sc.innerHTML = sid ? `<div class="segs"><button class="seg ${conv ? "" : "sel"}" data-scope="global" type="button">Global</button><button class="seg ${conv ? "sel" : ""}" data-scope="conv" type="button">Cette conversation</button></div>${conv && sessThemes[sid] ? `<button class="ghost-btn" id="th-inherit" type="button">↩ Hériter du global</button>` : ""}<div class="modal-sub" style="margin:8px 0 0">${conv ? "La palette s'applique quand cette conversation est ouverte et colore son onglet." : "Thème par défaut de l'app."}</div>` : "";
+  sc.innerHTML = sid ? `<div class="psegs"><button class="pseg ${conv ? "" : "sel"}" data-scope="global" type="button">Global</button><button class="pseg ${conv ? "sel" : ""}" data-scope="conv" type="button">Cette conversation</button></div>${conv && sessThemes[sid] ? `<button class="ghost-btn" id="th-inherit" type="button">↩ Hériter du global</button>` : ""}<div class="modal-sub" style="margin:8px 0 0">${conv ? "La palette s'applique quand cette conversation est ouverte et colore son onglet." : "Thème par défaut de l'app."}</div>` : "";
   sc.querySelectorAll("[data-scope]").forEach((b) => (b.onclick = () => { thScope = b.dataset.scope; renderThemePanel(); }));
   if ($("th-inherit")) $("th-inherit").onclick = () => { setSessionTheme(sid, null); renderThemePanel(); };
   const pick = (id) => (conv ? setSessionTheme(sid, id) : T.use(id));
@@ -1087,6 +1128,9 @@ if (window.parent !== window) {
   $("open-srv").onclick = () => window.parent.postMessage({ fleet: "settings" }, "*");
   try { window.parent.postMessage({ fleet: "hello" }, "*"); } catch {}
 }
+$("nav-search").onclick = () => openPalette();
+$("rail-filter-btn").onclick = () => { $("rail-fp").classList.toggle("hidden"); if (!$("rail-fp").classList.contains("hidden")) $("q").focus(); };
+hydrateIcons();
 $("q").oninput = (e) => { query = e.target.value.trim().toLowerCase(); renderSidebar(); if (view === "board" && !detailId) renderBoard(); };
 wireComposer(); wireDrop($("sp-attach"), attS, $("sp-attach-list")); wireDrop($("composer"), attC, $("c-attach"));
 wireResize($("rail-resize"), "--rail-w", { min: 240, max: 460, storeKey: "fleetoffice.railW" });

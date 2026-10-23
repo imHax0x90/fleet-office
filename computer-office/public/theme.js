@@ -5,7 +5,17 @@
 (function () {
   const KEY = "fleet.theme";
 
+  // Valeurs relevées dans le CSS d'Orca (stablyai/orca, MIT) : shadcn neutre, bordures à 7 % de blanc.
+  const ORCA_X = {
+    "--bg2": "#141414", "--panel": "#171717", "--panel2": "#1e1e1e", "--raise": "#262626", "--hover": "rgba(255,255,255,.04)",
+    "--line": "rgba(255,255,255,.07)", "--line2": "rgba(255,255,255,.10)", "--line3": "rgba(255,255,255,.18)",
+    "--mut": "#a1a1a1", "--mut2": "#737373", "--ink2": "#d4d4d4", "--code": "#0f0f0f",
+    "--s-work": "#eab308", "--s-review": "#16a34a", "--s-done": "#10b981", "--s-idle": "#737373",
+  };
+  const ORCA_SEM = { ok: "#22c55e", del: "#ef4444", warn: "#eab308", cyan: "#60a5fa", violet: "#a78bfa" };
   const PRESETS = [
+    { id: "orca", name: "Orca", bg: "#0a0a0a", ink: "#fafafa", acc: "#e5e5e5", mono: false, sem: ORCA_SEM, x: { ...ORCA_X, "--acc-deep": "rgba(255,255,255,.09)", "--acc-ink": "#fafafa", "--you-line": "rgba(255,255,255,.12)" } },
+    { id: "orca-rouge", name: "Orca · Rouge", bg: "#0a0a0a", ink: "#fafafa", acc: "#e5282e", mono: false, sem: ORCA_SEM, x: { ...ORCA_X } },
     { id: "noir-rouge", name: "Noir & Rouge", bg: "#0a0a0b", ink: "#ececec", acc: "#e5282e", mono: true },
     { id: "blanc-rouge", name: "Blanc & Rouge", bg: "#f4f4f2", ink: "#151515", acc: "#d4222a", mono: true },
     { id: "graphite", name: "Graphite", bg: "#17181b", ink: "#e4e4e6", acc: "#ff4d4f", mono: true },
@@ -14,7 +24,7 @@
     { id: "ambre", name: "Ambre", bg: "#0d0b08", ink: "#f0e5cf", acc: "#ffb000", mono: true },
     { id: "tokyonight", name: "Tokyo Night", bg: "#0d0f14", ink: "#e6e9ef", acc: "#7aa2f7", mono: false },
   ];
-  const DEFAULT_ID = "noir-rouge";
+  const DEFAULT_ID = "orca";
 
   // ---- couleurs -----------------------------------------------------------------
   const clamp = (n) => Math.max(0, Math.min(255, Math.round(n)));
@@ -55,6 +65,7 @@
       del = p.del || (light ? "#d4222a" : "#ff5a5f");
     } else if (light) { ok = "#3b8a1e"; del = "#d1243b"; warn = "#b36b00"; cyan = "#0a7fa8"; violet = "#7a4fd1"; }
     else { ok = "#9ece6a"; del = "#f7768e"; warn = "#e0af68"; cyan = "#7dcfff"; violet = "#bb9af7"; }
+    if (p.sem) { ok = p.sem.ok || ok; del = p.sem.del || del; warn = p.sem.warn || warn; cyan = p.sem.cyan || cyan; violet = p.sem.violet || violet; }
     v["--ok"] = ok; v["--del"] = del; v["--warn"] = warn; v["--cyan"] = cyan; v["--violet"] = violet;
     v["--okbg"] = alpha(ok, light ? 0.16 : 0.13); v["--delbg"] = alpha(del, light ? 0.13 : 0.13);
     v["--add-ink"] = mix(ok, ink, 0.4); v["--del-ink"] = mix(del, ink, 0.4);
@@ -65,7 +76,9 @@
     v["--hunk"] = mix(bg, acc, 0.08); v["--hover"] = mix(bg, ink, 0.05);
     v["--fan-bg"] = mix(bg, p.mono ? acc : violet, 0.08);
     v["--sb"] = mix(bg, ink, 0.14); v["--sbh"] = mix(bg, ink, 0.24);
+    v["--s-ask"] = "#f97316"; // agent qui attend une réponse / une permission
     for (let i = 0; i < 8; i++) v["--av" + i] = mix(bg, i % 3 === 0 ? acc : ink, 0.14 + i * 0.022);
+    if (p.x) Object.assign(v, p.x);
     return { vars: v, light };
   }
 
@@ -109,7 +122,7 @@
     create(fromId, opts) {
       const base = find(fromId) || PRESETS[0];
       const n = state.custom.length + 1;
-      const c = { id: "c" + Date.now().toString(36), name: "Perso " + n, bg: base.bg, ink: base.ink, acc: base.acc, mono: !!base.mono };
+      const c = { id: "c" + Date.now().toString(36), name: "Perso " + n, bg: base.bg, ink: base.ink, acc: base.acc, mono: !!base.mono, sem: base.sem, x: base.x };
       state.custom.push(c);
       if (opts && opts.keep) { save(); return c; } // palette de conversation : on ne change pas le thème global
       state.id = c.id; save(); apply(); return c;

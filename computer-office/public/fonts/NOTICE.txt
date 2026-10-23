@@ -1,0 +1,3 @@
+Geist (Vercel) — SIL Open Font License 1.1.
+Rendu visuel inspiré d'Orca (https://github.com/stablyai/orca, MIT, © 2026 Lovecast Inc.) : valeurs de couleurs,
+structure des cartes/onglets et jeu d'icônes Lucide (ISC) repris de leur code.

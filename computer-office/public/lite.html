@@ -13,6 +13,7 @@
   <script src="./theme.js"></script>
   <script src="./md.js"></script>
   <link rel="stylesheet" href="./lite.css" />
+  <link rel="stylesheet" href="./orca.css" />
 </head>
 <body>
   <div id="app" class="app">
@@ -20,29 +21,38 @@
     <!-- ===================== SIDEBAR (gauche) ===================== -->
     <aside id="rail" class="rail">
       <div class="rail-top">
-        <div class="brand"><span class="logo">⬢</span><span class="bt">Fleet<b>Office</b></span></div>
-        <button id="open-theme" class="gear" type="button" title="Apparence — palettes">◐</button>
-        <button id="open-srv" class="gear hidden" type="button" title="Serveur de l'app">⚙</button>
+        <div class="brand"><span class="logo" data-ico="logo" data-s="17"></span><span class="bt">Fleet Office</span></div>
+        <button id="open-theme" class="gear" type="button" title="Apparence — palettes" data-ico="palette" data-s="15"></button>
+        <button id="open-srv" class="gear hidden" type="button" title="Serveur de l'app" data-ico="gear" data-s="15"></button>
         <button id="net" class="net" type="button" title="connexion temps réel"><span class="dot"></span></button>
       </div>
 
-      <button id="new-task" class="new-task" type="button">＋ Nouvelle tâche</button>
-
       <nav id="nav" class="nav">
-        <button class="nav-item sel" data-view="board"><span class="ic">▦</span> Board <span class="count" id="nav-agents">0</span></button>
-        <button class="nav-item" data-view="machines"><span class="ic">▤</span> Machines <span class="count" id="nav-machines">0</span></button>
-        <button class="nav-item" data-view="skills"><span class="ic">◈</span> Skills <span class="count" id="nav-skills">0</span></button>
-        <button class="nav-item" data-view="audit"><span class="ic">▧</span> Audit <span class="count" id="nav-audit">0</span></button>
-        <button class="nav-item" data-view="design"><span class="ic">🎨</span> Design</button>
+        <button class="nav-item sel" data-view="board"><span class="ic" data-ico="board"></span><span class="nl">Board</span><span class="count" id="nav-agents">0</span></button>
+        <button class="nav-item" data-view="auto"><span class="ic" data-ico="zap"></span><span class="nl">Automations</span><span class="count" id="nav-auto">0</span></button>
+        <button class="nav-item" data-view="machines"><span class="ic" data-ico="server"></span><span class="nl">Machines</span><span class="count" id="nav-machines">0</span></button>
+        <button class="nav-item" data-view="skills"><span class="ic" data-ico="book"></span><span class="nl">Skills</span><span class="count" id="nav-skills">0</span></button>
+        <button class="nav-item" data-view="audit"><span class="ic" data-ico="file"></span><span class="nl">Audit</span><span class="count" id="nav-audit">0</span></button>
+        <button class="nav-item" data-view="design"><span class="ic" data-ico="globe"></span><span class="nl">Design</span></button>
+        <button class="nav-item" id="nav-search" type="button"><span class="ic" data-ico="search"></span><span class="nl">Rechercher</span><kbd>⌘K</kbd></button>
       </nav>
 
-      <div class="rail-search"><span class="ic">⌕</span><input id="q" type="search" placeholder="rechercher…  (⌘K)" autocomplete="off" /></div>
+      <div class="proj-bar">
+        <span class="pb-l">Projets</span>
+        <span class="pb-act">
+          <button id="rail-filter-btn" class="pb-btn" type="button" title="Filtrer / rechercher" data-ico="sliders" data-s="14"></button>
+          <button id="new-task" class="pb-btn" type="button" title="Nouvelle tâche" data-ico="plus" data-s="15"></button>
+        </span>
+      </div>
 
-      <div class="rail-filter" id="rail-filter">
-        <button class="chip sel" data-filter="all">Tout</button>
-        <button class="chip" data-filter="active">Au travail</button>
-        <button class="chip" data-filter="review">En revue</button>
-        <button class="chip" data-filter="idle">Au repos</button>
+      <div id="rail-fp" class="rail-fp hidden">
+        <div class="rail-search"><span class="ic" data-ico="search" data-s="13"></span><input id="q" type="search" placeholder="Filtrer les sessions…" autocomplete="off" /></div>
+        <div class="rail-filter" id="rail-filter">
+          <button class="chip sel" data-filter="all">Tout</button>
+          <button class="chip" data-filter="active">Au travail</button>
+          <button class="chip" data-filter="review">En revue</button>
+          <button class="chip" data-filter="idle">Au repos</button>
+        </div>
       </div>
 
       <div id="rail-list" class="rail-list"></div>
@@ -58,13 +68,13 @@
 
       <!-- Accueil -->
       <div id="welcome" class="welcome">
-        <div class="wbig">🛰️</div>
+        <div class="wbig" data-ico="logo" data-s="46"></div>
         <h1>Fleet Office</h1>
         <p>L'environnement de dev pour une flotte d'agents — chacun dans son worktree git, sur n'importe quel nœud de ton tailnet.</p>
         <div class="wactions">
-          <button id="w-new" class="primary" type="button">＋ Nouvelle tâche</button>
-          <button id="w-fanout" class="ghost-btn" type="button">⑂ Fan-out parallèle</button>
-          <button id="w-board" class="ghost-btn" type="button">▦ Ouvrir le board</button>
+          <button id="w-new" class="primary" type="button">Nouvelle tâche</button>
+          <button id="w-fanout" class="ghost-btn" type="button">Fan-out parallèle</button>
+          <button id="w-board" class="ghost-btn" type="button">Ouvrir le board</button>
         </div>
       </div>
 
@@ -75,10 +85,10 @@
       <div id="session" class="session hidden">
         <header id="sess-head" class="sess-head"></header>
         <div id="sess-tabs" class="sess-tabs">
-          <button class="ctab sel" data-ctab="conv" type="button">💬 Conversation</button>
-          <button class="ctab" data-ctab="diff" type="button">◇ Diff<span id="ctab-diff-n" class="ctab-n hidden">0</span></button>
-          <button class="ctab" data-ctab="term" type="button">▹_ Terminal</button>
-          <button class="ctab" data-ctab="preview" type="button">◱ Aperçu</button>
+          <button class="ctab sel" data-ctab="conv" type="button"><span data-ico="msg" data-s="14"></span>Conversation</button>
+          <button class="ctab" data-ctab="diff" type="button"><span data-ico="diff" data-s="14"></span>Diff<span id="ctab-diff-n" class="ctab-n hidden">0</span></button>
+          <button class="ctab" data-ctab="term" type="button"><span data-ico="term" data-s="14"></span>Terminal</button>
+          <button class="ctab" data-ctab="preview" type="button"><span data-ico="globe" data-s="14"></span>Aperçu</button>
         </div>
         <div id="fanout-bar" class="fanout-bar hidden"></div>
 
@@ -110,12 +120,12 @@
           <div id="c-quickreply" class="quickreply hidden"></div>
           <div class="slash"><div id="c-slash" class="slash-dd hidden"></div></div>
           <div class="cbox">
-            <textarea id="c-input" rows="1" placeholder="message / follow-up…   ( / = commandes,  📎 = fichiers )"></textarea>
+            <textarea id="c-input" rows="1" placeholder="Message à l'agent…   ( / commandes · glisser un fichier )"></textarea>
             <div class="crow">
-              <button id="c-clip" class="cbtn" type="button" title="Joindre des fichiers">📎</button>
+              <button id="c-clip" class="cbtn" type="button" title="Joindre des fichiers" data-ico="clip" data-s="16"></button>
               <span class="spacer"></span>
               <span id="c-busy" class="busyline hidden">⏳ l'agent réfléchit — ton message s'enchaîne</span>
-              <button id="c-send" class="send-btn" type="button">Envoyer ➤</button>
+              <button id="c-send" class="send-btn" type="button" title="Envoyer (Entrée)" data-ico="up" data-s="16"></button>
             </div>
           </div>
           <input id="c-file" type="file" multiple hidden />
@@ -127,6 +137,7 @@
       <div id="skills" class="skills-wrap view hidden"></div>
       <div id="audit" class="skills-wrap view hidden"></div>
       <div id="design" class="design-wrap view hidden"></div>
+      <div id="auto" class="auto-wrap view hidden"></div>
     </main>
 
     <!-- ===================== CONTEXTE (slide-over) ===================== -->
