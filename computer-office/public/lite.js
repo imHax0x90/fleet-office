@@ -71,7 +71,7 @@ function onSnapshot() {
   $("nav-agents").textContent = ags.length;
   $("nav-machines").textContent = new Set(ags.map((a) => a.host).filter(Boolean)).size + 1;
   renderSidebar(); renderStatusline(); renderTabbar();
-  if (view === "board" && !detailId) renderBoard();
+  if (view === "board" && !detailId) { applyCenterVisibility(); renderBoard(); }
   if (view === "machines") renderMachines();
   if (detailId) {
     const a = agentById(detailId);
@@ -91,36 +91,73 @@ function agentMatches(a) {
   if (railFilter === "idle") return !isActive(a) && !isReview(a);
   return true;
 }
+// Workspace dérivé du chemin : ~/Bureau/Projects/[MICRO/]<WS>/<client…> -> ASKEAL / EXPLORIA / ARTHUR ; le reste = Infra & perso
+const WS_SKIP = new Set(["micro"]);
+function wsOf(a) {
+  const cwd = String(a.cwd || "").replace(/\/+$/, "");
+  const m = cwd.match(/\/Projects\/(.+)$/i);
+  if (m) {
+    const seg = m[1].split("/").filter(Boolean).filter((x) => !WS_SKIP.has(x.toLowerCase()));
+    if (seg.length) { const rest = seg.slice(1); return { ws: seg[0], label: rest.length ? rest.slice(-2).join(" / ") : "", root: !rest.length }; }
+  }
+  if (!cwd || cwd === "~" || cwd === "-" || /^\/home\/[^/]+$/.test(cwd)) return { ws: "Infra & perso", label: "", root: true };
+  return { ws: "Infra & perso", label: projectOf(a), root: false };
+}
+function relT(t) {
+  if (typeof t === "string") t = Date.parse(t); if (!t) return "";
+  const s = (Date.now() - t) / 1000;
+  return s < 90 ? "à l'instant" : s < 3600 ? Math.round(s / 60) + " min" : s < 86400 ? Math.round(s / 3600) + " h" : Math.round(s / 86400) + " j";
+}
+const LSJ = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k) || ""); return v == null ? d : v; } catch { return d; } };
+const LSW = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+let favs = new Set(LSJ("fleet.favs", [])), wsCollapsed = LSJ("fleet.wsCollapsed", {});
+function toggleFav(id) { favs.has(id) ? favs.delete(id) : favs.add(id); LSW("fleet.favs", [...favs]); renderSidebar(); }
+
 function agentCard(a) {
-  const review = isReview(a);
+  const review = isReview(a), w = wsOf(a), fav = favs.has(a.id);
   const branch = a.worktree && a.branch ? `<div class="ac-branch"><span class="gi">⑂</span>${esc(a.branch)}</div>` : "";
   const intent = a.busy ? (a.intent || a.lastPrompt || "réfléchit…") : "";
   const statusLine = intent ? `<div class="ac-status-line">${esc(String(intent).slice(0, 80))}</div>` : "";
   const subs = (a.subAgents || []).length ? a.subAgents.map((s) => `<div class="subrow" data-sub="${esc(s.id)}"><span class="sd" style="background:${(STATUS[s.status] || STATUS.idle).c}"></span>${esc(s.name || s.role || "sous-agent")}</div>`).join("") : "";
   const badge = a.teamName ? `<span class="ac-badge" title="${esc(a.teamName)}">${a.chief ? "👑" : "👥"}</span>` : (a.fanoutId ? `<span class="ac-badge" title="fan-out">⑂</span>` : "");
+  const proj = `<div class="ac-proj">${w.label && w.label.toLowerCase() !== String(a.name).toLowerCase() ? esc(w.label) + " · " : ""}${esc(relT(a.updatedAt) || "—")}</div>`;
   return `<button class="acard ${detailId === a.id ? "sel" : ""} ${a.busy ? "working" : ""}" data-card="${esc(a.id)}">
     ${review ? `<span class="ac-review">à revoir</span>` : ""}
-    <div class="ac-top"><span class="ac-dot" style="background:${st(a).c}"></span><span class="ac-name">${esc(a.name)}</span>${badge}</div>
-    ${branch}
+    <div class="ac-top"><span class="ac-dot" style="background:${st(a).c}"></span><span class="ac-name">${esc(a.name)}</span>${badge}<span class="ac-star ${fav ? "on" : ""}" data-star="${esc(a.id)}" title="${fav ? "Retirer des favoris" : "Épingler"}">${fav ? "★" : "☆"}</span></div>
+    ${proj}${branch}
     <div class="ac-meta"><span class="ac-chip">${esc(a.model || "—")}</span>${a.changes ? chg(a.changes) : ""}<span class="ac-host">${esc(a.host || "local")}</span></div>
     ${statusLine}${subs}
   </button>`;
 }
+const recency = (x, y) => (b2(y) - b2(x)) || ((Date.parse(y.updatedAt) || y.updatedAt || 0) - (Date.parse(x.updatedAt) || x.updatedAt || 0));
 function renderSidebar() {
   const el = $("rail-list");
   const ags = (snap.agents || []).filter((a) => !a.internal).filter(agentMatches);
   if (!ags.length) { el.innerHTML = `<div class="rail-empty">${query || railFilter !== "all" ? "Aucune session pour ce filtre." : "Aucune session.<br>＋ Nouvelle tâche pour commencer."}</div>`; wireSidebar(el); return; }
+  const pinned = ags.filter((a) => favs.has(a.id)).sort(recency);
   const groups = {};
-  for (const a of ags) { const p = projectOf(a); (groups[p] = groups[p] || []).push(a); }
-  el.innerHTML = Object.keys(groups).sort().map((p) => {
-    const list = groups[p].sort((x, y) => (b2(y) - b2(x)) || (y.updatedAt - x.updatedAt));
-    return `<div class="proj-group"><div class="proj-h"><span class="pname">${esc(p)}</span><span class="pn">${list.length}</span></div>${list.map(agentCard).join("")}</div>`;
+  for (const a of ags) if (!favs.has(a.id)) { const w = wsOf(a).ws; (groups[w] = groups[w] || []).push(a); }
+  let html = pinned.length ? `<div class="proj-group fav"><div class="proj-h static"><span class="pname">★ Favoris</span><span class="pn">${pinned.length}</span></div>${pinned.map(agentCard).join("")}</div>` : "";
+  const names = Object.keys(groups).sort((x, y) => {
+    const ax = groups[x].some(isActive), ay = groups[y].some(isActive);
+    if (ax !== ay) return ax ? -1 : 1;
+    if ((x === "Infra & perso") !== (y === "Infra & perso")) return x === "Infra & perso" ? 1 : -1;
+    return (Math.max(...groups[y].map((q) => Date.parse(q.updatedAt) || q.updatedAt || 0))) - (Math.max(...groups[x].map((q) => Date.parse(q.updatedAt) || q.updatedAt || 0)));
+  });
+  html += names.map((w) => {
+    const list = groups[w].sort(recency), nAct = list.filter(isActive).length, hasSel = list.some((a) => a.id === detailId);
+    const def = !(nAct || hasSel || list.length <= 3);
+    const col = !query && (w in wsCollapsed ? wsCollapsed[w] : def) && !hasSel;
+    return `<div class="proj-group ${col ? "collapsed" : ""}"><div class="proj-h" data-ws="${esc(w)}"><span class="chev">${col ? "▸" : "▾"}</span><span class="pname">${esc(w)}</span>${nAct ? `<span class="pact" title="${nAct} au travail">●${nAct}</span>` : ""}<span class="pn">${list.length}</span></div>${col ? "" : list.map(agentCard).join("")}</div>`;
   }).join("");
+  el.innerHTML = html;
   wireSidebar(el);
 }
 const b2 = (a) => isActive(a) ? 2 : isReview(a) ? 1 : 0;
 function wireSidebar(el) {
-  el.querySelectorAll("[data-card]").forEach((c) => (c.onclick = (e) => { if (e.target.closest("[data-sub]")) return; select(c.dataset.card); }));
+  el.querySelectorAll("[data-card]").forEach((c) => (c.onclick = (e) => { if (e.target.closest("[data-sub]") || e.target.closest("[data-star]")) return; select(c.dataset.card); }));
+  el.querySelectorAll("[data-star]").forEach((x) => (x.onclick = (e) => { e.stopPropagation(); toggleFav(x.dataset.star); }));
+  el.querySelectorAll("[data-ws]").forEach((h) => (h.onclick = () => { const w = h.dataset.ws, was = h.parentElement.classList.contains("collapsed"); wsCollapsed[w] = !was; LSW("fleet.wsCollapsed", wsCollapsed); renderSidebar(); }));
   el.querySelectorAll("[data-sub]").forEach((s) => (s.onclick = (e) => { e.stopPropagation(); select(s.dataset.sub); }));
 }
 $("rail-filter").querySelectorAll(".chip").forEach((b) => (b.onclick = () => { railFilter = b.dataset.filter; $("rail-filter").querySelectorAll(".chip").forEach((x) => x.classList.toggle("sel", x === b)); renderSidebar(); }));
@@ -138,28 +175,47 @@ function renderStatusline() {
 }
 
 // ---- BOARD kanban -------------------------------------------------------------
+let boardMode = LSJ("fleet.boardMode", "status"), boardIdleAll = false;
+const IDLE_CAP = 8;
 function renderBoard() {
   const el = $("board");
-  const ags = (snap.agents || []).filter((a) => !a.internal).filter((a) => !query || [a.name, projectOf(a), a.branch].filter(Boolean).join(" ").toLowerCase().includes(query));
-  const cols = [
-    { key: "work", label: "Au travail", dot: "var(--s-work)", items: ags.filter(isActive) },
-    { key: "review", label: "En revue", dot: "var(--s-review)", items: ags.filter((a) => isReview(a)) },
-    { key: "idle", label: "Au repos", dot: "var(--s-idle)", items: ags.filter((a) => !isActive(a) && !isReview(a)) },
-  ];
-  el.innerHTML = cols.map((c) => `<div class="bcol"><div class="bcol-h"><span class="bdot" style="background:${c.dot}"></span>${c.label}<span class="bn">${c.items.length}</span></div>
-    <div class="bcol-body">${c.items.length ? c.items.map((a) => boardCard(a, c.key)).join("") : `<div class="bcol-empty">—</div>`}</div></div>`).join("");
+  const ags = (snap.agents || []).filter((a) => !a.internal).filter((a) => !query || [a.name, projectOf(a), wsOf(a).ws, a.branch].filter(Boolean).join(" ").toLowerCase().includes(query)).sort(recency);
+  let cols;
+  if (boardMode === "project") {
+    const g = {}; ags.forEach((a) => { const w = wsOf(a).ws; (g[w] = g[w] || []).push(a); });
+    cols = Object.keys(g).sort((x, y) => (g[y].some(isActive) - g[x].some(isActive)) || ((x === "Infra & perso") - (y === "Infra & perso"))).map((w) => ({ key: "ws", label: w, dot: g[w].some(isActive) ? "var(--s-work)" : "var(--s-idle)", items: g[w] }));
+  } else {
+    const idle = ags.filter((a) => !isActive(a) && !isReview(a));
+    cols = [
+      { key: "work", label: "Au travail", dot: "var(--s-work)", items: ags.filter(isActive) },
+      { key: "review", label: "En revue", dot: "var(--s-review)", items: ags.filter(isReview) },
+      { key: "idle", label: "Au repos · à reprendre", dot: "var(--s-idle)", items: idle, more: !boardIdleAll && idle.length > IDLE_CAP },
+    ];
+  }
+  const seg = (m, l) => `<button class="seg ${boardMode === m ? "sel" : ""}" data-bmode="${m}">${l}</button>`;
+  el.innerHTML = `<div class="board-bar"><div class="segs">${seg("status", "Par statut")}${seg("project", "Par projet")}</div><span class="bb-sum">${ags.filter(isActive).length} au travail · ${ags.length} sessions</span></div>
+  <div class="board-cols">${cols.map((c) => {
+    const shown = c.more ? c.items.slice(0, IDLE_CAP) : c.items;
+    return `<div class="bcol"><div class="bcol-h"><span class="bdot" style="background:${c.dot}"></span>${esc(c.label)}<span class="bn">${c.items.length}</span></div>
+    <div class="bcol-body">${shown.length ? shown.map((a) => boardCard(a, c.key)).join("") : `<div class="bcol-empty">—</div>`}${c.more ? `<button class="bmore" data-bmore>+ ${c.items.length - IDLE_CAP} de plus</button>` : ""}</div></div>`;
+  }).join("")}</div>`;
+  el.querySelectorAll("[data-bmode]").forEach((b) => (b.onclick = () => { boardMode = b.dataset.bmode; LSW("fleet.boardMode", boardMode); renderBoard(); }));
+  el.querySelectorAll("[data-bmore]").forEach((b) => (b.onclick = () => { boardIdleAll = true; renderBoard(); }));
   el.querySelectorAll("[data-bcard]").forEach((cd) => (cd.onclick = (e) => { if (e.target.closest("button")) return; select(cd.dataset.bcard); }));
   el.querySelectorAll("[data-review]").forEach((b) => (b.onclick = (e) => { e.stopPropagation(); select(b.dataset.review); setTimeout(() => setCenterTab("diff"), 60); }));
   el.querySelectorAll("[data-merge]").forEach((b) => (b.onclick = (e) => { e.stopPropagation(); const a = agentById(b.dataset.merge); if (a) doMerge(a); }));
 }
 function boardCard(a, col) {
+  const w = wsOf(a);
   const branch = a.worktree && a.branch ? `<div class="bc-branch"><span class="gi">⑂</span>${esc(a.branch)}</div>` : "";
+  const lab = w.label && w.label.toLowerCase() !== String(a.name).toLowerCase() ? w.label : "";
+  const sub = (col !== "ws" ? w.ws + (lab ? " · " + lab : "") : lab) || "";
   const actions = col === "review"
     ? `<div class="bc-actions"><button class="review" data-review="${esc(a.id)}">Revoir</button><button class="merge" data-merge="${esc(a.id)}">Merger</button></div>` : "";
   return `<div class="bcard" data-bcard="${esc(a.id)}">
     <div class="bc-top"><span class="bc-dot" style="background:${st(a).c}"></span><span class="bc-name">${esc(a.name)}</span><span class="bc-model">${esc(a.model || "—")}</span></div>
-    ${branch}
-    <div class="bc-foot">${a.changes ? `<span class="bc-stat"><span class="add">+${a.changes.add || 0}</span> <span class="del">−${a.changes.del || 0}</span></span>` : `<span style="color:var(--mut2)">${esc(st(a).l)}</span>`}<span class="bc-host">${esc(a.host || "local")}</span></div>
+    ${sub ? `<div class="bc-proj">${esc(sub)}</div>` : ""}${branch}
+    <div class="bc-foot">${a.changes ? `<span class="bc-stat"><span class="add">+${a.changes.add || 0}</span> <span class="del">−${a.changes.del || 0}</span></span>` : `<span style="color:var(--mut2)">${esc(st(a).l)} · ${esc(relT(a.updatedAt) || "—")}</span>`}<span class="bc-host">${esc(a.host || "local")}</span></div>
     ${actions}</div>`;
 }
 
