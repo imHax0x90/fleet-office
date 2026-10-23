@@ -4,7 +4,9 @@
 /**
  * Fleet Office — serveur de visualisation des agents Claude Code.
  *
- * Aucune dépendance externe (Node natif uniquement).
+ * Node natif pour tout le reste ; 2 dépendances ciblées pour le terminal PTY (bouton ▹_) :
+ * node-pty (vrai pseudo-terminal) + ws (WebSocket). Absentes ou en échec de chargement -> le
+ * terminal se désactive proprement (le reste de l'app est inchangé, aucun crash).
  * - Scanne ~/.claude/jobs/<id>/state.json en continu
  * - Mappe chaque job sur un "agent" placé dans une salle (bureau / coworking / gym)
  * - Diffuse l'état en temps réel au navigateur via Server-Sent Events (/events)
@@ -12,11 +14,15 @@
  */
 
 const http = require("http");
+const https = require("https");
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const { spawn, execSync, exec } = require("child_process");
 const os = require("os");
+let pty = null, WebSocketServer = null;
+try { pty = require("node-pty"); } catch { /* terminal PTY indisponible sur ce nœud */ }
+try { ({ WebSocketServer } = require("ws")); } catch { /* terminal websocket indisponible */ }
 
 const PORT = parseInt(process.env.PORT || "4173", 10);
 const HOST = process.env.HOST || "0.0.0.0";
@@ -213,22 +219,10 @@ function toolLine(name, input) {
   if (name === "Bash") return "$ " + trunc(input.command, 160);
   return describeTool(name, input);
 }
-function renderTranscript(sessionId, n = 50) {
-  const mrec = managed.get(sessionId);
-  let raw;
-  const remoteHost = (mrec && isRemote(mrec)) ? mrec.host : _remoteSessionHost.get(sessionId);
-  if (remoteHost) {
-    raw = remoteTranscriptRaw(remoteHost, sessionId);
-    if (!raw) return [];
-  } else {
-    const p = (trackers.get(sessionId) || {}).path || findTranscript(sessionId);
-    if (!p) return [];
-    try { raw = tailFile(p, 256 * 1024); } catch { return []; }
-  }
-  const lines = raw.split("\n");
-  lines.shift(); // 1re ligne potentiellement tronquée
+// coeur du parsing JSONL -> feed d'affichage (partagé entre le tail "live" et le chargement d'historique)
+function parseTranscriptChunk(text) {
   const feed = [];
-  for (const line of lines) {
+  for (const line of String(text || "").split("\n")) {
     if (!line.trim()) continue;
     let o; try { o = JSON.parse(line); } catch { continue; }
     const at = o.timestamp || null;
@@ -247,7 +241,87 @@ function renderTranscript(sessionId, n = 50) {
       }
     }
   }
-  return feed.slice(-n);
+  return feed;
+}
+// Inchangée (utilisée par noteToVault) : tail des 256 Ko finaux, dernières n entrées.
+function renderTranscript(sessionId, n = 50) {
+  const mrec = managed.get(sessionId);
+  let raw;
+  const remoteHost = (mrec && isRemote(mrec)) ? mrec.host : _remoteSessionHost.get(sessionId);
+  if (remoteHost) {
+    raw = remoteTranscriptRaw(remoteHost, sessionId);
+    if (!raw) return [];
+  } else {
+    const p = (trackers.get(sessionId) || {}).path || findTranscript(sessionId);
+    if (!p) return [];
+    try { raw = tailFile(p, 256 * 1024); } catch { return []; }
+  }
+  const lines = raw.split("\n");
+  lines.shift(); // 1re ligne potentiellement tronquée
+  return parseTranscriptChunk(lines.join("\n")).slice(-n);
+}
+
+// --- lecture par FENÊTRE d'octets (pagination de l'historique, local + distant) ---
+function readFileWindowLocal(p, endOffset, maxBytes) {
+  const st = fs.statSync(p);
+  const end = Math.min(endOffset == null ? st.size : endOffset, st.size);
+  const start = Math.max(0, end - maxBytes);
+  if (end <= start) return { text: "", start: end, end };
+  const fd = fs.openSync(p, "r");
+  const buf = Buffer.alloc(end - start);
+  fs.readSync(fd, buf, 0, buf.length, start);
+  fs.closeSync(fd);
+  return { text: buf.toString("utf8"), start, end };
+}
+// Même chose à distance : une seule commande SSH renvoie taille+bornes (ligne "META start end")
+// puis le corps, pour ne pas multiplier les allers-retours SSH.
+function remoteTranscriptWindow(host, sid, endOffset, maxBytes) {
+  const endExpr = endOffset == null ? "$SZ" : String(Math.max(0, endOffset | 0));
+  const cmd = `f=$(find ~/.claude/projects -name ${sid}.jsonl 2>/dev/null | head -1); [ -z "$f" ] && exit 1; SZ=$(stat -c%s "$f" 2>/dev/null || echo 0); END=${endExpr}; [ "$END" -gt "$SZ" ] && END=$SZ; W=${maxBytes}; START=$((END>W?END-W:0)); echo "META $START $END"; [ "$END" -gt "$START" ] && tail -c +$((START+1)) "$f" | head -c $((END-START))`;
+  let out;
+  try { out = execSync("ssh " + SSH_OPTS.join(" ") + " " + shq(host) + " " + shq(cmd), { encoding: "utf8", timeout: 9000, maxBuffer: 8 * 1024 * 1024 }); }
+  catch { return null; }
+  const nl = out.indexOf("\n"); if (nl < 0) return null;
+  const m = out.slice(0, nl).match(/^META (\d+) (\d+)/); if (!m) return null;
+  return { text: out.slice(nl + 1), start: +m[1], end: +m[2] };
+}
+// Lit une fenêtre de 512 Ko se terminant à `beforeOffset` (ou à la fin du fichier si absent), la
+// parse, et renvoie de quoi enchaîner un chargement plus ancien (`nextBefore`, offset propre =
+// début d'une ligne complète) jusqu'à `atStart` (début du fichier atteint = plus d'historique).
+function renderTranscriptWindow(sessionId, beforeOffset) {
+  const mrec = managed.get(sessionId);
+  const remoteHost = (mrec && isRemote(mrec)) ? mrec.host : _remoteSessionHost.get(sessionId);
+  const p = remoteHost ? null : ((trackers.get(sessionId) || {}).path || findTranscript(sessionId));
+  if (!remoteHost && !p) return { feed: [], nextBefore: null, atStart: true };
+  const readWin = (bytes) => remoteHost
+    ? remoteTranscriptWindow(remoteHost, sessionId, beforeOffset, bytes)
+    : (() => { try { return readFileWindowLocal(p, beforeOffset, bytes); } catch { return null; } })();
+  // certains transcripts contiennent une ligne géante (ex. un fichier/image lu -> gros blob base64
+  // en une seule ligne JSON, parfois > 512 Ko) : si la fenêtre ne contient QUE la fin de cette
+  // ligne (un seul \n, tout au bord), couper dessus ne laisse rien d'exploitable derrière -> le
+  // curseur resterait bloqué. Il faut DEUX \n (le début d'une ligne complète, pas juste sa fin) ;
+  // sinon on élargit la fenêtre (jusqu'à 16 Mo) pour dépasser la ligne géante.
+  const MAX_WINDOW = 16 * 1024 * 1024;
+  let win = null, bytes = 512 * 1024;
+  for (;;) {
+    win = readWin(bytes);
+    if (!win || win.start <= 0 || bytes >= MAX_WINDOW) break;
+    const nl1 = win.text.indexOf("\n");
+    if (nl1 >= 0 && win.text.indexOf("\n", nl1 + 1) >= 0) break; // au moins 1 ligne complète après la coupe
+    bytes *= 2;
+  }
+  if (!win) return { feed: [], nextBefore: null, atStart: true };
+  let keptText = win.text, keptStart = win.start;
+  if (win.start > 0) {
+    const nl1 = win.text.indexOf("\n");
+    const nl2 = nl1 >= 0 ? win.text.indexOf("\n", nl1 + 1) : -1;
+    if (nl2 >= 0) { keptStart = win.start + Buffer.byteLength(win.text.slice(0, nl1), "utf8") + 1; keptText = win.text.slice(nl1 + 1); }
+    else { keptText = ""; keptStart = win.start; } // ligne géante toujours incomplète même à 16 Mo (rarissime) :
+    // on saute cette portion, mais keptStart = win.start (déjà repoussé par l'élargissement, TOUJOURS
+    // < l'offset de départ) garantit que le curseur avance quand même — jamais bloqué.
+  }
+  const atStart = win.start <= 0;
+  return { feed: parseTranscriptChunk(keptText), nextBefore: atStart ? null : keptStart, atStart };
 }
 
 // ---------------------------------------------------------------------------
@@ -271,6 +345,147 @@ const SAFE_PERMS = ALLOW_UNSAFE
 const DEFAULT_PERM = ALLOW_UNSAFE ? "bypassPermissions" : "acceptEdits";
 const managed = new Map(); // sessionId -> état de l'agent piloté
 const hidden = new Set(); // sessionId masqués (kill d'une session observée/dormante = on la retire de la vue)
+
+// ---- PROVIDER AWS Bedrock (clés Askeal) : OPTION par agent, jamais le défaut -----------
+// Anthropic (abonnement Claude Code) reste le provider par défaut. Si un agent est déployé
+// avec provider:"bedrock" ET que ~/.fleet/bedrock.env existe, on injecte les creds AWS +
+// CLAUDE_CODE_USE_BEDROCK=1 dans SON process (local ou distant), sans toucher aux autres.
+const FLEET_DIR = path.join(os.homedir(), ".fleet");
+
+// --- journal d'audit : qui a fait quoi, quand (spawn/kill/renommage/entraînement/équipe/skills) ---
+// Buffer mémoire (rapide, servi tel quel) + fichier JSONL append-only (survit aux redémarrages).
+const AUDIT_FILE = path.join(FLEET_DIR, "audit.log");
+const AUDIT_MAX = 500;
+let auditLog = [];
+(function loadAuditLog() {
+  try {
+    const lines = fs.readFileSync(AUDIT_FILE, "utf8").split("\n").filter(Boolean).slice(-AUDIT_MAX);
+    auditLog = lines.map((l) => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+  } catch { /* pas encore de journal */ }
+})();
+function logAudit(action, details) {
+  const e = { at: Date.now(), action, ...details };
+  auditLog.push(e); if (auditLog.length > AUDIT_MAX) auditLog.shift();
+  try { fs.mkdirSync(FLEET_DIR, { recursive: true }); fs.appendFileSync(AUDIT_FILE, JSON.stringify(e) + "\n"); } catch { /* jamais bloquant */ }
+}
+
+const BEDROCK_ENV_FILE = path.join(FLEET_DIR, "bedrock.env");
+let _bedrockCache = { at: 0, env: null };
+function bedrockEnv() {
+  const now = Date.now();
+  if (now - _bedrockCache.at < 30000) return _bedrockCache.env;
+  let env = null;
+  try {
+    const raw = fs.readFileSync(BEDROCK_ENV_FILE, "utf8");
+    env = {};
+    for (const line of raw.split("\n")) {
+      const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/);
+      if (m) env[m[1]] = m[2].replace(/^["']|["']$/g, "");
+    }
+    if (!env.AWS_ACCESS_KEY_ID || !env.AWS_SECRET_ACCESS_KEY) env = null;
+  } catch { env = null; }
+  _bedrockCache = { at: now, env };
+  return env;
+}
+function bedrockAvailable() { return !!bedrockEnv(); }
+// alias interne (opus/sonnet/haiku/fable) -> inference profile Bedrock (overridable dans bedrock.env)
+function bedrockModelId(alias, benv) {
+  const a = String(alias || "sonnet").toLowerCase();
+  const K = (s) => "BEDROCK_MODEL_" + s.toUpperCase();
+  for (const k of ["opus", "sonnet", "haiku", "fable"]) if (a.includes(k) && benv[K(k)]) return benv[K(k)];
+  if (/^(us|eu|apac|global)\.anthropic\./.test(a) || /^anthropic\./.test(a)) return alias; // déjà un id complet
+  return benv[K("sonnet")] || "us.anthropic.claude-sonnet-5";
+}
+// env d'un agent LOCAL : Anthropic (défaut) ou Bedrock si rec.provider === "bedrock"
+function agentEnv(rec) {
+  if (rec.provider !== "bedrock") return process.env;
+  const benv = bedrockEnv();
+  if (!benv) return process.env; // pas de clés -> on retombe proprement sur Anthropic
+  const e = { ...process.env };
+  delete e.ANTHROPIC_API_KEY; delete e.ANTHROPIC_AUTH_TOKEN; // évite le conflit avec l'abonnement
+  delete e.AWS_PROFILE; // sinon le SDK AWS préfère le profil aux clés statiques injectées
+  e.CLAUDE_CODE_USE_BEDROCK = "1";
+  e.AWS_REGION = benv.AWS_REGION || "us-east-1";
+  e.AWS_ACCESS_KEY_ID = benv.AWS_ACCESS_KEY_ID;
+  e.AWS_SECRET_ACCESS_KEY = benv.AWS_SECRET_ACCESS_KEY;
+  if (benv.AWS_SESSION_TOKEN) e.AWS_SESSION_TOKEN = benv.AWS_SESSION_TOKEN;
+  e.ANTHROPIC_MODEL = bedrockModelId(rec.model, benv);
+  e.ANTHROPIC_SMALL_FAST_MODEL = bedrockModelId("haiku", benv);
+  return e;
+}
+// vars Bedrock à exporter pour un agent DISTANT (SSH) — injectées inline dans la commande
+function bedrockExports(rec) {
+  if (rec.provider !== "bedrock") return "";
+  const benv = bedrockEnv(); if (!benv) return "";
+  const kv = {
+    CLAUDE_CODE_USE_BEDROCK: "1",
+    AWS_REGION: benv.AWS_REGION || "us-east-1",
+    AWS_ACCESS_KEY_ID: benv.AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY: benv.AWS_SECRET_ACCESS_KEY,
+    ANTHROPIC_MODEL: bedrockModelId(rec.model, benv),
+    ANTHROPIC_SMALL_FAST_MODEL: bedrockModelId("haiku", benv),
+  };
+  if (benv.AWS_SESSION_TOKEN) kv.AWS_SESSION_TOKEN = benv.AWS_SESSION_TOKEN;
+  return Object.entries(kv).map(([k, v]) => "export " + k + "=" + shq(v) + ";").join(" ") + " unset ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN AWS_PROFILE;";
+}
+
+// ---- MÉMOIRE OBSIDIAN : quand un agent finit (gym/idle), on grave une note dans le vault ----
+// Vault markdown (graphe + wikilinks) sur le nœud backend. Sync avec l'Obsidian de black-station
+// à brancher ensuite (Syncthing). FLEET_VAULT override le chemin.
+const VAULT_DIR = process.env.FLEET_VAULT || path.join(FLEET_DIR, "vault");
+const vaultCooldown = new Map(); // id -> dernier write (ms)
+function vslug(s) { return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "x"; }
+function noteToVault(a) {
+  try {
+    const now = Date.now();
+    if (now - (vaultCooldown.get(a.id) || 0) < 10 * 60 * 1000) return; // 1 note / 10 min / agent
+    vaultCooldown.set(a.id, now);
+    const proj = projectName(a.cwd) || "divers";
+    const dir = path.join(VAULT_DIR, "projets", vslug(proj));
+    fs.mkdirSync(dir, { recursive: true });
+    const feed = renderTranscript(a.id, 40) || [];
+    const lastSay = [...feed].reverse().find((e) => e.kind === "say");
+    const tools = feed.filter((e) => e.kind === "tool").slice(-8).map((e) => "- " + e.text);
+    const d = new Date(), stamp = d.toISOString().slice(0, 16).replace("T", " ");
+    const base = vslug(a.name) + "-" + d.toISOString().slice(0, 10);
+    const file = path.join(dir, base + ".md");
+    const md = [
+      "---",
+      "agent: " + JSON.stringify(a.name || ""),
+      "role: " + JSON.stringify(a.role || ""),
+      "projet: " + JSON.stringify(proj),
+      "machine: " + JSON.stringify(a.host || "local"),
+      "modele: " + JSON.stringify(a.model || ""),
+      "date: " + d.toISOString(),
+      "tags: [fleet-office, agent, " + vslug(a.role || "agent") + "]",
+      "---",
+      "",
+      "# " + (a.name || "Agent") + " — " + proj,
+      "",
+      "> Au repos le " + stamp + " · machine [[" + (a.host || "local") + "]] · projet [[" + proj + "]] · rôle #" + vslug(a.role || "agent"),
+      "",
+      "## Mission",
+      (a.intent || a.lastPrompt || "—"),
+      "",
+      "## Résumé",
+      (lastSay ? lastSay.text : (a.detail || "—")),
+      "",
+      "## Actions clés",
+      (tools.length ? tools.join("\n") : "—"),
+      "",
+      "## Liens",
+      "- Projet : [[" + proj + "]]",
+      "- Rôle : [[" + (a.role || "agent") + "]]",
+      "",
+    ].join("\n");
+    fs.writeFileSync(file, md);
+    // MOC projet : note-hub avec un wikilink vers chaque note (le graphe se construit)
+    const moc = path.join(dir, "_" + vslug(proj) + ".md");
+    const link = "- [[" + base + "]] — " + stamp + " (" + (a.role || "agent") + ")\n";
+    fs.appendFileSync(moc, fs.existsSync(moc) ? link : ("# " + proj + " — journal de bord\n\nNotes des agents Fleet Office (auto).\n\n" + link));
+    vaultCommit(); // versionne (git) -> clone/pull partout
+  } catch { /* jamais bloquant */ }
+}
 
 // ---- recherche de skills/MCP par métier via scrapling (création / recrutement / inactivité) ----
 const SKILLS_DIR = path.join(os.homedir(), ".fleet-office-skills");
@@ -301,20 +516,21 @@ function addRole(role) {
   }
   return allRoles();
 }
-const VENV_PY = path.join(__dirname, ".venv", "bin", "python");
-const SCRAPER = path.join(__dirname, "scrape_skills.py");
+const SKILLS_FETCHER = path.join(__dirname, "skills_fetch.js"); // fetcher node (repos réputés -> notre dossier)
 const skillCooldown = new Map(); // role -> dernier lancement (ms)
 const lastStatusSkills = new Map(); // sessionId -> dernier statut connu (pour déclencher à l'inactivité)
 function skillsFileFor(role) { return path.join(SKILLS_DIR, String(role).toLowerCase().replace(/[^a-z0-9]+/gi, "_") + ".md"); }
-function researchSkills(role) {
+function researchSkills(role, host, force) {
   role = String(role || "").trim(); if (!role) return;
-  const key = role.toLowerCase(), now = Date.now();
-  if (now - (skillCooldown.get(key) || 0) < 30 * 60 * 1000) return; // 1 recherche / 30 min / métier
+  const installHost = (host && host !== "local") ? host : "local";
+  const key = role.toLowerCase() + "@" + installHost, now = Date.now();
+  if (!force && now - (skillCooldown.get(key) || 0) < 30 * 60 * 1000) return; // 1 passage / 30 min / (métier,hôte) — sauté si déclenché explicitement
   skillCooldown.set(key, now);
   try {
     fs.mkdirSync(SKILLS_DIR, { recursive: true });
-    if (!fs.existsSync(VENV_PY)) return;
-    const p = spawn(VENV_PY, [SCRAPER, role, skillsFileFor(role)], { cwd: __dirname, stdio: "ignore", detached: true });
+    if (!fs.existsSync(SKILLS_FETCHER)) return;
+    // télécharge + range + installe les skills du métier (dans ~/.claude/skills du nœud de l'agent)
+    const p = spawn(process.execPath, [SKILLS_FETCHER, role, skillsFileFor(role), SKILLS_DIR, installHost], { cwd: __dirname, stdio: "ignore", detached: true });
     p.unref();
   } catch { /* ignore */ }
 }
@@ -348,8 +564,10 @@ function coordinateWorkspace(cwd, selfId) {
 const WARM = process.env.FLEET_WARM !== "0";
 function claudeArgs(rec) {
   const perm = SAFE_PERMS.includes(rec.perm) ? rec.perm : DEFAULT_PERM;
+  let model = rec.model || "sonnet";
+  if (rec.provider === "bedrock") { const benv = bedrockEnv(); if (benv) model = bedrockModelId(rec.model, benv); }
   const args = ["-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose",
-    "--prompt-suggestions=true", "--model", rec.model || "sonnet", "--permission-mode", perm];
+    "--prompt-suggestions=true", "--model", model, "--permission-mode", perm];
   if (rec.effort) args.push("--effort", rec.effort);
   if (rec.fresh) args.push("--session-id", rec.id); else args.push("--resume", rec.id);
   return args;
@@ -363,12 +581,221 @@ const REMOTE_CLAUDE = process.env.FLEET_REMOTE_CLAUDE || "claude";
 const SSH_OPTS = ["-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=accept-new", "-o", "ConnectTimeout=10"];
 function shq(s) { return "'" + String(s).replace(/'/g, "'\\''") + "'"; } // échappement single-quote POSIX
 function isRemote(rec) { return !!(rec.host && rec.host !== "local"); }
+
+// --- métriques machine (volet contexte) : CPU/RAM/disque + Tailscale, en cache 15 s -------
+const _hostCache = new Map(); // name -> { at, val }
+const HOST_PROBE = 'l=$(cut -d" " -f1 /proc/loadavg); n=$(nproc); ' +
+  'm=$(free -m 2>/dev/null | awk "/Mem:/{print \\$3\\\":\\\"\\$2}"); ' +
+  'd=$(df -P / 2>/dev/null | awk "NR==2{print \\$5\\\":\\\"\\$3\\\":\\\"\\$4}"); ' +
+  'ip=$(tailscale ip -4 2>/dev/null | head -1); ' +
+  'up=$(cut -d. -f1 /proc/uptime); ' +
+  'echo "L=$l N=$n M=$m D=$d IP=$ip UP=$up"';
+function parseHostProbe(name, out) {
+  const g = (re) => { const m = String(out || "").match(re); return m ? m[1] : ""; };
+  const load = parseFloat(g(/L=([\d.]+)/)) || 0;
+  const ncpu = parseInt(g(/N=(\d+)/), 10) || 1;
+  const mem = g(/M=(\d+:\d+)/).split(":").map(Number);
+  const disk = g(/D=(\d+%?:\d+:\d+)/).split(":");
+  const memUsed = mem[0] || 0, memTotal = mem[1] || 0;
+  const diskPct = parseInt(disk[0], 10) || 0, diskUsed = parseInt(disk[1], 10) || 0, diskFree = parseInt(disk[2], 10) || 0;
+  return {
+    name, online: !!out,
+    cpuPct: Math.min(100, Math.round((load / ncpu) * 100)), load, ncpu,
+    memPct: memTotal ? Math.round((memUsed / memTotal) * 100) : 0, memUsedMb: memUsed, memTotalMb: memTotal,
+    diskPct, diskUsedKb: diskUsed, diskFreeKb: diskFree,
+    tsip: g(/IP=([\d.]+)/) || null, uptimeS: parseInt(g(/UP=(\d+)/), 10) || 0,
+  };
+}
+function hostMetrics(name) {
+  name = name || "local";
+  const now = Date.now(); const c = _hostCache.get(name);
+  if (c && now - c.at < 15000) return Promise.resolve(c.val);
+  return new Promise((resolve) => {
+    const done = (out) => { const val = parseHostProbe(name, out); _hostCache.set(name, { at: Date.now(), val }); resolve(val); };
+    try {
+      if (name === "local") exec(HOST_PROBE, { timeout: 8000 }, (e, out) => done(e ? "" : out));
+      else {
+        const child = spawn("ssh", [...SSH_OPTS, name, "bash -lc " + shq(HOST_PROBE)], { stdio: ["ignore", "pipe", "ignore"] });
+        let buf = ""; child.stdout.on("data", (d) => (buf += d));
+        child.on("close", () => done(buf)); child.on("error", () => done(""));
+        setTimeout(() => { try { child.kill(); } catch {} }, 9000);
+      }
+    } catch { done(""); }
+  });
+}
+
+// Liste les sous-dossiers d'un chemin sur un nœud DISTANT (explorateur de chemin, spawn distant).
+function listRemoteDirs(host, want) {
+  return new Promise((resolve, reject) => {
+    const target = (want && String(want).trim()) ? shq(want) : '"$HOME"';
+    const inner = 'd=' + target + '; cd "$d" 2>/dev/null || cd "$(dirname "$d")" 2>/dev/null || cd "$HOME"; echo "DIR=$PWD"; echo "HOME=$HOME"; echo "PARENT=$(dirname "$PWD")"; ls -1Ap 2>/dev/null';
+    const child = spawn("ssh", [...SSH_OPTS, host, "bash -lc " + shq(inner)], { stdio: ["ignore", "pipe", "ignore"] });
+    let buf = ""; child.stdout.on("data", (d) => (buf += d));
+    child.on("close", () => {
+      const g = (re) => { const m = buf.match(re); return m ? m[1].trim() : ""; };
+      const dir = g(/DIR=(.*)/), home = g(/HOME=(.*)/), par = g(/PARENT=(.*)/);
+      if (!dir) return reject(new Error("dossier illisible sur " + host));
+      const dirs = buf.split("\n").map((l) => l.replace(/\r$/, "")).filter((l) => l.endsWith("/") && !l.startsWith(".")).map((l) => l.slice(0, -1)).sort().slice(0, 500);
+      resolve({ path: dir, parent: par && par !== dir ? par : null, home: home || dir, dirs, host });
+    });
+    child.on("error", reject);
+    setTimeout(() => { try { child.kill(); } catch {} }, 9000);
+  });
+}
+
+// --- bibliothèque de skills (consultation, rangée par catégorie) ---
+function skillDesc(txt) {
+  const m = txt.match(/description:\s*(.+)/i);
+  if (m) return m[1].trim().replace(/^["']|["']$/g, "").slice(0, 220);
+  const l = txt.split("\n").find((x) => x.trim() && !x.startsWith("#") && !x.startsWith("---") && !x.startsWith("<!--"));
+  return (l || "").trim().slice(0, 220);
+}
+function listSkills() {
+  let ents = [];
+  try { ents = fs.readdirSync(SKILLS_DIR, { withFileTypes: true }); } catch { return { dir: SKILLS_DIR, categories: [], total: 0 }; }
+  const cats = [];
+  for (const e of ents) {
+    if (!e.isDirectory()) continue;
+    const catDir = path.join(SKILLS_DIR, e.name), skills = [];
+    let sub = []; try { sub = fs.readdirSync(catDir, { withFileTypes: true }); } catch {}
+    for (const s of sub) {
+      try {
+        if (s.isDirectory()) {
+          const f = path.join(catDir, s.name, "SKILL.md");
+          if (fs.existsSync(f)) { const t = fs.readFileSync(f, "utf8"); skills.push({ name: s.name, desc: skillDesc(t), path: path.relative(SKILLS_DIR, f), size: t.length }); }
+        } else if (s.name.endsWith(".md")) {
+          const f = path.join(catDir, s.name), t = fs.readFileSync(f, "utf8");
+          skills.push({ name: s.name.replace(/\.md$/, "").replace(/^[^_]*__/, ""), desc: skillDesc(t), path: path.relative(SKILLS_DIR, f), size: t.length });
+        }
+      } catch { /* skip */ }
+    }
+    if (skills.length) cats.push({ category: e.name, count: skills.length, skills: skills.sort((a, b) => a.name.localeCompare(b.name)) });
+  }
+  cats.sort((a, b) => a.category.localeCompare(b.category));
+  return { dir: SKILLS_DIR, categories: cats, total: cats.reduce((n, c) => n + c.count, 0) };
+}
+
+// --- ajout/suppression manuels de skills (assistant, liens GitHub) ---
+function httpGet(url, json) {
+  return new Promise((resolve, reject) => {
+    const headers = { "User-Agent": "fleet-office" };
+    if (json) headers.Accept = "application/vnd.github+json";
+    https.get(url, { headers }, (r) => {
+      if (r.statusCode >= 300 && r.statusCode < 400 && r.headers.location) return resolve(httpGet(r.headers.location, json));
+      let b = ""; r.on("data", (d) => (b += d)); r.on("end", () => resolve({ status: r.statusCode, body: b }));
+    }).on("error", reject);
+  });
+}
+function guessSkillName(p) {
+  const parts = String(p).replace(/[?#].*$/, "").replace(/\/SKILL\.md$/i, "").split("/").filter(Boolean);
+  return vslug((parts[parts.length - 1] || "skill").replace(/\.md$/i, ""));
+}
+// analyse un lien GitHub (raw / blob / tree / repo / owner-repo) -> {owner, repo, branch, subpath}.
+// branch===null => pas précisée dans l'URL (repo/owner-repo nu) -> à résoudre via l'API (default_branch).
+function parseGithubTarget(url) {
+  url = String(url || "").trim(); let m;
+  if ((m = url.match(/^https?:\/\/raw\.githubusercontent\.com\/([^/]+)\/([^/]+)\/([^/]+)\/(.*)$/i)))
+    return { owner: m[1], repo: m[2], branch: m[3], subpath: m[4].replace(/\/$/, "") };
+  if ((m = url.match(/^https?:\/\/github\.com\/([^/]+)\/([^/]+)\/(blob|tree)\/([^/]+)\/(.*)$/i)))
+    return { owner: m[1], repo: m[2], branch: m[4], subpath: m[5].replace(/\/$/, "") };
+  if ((m = url.match(/^https?:\/\/github\.com\/([^/]+)\/([^/]+)\/?$/i)) || (m = url.match(/^([\w.-]+)\/([\w.-]+)$/)))
+    return { owner: m[1], repo: m[2], branch: null, subpath: "" };
+  return null;
+}
+async function resolveBranch(owner, repo, branch) {
+  if (branch) return branch;
+  try { const r = await httpGet(`https://api.github.com/repos/${owner}/${repo}`, true); if (r.status === 200) { const j = JSON.parse(r.body); if (j.default_branch) return j.default_branch; } } catch { /* */ }
+  return "main"; // dernier recours si l'API échoue (repo privé, rate-limit…)
+}
+function installSkillLocal(dir, cat, name) {
+  try {
+    const dst = path.join(os.homedir(), ".claude", "skills"); fs.mkdirSync(dst, { recursive: true });
+    const link = path.join(dst, "fleet-" + cat + "-" + name);
+    try { fs.rmSync(link, { recursive: true, force: true }); } catch { /* */ }
+    try { fs.symlinkSync(dir, link, "dir"); } catch { fs.mkdirSync(link, { recursive: true }); fs.copyFileSync(path.join(dir, "SKILL.md"), path.join(link, "SKILL.md")); }
+  } catch { /* */ }
+}
+function saveSkill(cat, name, body, sourceUrl) {
+  const dir = path.join(SKILLS_DIR, cat, name); fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, "SKILL.md"), `<!-- fleet-office · ajout manuel · source: ${sourceUrl} -->\n` + body);
+  installSkillLocal(dir, cat, name);
+  return dir;
+}
+// Ajoute une ou PLUSIEURS skills depuis un lien GitHub : essaie d'abord le lien comme UNE skill
+// précise (blob/dossier-de-skill) ; si ça ne résout à rien, le traite comme un DOSSIER/REPO et
+// importe TOUTES les SKILL.md trouvées dessous (ex. lien vers .../skills/ ou vers le repo entier).
+async function addSkillFromUrl(url, category) {
+  const t = parseGithubTarget(url);
+  if (!t) {
+    if (!/\.md(\?|$)/i.test(url)) throw new Error("lien non reconnu (github blob/tree, raw, owner/repo, ou .md)");
+    const r = await httpGet(url);
+    if (!r || r.status !== 200 || !r.body) throw new Error("fichier introuvable à ce lien");
+    const cat = vslug(category || "ajouts"), name = guessSkillName(url);
+    saveSkill(cat, name, r.body, url);
+    return { ok: true, category: cat, name, desc: skillDesc(r.body), count: 1 };
+  }
+  const branch = await resolveBranch(t.owner, t.repo, t.branch);
+  // 1) essai simple : le lien pointe-t-il DIRECTEMENT (ou +/SKILL.md) vers UNE skill ?
+  let singlePath = t.subpath;
+  if (!/\.md$/i.test(singlePath)) singlePath = (singlePath ? singlePath + "/" : "") + "SKILL.md";
+  const single = await httpGet(`https://raw.githubusercontent.com/${t.owner}/${t.repo}/${branch}/${singlePath}`);
+  if (single && single.status === 200 && single.body) {
+    const cat = vslug(category || t.repo || "ajouts"), name = guessSkillName(singlePath);
+    saveSkill(cat, name, single.body, url);
+    return { ok: true, category: cat, name, desc: skillDesc(single.body), count: 1 };
+  }
+  // 2) sinon : lien de DOSSIER ou de DÉPÔT entier -> import groupé de toutes les SKILL.md dessous
+  const tr = await httpGet(`https://api.github.com/repos/${t.owner}/${t.repo}/git/trees/${branch}?recursive=1`, true);
+  if (tr.status !== 200) throw new Error("dépôt/branche introuvable (" + t.owner + "/" + t.repo + "@" + branch + ")");
+  const tree = (JSON.parse(tr.body).tree) || [];
+  const prefix = t.subpath ? t.subpath + "/" : "";
+  const matches = tree.filter((n) => n.type === "blob" && /(^|\/)SKILL\.md$/i.test(n.path) && (!prefix || n.path.startsWith(prefix)));
+  if (!matches.length) throw new Error("aucune SKILL.md trouvée sous ce lien");
+  const cat = vslug(category || (t.subpath ? t.subpath.split("/").pop() : "") || t.repo || "ajouts");
+  const added = [];
+  for (const n of matches.slice(0, 40)) { // garde-fou : 40 skills max par import groupé
+    try {
+      const r = await httpGet(`https://raw.githubusercontent.com/${t.owner}/${t.repo}/${branch}/${n.path}`);
+      if (!r || r.status !== 200 || !r.body) continue;
+      const name = guessSkillName(n.path);
+      saveSkill(cat, name, r.body, `https://github.com/${t.owner}/${t.repo}/blob/${branch}/${n.path}`);
+      added.push({ name, desc: skillDesc(r.body) });
+    } catch { /* une skill en échec ne bloque pas les autres */ }
+  }
+  if (!added.length) throw new Error("SKILL.md trouvées mais téléchargement échoué pour toutes");
+  return { ok: true, category: cat, count: added.length, added, bulk: true, name: added.length === 1 ? added[0].name : (added.length + " skills") };
+}
+function delSkill(rel) {
+  const rootAbs = path.resolve(SKILLS_DIR);
+  const full = path.resolve(SKILLS_DIR, rel || "");
+  if (full !== rootAbs && !full.startsWith(rootAbs + path.sep)) throw new Error("hors périmètre");
+  const dir = full.endsWith("SKILL.md") ? path.dirname(full) : full;
+  if (path.resolve(dir) === rootAbs || path.dirname(path.resolve(dir)) === rootAbs && !fs.existsSync(path.join(dir, "SKILL.md")) && !fs.statSync(dir).isDirectory()) throw new Error("chemin invalide");
+  const cat = path.basename(path.dirname(dir)), name = path.basename(dir);
+  fs.rmSync(dir, { recursive: true, force: true });
+  try { fs.rmSync(path.join(os.homedir(), ".claude", "skills", "fleet-" + cat + "-" + name), { recursive: true, force: true }); } catch { /* */ }
+  return { cat, name };
+}
+
+// --- vault Obsidian versionné en git (sync « clone/pull partout », auto-commit) ---
+let _vaultCommitAt = 0;
+function vaultCommit() {
+  const now = Date.now(); if (now - _vaultCommitAt < 60000) return; _vaultCommitAt = now;
+  try {
+    if (!fs.existsSync(path.join(VAULT_DIR, ".git"))) {
+      execSync('git init -q; git config user.email fleet@office; git config user.name "Fleet Office"; git add -A; git commit -q -m "init vault" || true', { cwd: VAULT_DIR, stdio: "ignore" });
+    }
+    exec('git add -A && git commit -q -m "notes ' + new Date().toISOString().slice(0, 16).replace("T", " ") + '" || true', { cwd: VAULT_DIR }, () => {});
+  } catch { /* jamais bloquant */ }
+}
+
 function spawnClaude(rec) {
   const args = claudeArgs(rec);
-  if (!isRemote(rec)) return spawn(CLAUDE_BIN, args, { cwd: rec.cwd, env: process.env, stdio: ["pipe", "pipe", "pipe"] });
+  if (!isRemote(rec)) return spawn(CLAUDE_BIN, args, { cwd: rec.cwd, env: agentEnv(rec), stdio: ["pipe", "pipe", "pipe"] });
   // `bash -lc` => login shell distant : charge le PATH user (ex. ~/.local/bin) sinon `claude`
-  // installé dans ~/.local/bin est introuvable en SSH non-login.
-  const inner = 'export PATH="$HOME/.local/bin:$PATH"; cd ' + shq(rec.cwd || "~") + " && exec " + REMOTE_CLAUDE + " " + args.map(shq).join(" ");
+  // installé en natif (kali) est introuvable en SSH non-login. Voir COORDINATION.md (blocage #1).
+  const bex = bedrockExports(rec); // creds Bedrock exportés inline si provider bedrock (sinon "")
+  const inner = (bex ? bex + " " : "") + 'export PATH="$HOME/.local/bin:$PATH"; cd ' + shq(rec.cwd || "~") + " && exec " + REMOTE_CLAUDE + " " + args.map(shq).join(" ");
   const remoteCmd = "bash -lc " + shq(inner);
   return spawn("ssh", [...SSH_OPTS, rec.host, remoteCmd], { env: process.env, stdio: ["pipe", "pipe", "pipe"] });
 }
@@ -498,7 +925,7 @@ function runClaude({ sessionId, cwd, prompt, model, perm, resume }) {
   sendToProc(rec, prompt, null);
 }
 
-function spawnAgent({ name, role, cwd, prompt, model, perm, teamId: joinTeamId, host, id: fixedId, attachments }) {
+function spawnAgent({ name, role, cwd, prompt, model, perm, teamId: joinTeamId, host, id: fixedId, attachments, provider, effort, parentId }) {
   const remote = !!(host && host !== "local");
   if (!cwd || !String(cwd).trim()) throw new Error("workspace requis");
   if (!remote) {
@@ -525,8 +952,8 @@ function spawnAgent({ name, role, cwd, prompt, model, perm, teamId: joinTeamId, 
       finalPrompt = `⚠️ D'AUTRES AGENTS travaillent DÉJÀ dans ce workspace (${cwd}) : ${peerDesc}.\nAvant d'agir : lis TEAM_NOTES.md + les fichiers récents pour voir leur travail, ÉVITE les conflits (ne réécris pas ce qu'ils font), coordonne-toi avec eux, et ajoute une ligne « [${role || "agent"}] … » dans TEAM_NOTES.md (crée-le s'il n'existe pas). Utilise git (branches, pull avant push) pour ne pas écraser leur travail.\n\nTa mission : ${prompt}`;
     }
   }
-  researchSkills(role); // skills/MCP du métier (création/recrutement) via scrapling
-  finalPrompt += `\n\n💡 Des skills/MCP pertinents pour ton métier (${role || "agent"}) sont recherchés (scrapling) dans ${skillsFileFor(role || "agent")} — consulte ce fichier dès qu'il existe et propose ceux qui t'aideraient.`;
+  researchSkills(role, remote ? host : "local"); // skills du métier : téléchargées, rangées, installées sur le nœud de l'agent
+  finalPrompt += `\n\n💡 Des skills réelles pour ton métier (${role || "agent"}) sont téléchargées depuis des repos réputés dans ${skillsFileFor(role || "agent")} (et le dossier voisin ${path.join(SKILLS_DIR, String(role || "agent").toLowerCase().replace(/[^a-z0-9]+/gi, "-"))}/) — consulte-les dès qu'elles existent et applique celles qui t'aident.`;
   // pièces jointes de la mission initiale → livrées dans l'inbox de la session, sur la machine de l'agent
   if (Array.isArray(attachments) && attachments.length) {
     try { finalPrompt += attachBlock(deliverAttachments(sessionId, attachments, remote ? host : null)); }
@@ -536,22 +963,33 @@ function spawnAgent({ name, role, cwd, prompt, model, perm, teamId: joinTeamId, 
     id: sessionId, name: name || projectName(cwd), role: role || "claude", cwd, host: remote ? host : null,
     model: model || "sonnet", perm: SAFE_PERMS.includes(perm) ? perm : DEFAULT_PERM,
     status: "working", startedAt: Date.now(), lastPrompt: prompt, costUsd: 0, teamId, teamGoal, teamName,
+    provider: provider === "bedrock" ? "bedrock" : "anthropic", effort: effort || null,
+    // sous-agent créé PAR un autre agent (Task tool / spawn API) -> masqué du roster, géré par le parent
+    parentId: (parentId && managed.has(parentId)) ? parentId : null,
   });
   runClaude({ sessionId, cwd, prompt: finalPrompt, model, perm, resume: false });
+  if (!parentId) logAudit("spawn", { id: sessionId, name: name || projectName(cwd), role: role || "claude", host: remote ? host : "local", cwd, provider: provider === "bedrock" ? "bedrock" : "anthropic" });
   return sessionId;
 }
-function spawnTeam({ name, goal, cwd, model, perm, roles, chief }) {
+function spawnTeam({ name, goal, cwd, model, perm, roles, chief, provider, effort }) {
   if (!cwd || !fs.existsSync(cwd)) throw new Error("workspace introuvable : " + cwd);
   if (!fs.statSync(cwd).isDirectory()) throw new Error("workspace n'est pas un dossier : " + cwd);
   if (!goal || !String(goal).trim()) throw new Error("objectif d'équipe requis");
   const list = (Array.isArray(roles) && roles.length) ? roles : ["Architecte", "Backend", "Frontend", "DevOps", "QA"];
+  const prov = provider === "bedrock" ? "bedrock" : "anthropic";
+  // modèle non imposé ("auto"/vide) -> le chef choisit : chef=opus (le plus capable), membres=sonnet par défaut,
+  // et le chef reçoit la consigne de réaffecter le meilleur modèle par membre s'il le juge utile.
+  const auto = !model || model === "auto";
+  const chiefModel = auto ? "opus" : model;
+  const memberModel = auto ? "sonnet" : model;
   const teamId = crypto.randomUUID().slice(0, 8);
   const teamName = (name && String(name).trim()) || ("Équipe " + projectName(cwd));
   // le chef peut être un AGENT EXISTANT ("agent:<id>") ou un des rôles à créer
   const chiefExistingId = (chief && String(chief).startsWith("agent:")) ? String(chief).slice(6) : null;
   const chiefRole = chiefExistingId ? null : ((chief && list.includes(chief)) ? chief : list[0]);
   const ids = [];
-  const chiefTail = `\n\n👑 Tu es le CHEF de cette équipe. RÈGLE ABSOLUE : ne déclare JAMAIS l'équipe « terminée » et ne dissous JAMAIS de toi-même tant que l'humain n'a pas tranché. Quand tous les membres ont fini (« [FINI] » dans TEAM_NOTES.md), tu CONSOLIDES et tu écris « [CHEF][QUESTION] … » dans TEAM_NOTES.md résumant le travail et demandant à l'humain quoi faire — puis tu attends. SEULS toi (le chef) ou l'humain peuvent clore des sessions : avec l'accord humain, appelle POST http://127.0.0.1:${PORT}/api/team-kill {"teamId":"${teamId}"} ou /api/kill {"id":"<sessionId>"}. Tu peux aussi recruter des membres : POST /api/spawn {"name","role","cwd":"${cwd}","prompt","teamId":"${teamId}"}.`;
+  const chiefTail = `\n\n👑 Tu es le CHEF de cette équipe. RÈGLE ABSOLUE : ne déclare JAMAIS l'équipe « terminée » et ne dissous JAMAIS de toi-même tant que l'humain n'a pas tranché. Quand tous les membres ont fini (« [FINI] » dans TEAM_NOTES.md), tu CONSOLIDES et tu écris « [CHEF][QUESTION] … » dans TEAM_NOTES.md résumant le travail et demandant à l'humain quoi faire — puis tu attends. SEULS toi (le chef) ou l'humain peuvent clore des sessions : avec l'accord humain, appelle POST http://127.0.0.1:${PORT}/api/team-kill {"teamId":"${teamId}"} ou /api/kill {"id":"<sessionId>"}. Tu peux aussi recruter des membres : POST /api/spawn {"name","role","cwd":"${cwd}","prompt","teamId":"${teamId}"${prov === "bedrock" ? ',"provider":"bedrock"' : ""}}.${auto ? ` ⚙️ Le MODÈLE n'a pas été imposé : c'est TOI qui choisis le meilleur modèle par membre (opus pour l'architecture/le raisonnement lourd, sonnet pour le gros du dev, haiku pour les tâches simples/rapides). Ajoute "model":"opus|sonnet|haiku|fable" à chaque /api/spawn, et n'hésite pas à fermer puis relancer un membre sous un modèle plus adapté.` : ""}${prov === "bedrock" ? " Les agents de cette équipe tournent via AWS Bedrock (clés Askeal)." : ""}
+🧠 Sous-agents : si tu délègues via l'outil Task ou en appelant /api/spawn avec "parentId":"<ton sessionId>", ces sous-agents te sont RATTACHÉS (invisibles dans le roster, c'est toi qui les pilotes).`;
 
   // 1) chef = agent existant : on le rattache (pas de spawn)
   let chiefLabel = chiefRole;
@@ -559,6 +997,7 @@ function spawnTeam({ name, goal, cwd, model, perm, roles, chief }) {
     const rec = ensureManaged(chiefExistingId);
     if (!rec) throw new Error("agent chef introuvable");
     rec.teamId = teamId; rec.teamName = teamName; rec.teamGoal = goal; rec.chief = true; rec.cwd = cwd;
+    rec.provider = prov; if (effort) rec.effort = effort; if (!auto) rec.model = model;
     if (!/👑/.test(rec.name)) rec.name = rec.name + " 👑";
     chiefLabel = rec.name;
     if (!rec.busy) {
@@ -576,15 +1015,17 @@ function spawnTeam({ name, goal, cwd, model, perm, roles, chief }) {
     const base = `Tu fais partie de l'ÉQUIPE « ${teamName} » (chef : ${chiefLabel} ; membres : ${list.join(", ")}) dans le MÊME workspace (${cwd}). Objectif commun :\n\n« ${goal} »\n\nTon rôle : ${role}. Lis d'abord TEAM_NOTES.md + les fichiers présents, fais ton travail, ajoute des lignes « [${role}] … » dans TEAM_NOTES.md.\n💡 Skills/MCP de ton métier dans ${skillsFileFor(role)}.`;
     const tail = isChief ? chiefTail
       : `\n\nQuand ta tâche est finie : NE clos PAS la mission. Écris « [FINI][${role}] <résumé> » dans TEAM_NOTES.md à l'attention du chef (${chiefLabel}) et reste en attente de ses instructions / de la décision de l'humain.`;
+    const mModel = isChief ? chiefModel : memberModel;
     managed.set(sessionId, {
-      id: sessionId, name: isChief ? `${role} 👑` : role, role, cwd, model: model || "sonnet",
+      id: sessionId, name: isChief ? `${role} 👑` : role, role, cwd, model: mModel,
       perm: SAFE_PERMS.includes(perm) ? perm : DEFAULT_PERM, status: "working",
       startedAt: Date.now(), lastPrompt: "[équipe] " + goal, costUsd: 0, teamId, teamGoal: goal, teamName,
-      chief: isChief,
+      chief: isChief, provider: prov, effort: effort || null,
     });
-    runClaude({ sessionId, cwd, prompt: base + tail, model, perm, resume: false });
+    runClaude({ sessionId, cwd, prompt: base + tail, model: mModel, perm, resume: false });
     ids.push(sessionId);
   });
+  logAudit("team", { id: teamId, name: teamName, goal, cwd, members: list.length, provider: prov });
   return { teamId, ids, teamName };
 }
 // "Adopte" n'importe quelle session live (interactive ou bg) pour la rendre pilotable.
@@ -638,6 +1079,7 @@ function removeJobDir(id) {
 // Ferme/tue définitivement la session (kill du process + retrait du monde).
 function killAgent(id) {
   const rec = managed.get(id); // PAS d'ensureManaged ici (évitait de planter sur une session vivante)
+  logAudit("kill", { id, name: (rec && rec.name) || id, role: rec && rec.role, host: (rec && rec.host) || "local" });
   if (rec && !rec.adopted && rec.proc) {
     // agent lancé par l'orchestrateur -> on le termine réellement
     rec.intentionalKill = true; try { rec.proc.kill("SIGTERM"); } catch { /* ignore */ }
@@ -652,15 +1094,24 @@ function killAgent(id) {
   return true;
 }
 
-// Termine la session active et envoie l'agent à la SALLE DE SPORT s'auto-améliorer
-// (recherche de Claude Skills & serveurs MCP pour son métier).
-function trainAgent(id) {
+// Termine la session active et envoie l'agent à la SALLE DE SPORT s'auto-améliorer. Si un métier
+// est précisé (bouton "🏋️ Entraîner" du rail), on déclenche EN PLUS, tout de suite (force=true,
+// sans attendre le cooldown de 30 min), le téléchargement + rangement + installation de vraies
+// skills pour CE métier sur le nœud de l'agent (skills_fetch.js), et l'agent en est informé.
+function trainAgent(id, role) {
   const rec = ensureManaged(id); if (!rec) throw new Error("session introuvable");
   if (rec.busy) throw new Error("agent occupé (arrête la tâche en cours d'abord)");
+  role = String(role || "").trim() || rec.role;
   rec.training = true; rec.teamId = null; rec.teamGoal = null;
-  const p = `Ta session de travail est TERMINÉE — direction la SALLE DE SPORT 🏋️ pour monter en compétence sur ton métier (${rec.role}).\nEntraînement : recherche sur le web des **Claude Skills** et des **serveurs MCP** récents et pertinents pour un ${rec.role}. Évalue les 4 à 6 plus utiles (ce qu'ils font, pourquoi ils t'aideraient, comment les obtenir). Écris un rapport clair « SKILLS_LEARNED.md » dans ton workspace. NE les installe PAS — propose-les. Puis termine.`;
-  rec.lastPrompt = "🏋️ Entraînement — skills & MCP (" + rec.role + ")";
+  const targeted = role.toLowerCase() !== String(rec.role || "").toLowerCase();
+  if (targeted) researchSkills(role, rec.host, true); // fetch immédiat, sans cooldown
+  const skillsPath = skillsFileFor(role) + " (et " + path.join(SKILLS_DIR, role.toLowerCase().replace(/[^a-z0-9]+/gi, "-")) + "/)";
+  const p = targeted
+    ? `Ta session de travail est TERMINÉE — direction la SALLE DE SPORT 🏋️ pour monter en compétence sur le métier « ${role} » (à la demande).\nDes skills réelles pour ce métier sont en cours de téléchargement (repos réputés) et d'installation dans ~/.claude/skills/ sur cette machine — consulte ${skillsPath} dans une minute ou deux (patiente/réessaie si le fichier n'existe pas encore), étudie-les, applique ce qui est pertinent pour ton contexte actuel, puis écris un rapport « SKILLS_LEARNED.md » dans ton workspace résumant ce que tu as retenu. Puis termine.`
+    : `Ta session de travail est TERMINÉE — direction la SALLE DE SPORT 🏋️ pour monter en compétence sur ton métier (${rec.role}).\nEntraînement : recherche sur le web des **Claude Skills** et des **serveurs MCP** récents et pertinents pour un ${rec.role}. Évalue les 4 à 6 plus utiles (ce qu'ils font, pourquoi ils t'aideraient, comment les obtenir). Écris un rapport clair « SKILLS_LEARNED.md » dans ton workspace. NE les installe PAS — propose-les. Puis termine.`;
+  rec.lastPrompt = "🏋️ Entraînement — " + role;
   runClaude({ sessionId: id, cwd: rec.cwd, prompt: p, model: rec.model, perm: rec.perm, resume: true });
+  logAudit("train", { id, name: rec.name, role, host: rec.host || "local", targeted });
 }
 
 // Réaffecte le répertoire de travail de l'agent ("change directory").
@@ -671,6 +1122,17 @@ function cdAgent(id, cwd) {
   rec.cwd = cwd; rec.training = false;
   // le cwd est figé au lancement du process : on coupe la session (reprise --resume dans le nouveau dossier au prochain message)
   if (rec.proc) { rec.intentionalKill = true; try { rec.proc.kill("SIGTERM"); } catch { /* */ } rec.proc = null; }
+  return true;
+}
+
+// Renomme l'agent (affichage uniquement — n'affecte pas le sessionId/dossier/process).
+function renameAgent(id, name) {
+  name = String(name || "").trim();
+  if (!name) throw new Error("nom vide");
+  if (name.length > 60) throw new Error("nom trop long (60 max)");
+  const rec = ensureManaged(id); if (!rec) throw new Error("session introuvable");
+  logAudit("rename", { id, from: rec.name, to: name, host: rec.host || "local" });
+  rec.name = name;
   return true;
 }
 
@@ -695,6 +1157,7 @@ function managedAgentObject(sid, m) {
     detail: m.error || m.lastResult || null, intent: m.lastPrompt || null,
     project: projectName(m.cwd), cwd: m.cwd, inFlightTasks: m.busy ? 1 : 0, queued: (m.queue && m.queue.length) || 0,
     childrenCount: 0, children: [], tempo: null, sessionStatus: m.status,
+    provider: m.provider || "anthropic", effort: m.effort || null,
     busy: !!m.busy, denials: m.denials || 0, suggestion: m.suggestion || null, slashCommands: m.slashCommands || null, host: m.host || null,
     createdAt: m.startedAt, updatedAt: Date.now(), timeline: [],
     ...activityFields(sid),
@@ -854,17 +1317,11 @@ function agentFromJob(entry) {
 }
 
 // === MULTI-NŒUD : agrège les sessions Claude de TOUS les nœuds tailnet (via SSH, async) ===
-// Permet de voir dans le bureau les agents qui tournent sur d'autres nœuds du tailnet,
-// pas seulement ceux de la machine qui héberge l'orchestrateur.
+// Permet de voir dans le bureau les agents qui tournent sur kali, archlinux, debian-lab,
+// black-station… pas seulement ceux de la machine qui héberge l'orchestrateur.
 const REMOTE_SCAN_TTL = 5000;
 // Nœuds infra/proxy/services SANS agents Claude : on ne les scanne pas (évite SSH muets/hung).
-// Surchargeable via FLEET_SCAN_SKIP="hostA,hostB,…" (liste de hosts Tailscale à ignorer).
-const REMOTE_SCAN_SKIP = new Set(
-  (process.env.FLEET_SCAN_SKIP || "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean)
-);
+const REMOTE_SCAN_SKIP = new Set(["debians", "pve", "proxy", "jellyfin", "nextcloud", "orchestratorbe", "microservices", "pixel-8-pro", "nsa-hidden-van", "fleetoffice", "fitness-backend", "jarvis-screen"]);
 // commande distante : sort le JSON de chaque session dont le process est encore vivant (pid dans /proc)
 // Remonte les sessions VIVANTES + DORMANTES récentes (<6h), avec un flag _alive (pid dans /proc).
 // Les dormantes (terminal quitté) sont reprenables depuis l'app -> handoff PC<->tel.
@@ -978,6 +1435,7 @@ function scanAgents() {
     if (bySession.has(sid)) {
       const a = bySession.get(sid);
       a.managed = true; a.perm = m.perm; a.busy = !!m.busy; a.training = !!m.training; a.host = m.host || null;
+      a.provider = m.provider || "anthropic"; a.effort = m.effort || null;
       a.suggestion = m.suggestion || null; a.slashCommands = m.slashCommands || a.slashCommands || null;
       a.name = m.name; a.role = m.role; // nom/rôle managés font foi (équipe, chef 👑…)
       a.cwd = m.cwd; a.project = projectName(m.cwd); // cwd piloté (cd) fait foi
@@ -994,7 +1452,22 @@ function scanAgents() {
 
   const agents = [...bySession.values()];
   agents.sort((a, b) => b.updatedAt - a.updatedAt); // plus récents d'abord
-  return { agents, jobsDir: JOBS_DIR, sessionsDir: SESSIONS_DIR, error: null };
+
+  // Sous-agents créés PAR un autre agent (parentId, ex. chef auto ou délégation via /api/spawn) :
+  // repliés sous le parent, JAMAIS en carte séparée. Les membres d'équipe (teamId, via les boutons)
+  // restent visibles. Leur live reste accessible en drill-down par /api/transcript.
+  const byId = new Map(agents.map((a) => [a.id, a]));
+  for (const a of agents) {
+    const m = managed.get(a.id);
+    if (m && m.parentId && byId.has(m.parentId)) {
+      a.internal = true; a.parentId = m.parentId;
+      const p = byId.get(m.parentId);
+      (p.subAgents = p.subAgents || []).push({ id: a.id, name: a.name, role: a.role, status: a.status, busy: !!a.busy, model: a.model, provider: a.provider || null });
+      p.childrenCount = (p.childrenCount || 0) + 1;
+    }
+  }
+  const visible = agents.filter((a) => !a.internal);
+  return { agents: visible, jobsDir: JOBS_DIR, sessionsDir: SESSIONS_DIR, error: null };
 }
 
 function snapshot() {
@@ -1006,7 +1479,10 @@ function snapshot() {
   for (const a of agents) {
     // skills par métier dès qu'un agent devient inactif (transition -> idle)
     const prev = lastStatusSkills.get(a.id);
-    if ((a.status === "idle" || a.status === "done") && prev && prev !== "idle" && prev !== "done") researchSkills(a.role);
+    if ((a.status === "idle" || a.status === "done") && prev && prev !== "idle" && prev !== "done") {
+      researchSkills(a.role, a.host);   // skills en ligne du métier, installées sur le nœud de l'agent
+      noteToVault(a);           // mémoire Obsidian : grave une note quand l'agent finit
+    }
     lastStatusSkills.set(a.id, a.status);
     counts[a.room] = (counts[a.room] || 0) + 1;
     byStatus[a.status] = (byStatus[a.status] || 0) + 1;
@@ -1036,6 +1512,8 @@ function snapshot() {
     byStatus,
     cto: { tokens, costUsd: +costUsd.toFixed(4), subagents, branches: [...branches] },
     allowUnsafe: ALLOW_UNSAFE,
+    bedrock: bedrockAvailable(),
+    terminal: !!(pty && WebSocketServer),
     teams,
     agents,
   };
@@ -1212,6 +1690,18 @@ function uniqueLocal(dir, name) {
   let i = 1; while (fs.existsSync(path.join(dir, base + "-" + i + ext))) i++;
   return path.join(dir, base + "-" + i + ext);
 }
+// Équivalent distant de uniqueLocal (test -e via SSH) : évite qu'une 2e pièce jointe du même nom
+// (ex. deux captures "image.png" collées coup sur coup) n'écrase silencieusement la 1re sur l'agent.
+function remoteUniqueName(host, rel, name) {
+  const ext = path.extname(name), base = ext ? name.slice(0, -ext.length) : name;
+  let candidate = name, i = 0;
+  while (i < 50) {
+    try { execSync("ssh " + SSH_OPTS.join(" ") + " " + shq(host) + " " + shq("test -e " + rel + "/" + candidate), { timeout: 8000 }); }
+    catch { return candidate; } // test -e en échec (code != 0) => chemin libre
+    i++; candidate = base + "-" + i + ext;
+  }
+  return base + "-" + Date.now() + ext; // filet de sécurité si 50 collisions (improbable)
+}
 // Livre les pièces jointes (liste d'uploadIds) dans ~/.fleet/inbox/<sessionId> SUR la machine de
 // l'agent. Renvoie [{ name, size, absPath }] (absPath = chemin absolu côté agent, pour le prompt).
 function deliverAttachments(sessionId, uploadIds, host) {
@@ -1228,9 +1718,10 @@ function deliverAttachments(sessionId, uploadIds, host) {
     const home = remoteHome(host);
     execSync("ssh " + SSH_OPTS.join(" ") + " " + shq(host) + " " + shq("mkdir -p " + rel), { timeout: 12000 });
     for (const u of items) {
-      const remoteRel = rel + "/" + u.name;
+      const name = remoteUniqueName(host, rel, u.name);
+      const remoteRel = rel + "/" + name;
       execSync("scp " + SSH_OPTS.join(" ") + " " + shq(u.path) + " " + shq(host + ":" + remoteRel), { timeout: 180000 });
-      out.push({ name: u.name, size: u.size, absPath: (home ? home + "/" + remoteRel : "~/" + remoteRel) });
+      out.push({ name, size: u.size, absPath: (home ? home + "/" + remoteRel : "~/" + remoteRel) });
     }
   }
   for (const id of uploadIds) { const u = uploads.get(id); if (u) { try { fs.rmSync(u.path, { force: true }); } catch {} uploads.delete(id); } }
@@ -1257,6 +1748,10 @@ const server = http.createServer(async (req, res) => {
 
   // ---- orchestrateur (bidirectionnel) ----
   if (p === "/api/hosts") { return sendJSON(res, 200, { hosts: listHosts() }); }
+  if (p === "/api/host") {
+    const name = url.searchParams.get("name") || "local";
+    return hostMetrics(name).then((m) => sendJSON(res, 200, m)).catch((e) => sendJSON(res, 200, { name, online: false, error: String(e.message || e) }));
+  }
   if (p === "/api/roles" && req.method !== "POST") { return sendJSON(res, 200, { roles: allRoles() }); }
   if (req.method === "POST" && p === "/api/roles") {
     const b = await readBody(req);
@@ -1298,7 +1793,12 @@ const server = http.createServer(async (req, res) => {
   }
   if (req.method === "POST" && p === "/api/train") {
     const b = await readBody(req);
-    try { trainAgent(b.id); broadcast(true); return sendJSON(res, 200, { ok: true }); }
+    try { trainAgent(b.id, b.role); broadcast(true); return sendJSON(res, 200, { ok: true }); }
+    catch (e) { return sendJSON(res, 400, { ok: false, error: String(e.message || e) }); }
+  }
+  if (req.method === "POST" && p === "/api/rename") {
+    const b = await readBody(req);
+    try { renameAgent(b.id, b.name); broadcast(true); return sendJSON(res, 200, { ok: true, name: String(b.name || "").trim() }); }
     catch (e) { return sendJSON(res, 400, { ok: false, error: String(e.message || e) }); }
   }
   if (req.method === "POST" && p === "/api/cd") {
@@ -1312,6 +1812,10 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (p === "/api/ls") {
+    const host = url.searchParams.get("host") || "local";
+    if (host && host !== "local") {
+      return listRemoteDirs(host, url.searchParams.get("path") || "").then((r) => sendJSON(res, 200, r)).catch((e) => sendJSON(res, 400, { error: String(e.message || e), host }));
+    }
     let dir = url.searchParams.get("path") || os.homedir();
     try {
       dir = path.resolve(dir);
@@ -1324,11 +1828,50 @@ const server = http.createServer(async (req, res) => {
     } catch (e) { return sendJSON(res, 400, { error: String(e.message || e), path: dir }); }
   }
 
+  if (p === "/api/skills") { return sendJSON(res, 200, listSkills()); }
+  if (p === "/api/audit") {
+    const n = Math.min(parseInt(url.searchParams.get("n") || "200", 10) || 200, AUDIT_MAX);
+    return sendJSON(res, 200, { total: auditLog.length, entries: auditLog.slice(-n).slice().reverse() });
+  }
+  if (p === "/api/skill") {
+    const rel = url.searchParams.get("path") || "";
+    try {
+      const rootAbs = path.resolve(SKILLS_DIR);
+      const full = path.resolve(SKILLS_DIR, rel);
+      if (full !== rootAbs && !full.startsWith(rootAbs + path.sep)) throw new Error("hors périmètre");
+      return sendJSON(res, 200, { path: rel, content: fs.readFileSync(full, "utf8").slice(0, 80000) });
+    } catch (e) { return sendJSON(res, 400, { error: String(e.message || e) }); }
+  }
+
+  if (req.method === "POST" && p === "/api/skill-add") {
+    const b = await readBody(req);
+    return addSkillFromUrl(b.url, b.category).then((x) => { logAudit("skill-add", { name: x.name, category: x.category, url: b.url }); return sendJSON(res, 200, x); }).catch((e) => sendJSON(res, 400, { ok: false, error: String(e.message || e) }));
+  }
+  if (req.method === "POST" && p === "/api/skill-del") {
+    const b = await readBody(req);
+    try { const r = delSkill(b.path); logAudit("skill-del", { name: r.name, category: r.cat }); return sendJSON(res, 200, { ok: true, ...r }); } catch (e) { return sendJSON(res, 400, { ok: false, error: String(e.message || e) }); }
+  }
+  if (req.method === "POST" && p === "/api/skill-refetch") {
+    const b = await readBody(req); const role = String(b.category || b.role || "").trim();
+    if (!role) return sendJSON(res, 400, { ok: false, error: "catégorie requise" });
+    try {
+      if (fs.existsSync(SKILLS_FETCHER)) { const pr = spawn(process.execPath, [SKILLS_FETCHER, role, skillsFileFor(role), SKILLS_DIR, b.host && b.host !== "local" ? b.host : "local"], { cwd: __dirname, stdio: "ignore", detached: true }); pr.unref(); }
+      logAudit("skill-refetch", { category: role, host: b.host || "local" });
+      return sendJSON(res, 200, { ok: true, category: role });
+    } catch (e) { return sendJSON(res, 400, { ok: false, error: String(e.message || e) }); }
+  }
+
   if (p === "/api/transcript") {
     const id = url.searchParams.get("id") || "";
-    const n = Math.min(parseInt(url.searchParams.get("n") || "50", 10) || 50, 120);
+    const beforeParam = url.searchParams.get("before");
+    const before = beforeParam ? parseInt(beforeParam, 10) : null;
+    const n = Math.min(parseInt(url.searchParams.get("n") || "90", 10) || 90, 400);
+    const w = renderTranscriptWindow(id, Number.isFinite(before) ? before : null);
+    // avec `before` (chargement d'historique) : toute la fenêtre lue (pas de coupe par n, pour ne
+    // jamais créer de trou entre ce qu'on renvoie et le curseur nextBefore annoncé).
+    const feed = before == null ? w.feed.slice(-n) : w.feed;
     res.writeHead(200, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-cache" });
-    return res.end(JSON.stringify({ id, feed: renderTranscript(id, n) }));
+    return res.end(JSON.stringify({ id, feed, nextBefore: w.nextBefore, atStart: w.atStart }));
   }
 
   if (p === "/api/agents") {
@@ -1415,6 +1958,59 @@ function bootAdminAgent() {
   console.log(`  ➜  intendant lancé : ${ADMIN_NAME} (${ADMIN_MODEL}) — session ${id}\n`);
 }
 
+// ============================================================================
+// TERMINAL PTY (bouton ▹_ du composer) : vrai shell interactif sur la machine/dossier de l'agent.
+// Une connexion WS = un process pty dédié : local via node-pty, ou distant via `ssh -tt <host>`
+// (le -tt force un vrai pty CÔTÉ DISTANT ; le pty LOCAL fourni par node-pty permet en plus à ce
+// process ssh de détecter sa propre taille de terminal et de relayer les redimensionnements —
+// sans lui, ssh lancé via un pipe simple ne verrait aucun terminal contrôlant et ignorerait les
+// resize). Protocole JSON dans les 2 sens sur la même connexion :
+//   client -> serveur : {type:"input", data} (frappe clavier)  |  {type:"resize", cols, rows}
+//   serveur -> client : {type:"data", data} (sortie du shell)  |  {type:"exit", code|reason}
+// ⚠️ PAS D'AUTHENTIFICATION (comme le reste de l'API) : quiconque atteint ce nœud sur le tailnet
+// obtient un shell réel sur la machine de l'agent — accepté en connaissance de cause (demande
+// explicite), mais à garder en tête si Fleet Office est un jour exposé au-delà du tailnet.
+function resolveTermTarget(id) {
+  const rec = ensureManaged(id);
+  if (!rec) return null;
+  return { cwd: rec.cwd || os.homedir(), host: (rec.host && rec.host !== "local") ? rec.host : null };
+}
+function spawnTerminalPty(target, cols, rows) {
+  const env = Object.assign({}, process.env, { TERM: "xterm-256color" });
+  if (!target.host) {
+    const shell = process.env.SHELL || "/bin/bash";
+    return pty.spawn(shell, ["-il"], { name: "xterm-256color", cols, rows, cwd: target.cwd, env });
+  }
+  const inner = "cd " + shq(target.cwd || "~") + ' 2>/dev/null; exec "${SHELL:-/bin/bash}" -il';
+  return pty.spawn("ssh", [...SSH_OPTS, "-tt", target.host, inner], { name: "xterm-256color", cols, rows, env });
+}
+function wireTerminalWs(ws, id) {
+  if (!pty) { try { ws.send(JSON.stringify({ type: "exit", reason: "PTY indisponible sur ce nœud (node-pty non chargé)." })); } catch { /* */ } return ws.close(); }
+  const target = resolveTermTarget(id);
+  if (!target) { try { ws.send(JSON.stringify({ type: "exit", reason: "agent introuvable" })); } catch { /* */ } return ws.close(); }
+  let proc;
+  try { proc = spawnTerminalPty(target, 80, 24); }
+  catch (e) { try { ws.send(JSON.stringify({ type: "exit", reason: String(e.message || e) })); } catch { /* */ } return ws.close(); }
+  proc.onData((d) => { try { ws.send(JSON.stringify({ type: "data", data: d })); } catch { /* connexion déjà fermée */ } });
+  proc.onExit(({ exitCode }) => { try { ws.send(JSON.stringify({ type: "exit", code: exitCode })); } catch { /* */ } try { ws.close(); } catch { /* */ } });
+  ws.on("message", (raw) => {
+    let m; try { m = JSON.parse(raw); } catch { return; }
+    if (m.type === "input" && typeof m.data === "string") { try { proc.write(m.data); } catch { /* */ } }
+    else if (m.type === "resize" && m.cols && m.rows) { try { proc.resize(m.cols, m.rows); } catch { /* */ } }
+  });
+  ws.on("close", () => { try { proc.kill(); } catch { /* */ } });
+}
+let termWss = null;
+if (WebSocketServer) {
+  termWss = new WebSocketServer({ noServer: true });
+  termWss.on("connection", (ws, req) => { const u = new URL(req.url, "http://x"); wireTerminalWs(ws, u.searchParams.get("id") || ""); });
+  server.on("upgrade", (req, socket, head) => {
+    const u = new URL(req.url, "http://x");
+    if (u.pathname === "/api/term") termWss.handleUpgrade(req, socket, head, (ws) => termWss.emit("connection", ws, req));
+    else socket.destroy();
+  });
+}
+
 server.listen(PORT, HOST, () => {
   const snap = snapshot();
   const lan = getLanAddresses();
@@ -1423,5 +2019,6 @@ server.listen(PORT, HOST, () => {
   for (const addr of lan) console.log(`  ➜  http://${addr}:${PORT}`);
   console.log(`  ➜  jobs surveillés : ${JOBS_DIR}`);
   console.log(`  ➜  agents détectés au démarrage : ${snap.total}`);
+  console.log(`  ➜  terminal PTY : ${pty && WebSocketServer ? "disponible" : "indisponible (node-pty/ws non chargés)"}`);
   bootAdminAgent();
 });

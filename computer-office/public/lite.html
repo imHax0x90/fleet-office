@@ -3,166 +3,200 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#05030c" />
-  <title>Fleet Office — console</title>
+  <meta name="theme-color" content="#0a0e17" />
+  <title>Fleet Office — command center</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9B%B0%EF%B8%8F%3C/text%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.css" />
   <link rel="stylesheet" href="./lite.css" />
 </head>
 <body>
-  <div class="grid-bg" aria-hidden="true"></div>
-  <div class="scanlines" aria-hidden="true"></div>
+  <div id="app" class="app">
 
-  <!-- ===== Barre supérieure ===== -->
-  <header id="top">
-    <div class="brand">
-      <span class="hex">⬢</span>
-      <div class="brand-txt">
-        <h1>FLEET<b>OFFICE</b></h1>
-        <button id="net" class="net" type="button"><span class="dot"></span><span id="net-label">connexion…</span></button>
+    <!-- ===================== RAIL GAUCHE ===================== -->
+    <aside id="rail" class="rail">
+      <div class="rail-brand">
+        <div class="logo">⬢</div>
+        <div style="flex:1">
+          <h1>FLEET<b>OFFICE</b></h1>
+          <div class="sub">AI Agent Command Center</div>
+        </div>
+        <button id="net" class="net" type="button" title="état de la connexion temps réel"><span class="dot"></span><span id="net-label">…</span></button>
       </div>
-    </div>
 
-    <section id="stats" class="stats"></section>
+      <nav class="rail-nav" id="nav">
+        <button class="nav-item sel" data-view="agents"><span class="ic">▦</span> Agents <span class="count" id="nav-agents">0</span></button>
+        <button class="nav-item" data-view="machines"><span class="ic">▤</span> Machines <span class="count" id="nav-machines">0</span></button>
+        <button class="nav-item" data-view="skills"><span class="ic">◈</span> Skills <span class="count" id="nav-skills">0</span></button>
+        <button class="nav-item" data-view="audit"><span class="ic">▧</span> Audit <span class="count" id="nav-audit">0</span></button>
+      </nav>
 
-    <div class="top-actions">
-      <a class="ghost-btn" href="/3d" title="Ouvrir le bureau 3D">🏢 Bureau&nbsp;3D</a>
-      <button id="team-btn" class="ghost-btn" type="button" title="Lancer une équipe d'agents">👥 Équipe</button>
-      <button id="deploy-btn" class="cta-btn" type="button">＋ Déployer</button>
-    </div>
-  </header>
+      <div class="rail-search">
+        <div class="box"><span class="ic">⌕</span><input id="q" type="search" placeholder="rechercher un agent…" autocomplete="off" /></div>
+      </div>
 
-  <!-- ===== Outils (recherche + filtres) ===== -->
-  <div id="toolbar" class="toolbar">
-    <div class="search">
-      <span class="s-ic">⌕</span>
-      <input id="q" type="search" placeholder="filtrer par nom, métier, projet, machine…" autocomplete="off" />
-    </div>
-    <div id="filters" class="filters">
-      <button class="chip sel" data-f="all">Tous</button>
-      <button class="chip" data-f="working">⚡ Actifs</button>
-      <button class="chip" data-f="idle">🧘 Au repos</button>
-      <button class="chip" data-f="attn">🙋 À voir</button>
-      <button class="chip" data-f="remote">📍 Distants</button>
-    </div>
-  </div>
+      <div id="rail-groups" class="rail-groups"></div>
 
-  <!-- ===== Équipes actives ===== -->
-  <section id="teams" class="teams"></section>
+      <div class="rail-user">
+        <div class="uav">🧑‍✈️</div>
+        <div style="flex:1"><div class="un">imHax0x90</div><div class="ur">Administrator</div></div>
+        <button id="deploy-btn" class="cta-btn" type="button" title="Déployer un agent">＋</button>
+      </div>
+      <div id="rail-resize" class="resize-handle resize-handle-r" title="glisser pour redimensionner"></div>
+    </aside>
 
-  <!-- ===== Grille des agents ===== -->
-  <main id="roster" class="roster"></main>
+    <!-- ===================== CENTRE (conversation) ===================== -->
+    <main class="center">
+      <header id="center-head" class="center-head">
+        <div class="hid"><div class="hn">Fleet Office</div><div class="status">sélectionne un agent à gauche</div></div>
+        <div class="hact">
+          <button id="team-btn" class="ghost-btn" type="button" title="Lancer une équipe">👥 Équipe</button>
+          <a class="ghost-btn" href="/3d" title="Bureau 3D">🏢 3D</a>
+        </div>
+      </header>
 
-  <!-- ===== Inspecteur latéral (pilotage + live) ===== -->
-  <aside id="inspector" class="inspector hidden" aria-hidden="true">
-    <div class="insp-head">
-      <div class="insp-id">
-        <div id="i-av" class="i-av">?</div>
-        <div>
-          <h2 id="i-name">—</h2>
-          <div id="i-sub" class="insp-sub"></div>
+      <div id="conv" class="conv">
+        <div class="empty"><span class="big">🛰️</span>Bienvenue dans le command center.<br>Sélectionne un agent à gauche, ou <b style="color:var(--cyan)">déploie</b>-en un nouveau.</div>
+      </div>
+
+      <div id="composer" class="composer hidden">
+        <div id="c-attach" class="tray hidden"></div>
+        <div id="c-suggest" class="suggest hidden"></div>
+        <div id="c-quickreply" class="quickreply hidden"></div>
+        <div class="slash"><div id="c-slash" class="slash-dd hidden"></div></div>
+        <div class="cbox">
+          <textarea id="c-input" rows="1" placeholder="message / follow-up…   ( / = commandes,  📎 = fichiers )"></textarea>
+          <div class="crow">
+            <button id="c-clip" class="cbtn" type="button" title="Joindre des fichiers">📎</button>
+            <button id="c-term" class="cbtn" type="button" title="terminal — shell direct sur la machine de l'agent">▹_</button>
+            <span class="spacer"></span>
+            <span id="c-busy" class="busyline hidden">⏳ l'agent réfléchit — ton message s'enchaîne</span>
+            <button id="c-send" class="send-btn" type="button">Envoyer ➤</button>
+          </div>
+        </div>
+        <input id="c-file" type="file" multiple hidden />
+      </div>
+
+      <!-- vue Machines (masquée par défaut) -->
+      <div id="mach" class="mach-grid hidden"></div>
+      <!-- vue Skills (bibliothèque rangée + consultable) -->
+      <div id="skills" class="skills-wrap hidden"></div>
+      <!-- vue Audit (journal des actions : spawn/kill/renommage/entraînement/équipe/skills) -->
+      <div id="audit" class="skills-wrap hidden"></div>
+    </main>
+
+    <!-- ===================== CONTEXTE DROIT ===================== -->
+    <aside id="ctx" class="ctx">
+      <div class="ctx-head">
+        <h2>⟡ <span id="ctx-title">Contexte flotte</span></h2>
+        <div class="ctx-tabs" id="ctx-tabs">
+          <button class="ctx-tab sel" data-tab="ctx">Contexte</button>
+          <button class="ctx-tab" data-tab="machine">Machine</button>
+          <button class="ctx-tab" data-tab="logs">Logs</button>
         </div>
       </div>
-      <button class="icon-btn close" data-close="inspector" aria-label="fermer">✕</button>
-    </div>
+      <div id="ctx-body" class="ctx-body"></div>
+      <div id="ctx-resize" class="resize-handle resize-handle-l" title="glisser pour redimensionner"></div>
+    </aside>
+  </div>
 
-    <div id="i-meta" class="i-meta"></div>
-    <div id="i-perm" class="perm-note"></div>
-
-    <div class="feed-title">⬢ LIVE CLAUDE CODE <span id="i-live" class="live-dot"></span></div>
-    <div id="i-feed" class="feed"></div>
-
-    <div id="i-suggest" class="suggest hidden"></div>
-    <div class="pilot">
-      <div id="i-attach" class="tray hidden"></div>
-      <div class="pilot-row">
-        <button id="i-clip" class="clip" type="button" title="Joindre des fichiers (ou glisser-déposer / coller)">📎</button>
-        <textarea id="i-input" rows="1" autocomplete="off" placeholder="message / follow-up…   ( / = commandes,  📎/glisser/coller = fichiers )"></textarea>
-        <button id="i-send" class="send" aria-label="envoyer">➤</button>
-      </div>
-      <div id="i-slash" class="slash hidden"></div>
-      <div id="i-busy" class="busy hidden">⏳ l'agent réfléchit — ton message s'enchaîne</div>
-      <input id="i-file" type="file" multiple hidden />
-    </div>
-
-    <div class="actions">
-      <button id="i-stop" class="act warn hidden">⏹ stop</button>
-      <button id="i-train" class="act ok">🏋️ gym</button>
-      <button id="i-kill" class="act danger">✖ fermer</button>
-    </div>
-  </aside>
-
-  <!-- ===== Modale DÉPLOIEMENT ===== -->
+  <!-- ===================== Modale DÉPLOIEMENT ===================== -->
   <div id="spawn" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modal-head">
       <div><h2>⊕ Déployer un agent</h2><div class="modal-sub">un vrai process Claude Code, local ou sur le réseau Tailscale</div></div>
       <button class="icon-btn close" data-close="spawn" aria-label="fermer">✕</button>
     </div>
-    <label class="fld">
-      <span class="fld-l">📍 Machine</span>
-      <div id="sp-hosts" class="hosts"></div>
+    <label class="fld"><span class="fld-l">📍 Machine</span><div id="sp-hosts" class="hosts"></div></label>
+    <label class="fld"><span class="fld-l">↩ Reprendre une session existante <small>(optionnel — reprend son contexte)</small></span>
+      <div id="sp-resume" class="resume-list"></div>
     </label>
     <div class="fld-grid2">
       <label class="fld"><span class="fld-l">Nom</span><input id="sp-name" placeholder="Aria" /></label>
       <label class="fld"><span class="fld-l">Métier</span><input id="sp-role" placeholder="Backend Senior" /></label>
     </div>
-    <label class="fld"><span class="fld-l">Workspace <small id="sp-cwd-hint"></small></span><input id="sp-cwd" placeholder="/home/user/projet" /></label>
+    <label class="fld"><span class="fld-l">Workspace <small id="sp-cwd-hint"></small></span>
+      <div class="cwd-row"><input id="sp-cwd" placeholder="/home/user/projet" /><button type="button" id="sp-browse" class="browse-btn" title="explorateur">📁 Parcourir</button></div>
+    </label>
     <label class="fld"><span class="fld-l">Mission</span><textarea id="sp-prompt" rows="3" placeholder="Analyse le repo et propose un plan."></textarea></label>
     <label class="fld">
-      <span class="fld-l">📎 Pièces jointes <small>(tous formats — livrées sur la machine de l'agent)</small></span>
-      <div id="sp-attach" class="dropzone">
-        <div id="sp-attach-list" class="tray hidden"></div>
-        <div class="dz-hint">glisser-déposer ici, ou <button type="button" id="sp-clip" class="linkbtn">choisir des fichiers</button></div>
-      </div>
+      <span class="fld-l">📎 Pièces jointes <small>(livrées sur la machine de l'agent)</small></span>
+      <div id="sp-attach" class="dropzone"><div id="sp-attach-list" class="tray hidden"></div><div class="dz-hint">glisser-déposer, ou <button type="button" id="sp-clip" class="linkbtn">choisir des fichiers</button></div></div>
       <input id="sp-file" type="file" multiple hidden />
     </label>
+    <label class="fld" id="sp-prov-fld"><span class="fld-l">Provider</span>
+      <div class="seg" id="sp-prov">
+        <button type="button" class="sel" data-prov="anthropic">Anthropic (abonnement)</button>
+        <button type="button" data-prov="bedrock">AWS Bedrock (Askeal)</button>
+      </div>
+    </label>
     <div class="fld-grid2">
-      <label class="fld"><span class="fld-l">Modèle</span>
-        <select id="sp-model"><option value="sonnet">Sonnet</option><option value="opus">Opus</option><option value="claude-fable-5">Fable 5</option><option value="haiku">Haiku</option></select>
-      </label>
-      <label class="fld"><span class="fld-l">Permissions</span>
-        <select id="sp-perm"><option value="acceptEdits">Édite (sûr)</option><option value="plan">Plan (lecture)</option><option value="bypassPermissions">⚠ Bypass</option><option value="default">Strict</option></select>
-      </label>
+      <label class="fld"><span class="fld-l">Modèle</span><select id="sp-model"></select></label>
+      <label class="fld"><span class="fld-l">Effort</span><select id="sp-effort"><option value="">auto</option><option value="low">low</option><option value="medium">medium</option><option value="high">high</option></select></label>
     </div>
+    <label class="fld"><span class="fld-l">Permissions</span>
+      <select id="sp-perm"><option value="bypassPermissions">⚡ Bypass (pleine capacité)</option><option value="acceptEdits">Édite (sûr)</option><option value="plan">Plan (lecture)</option><option value="default">Strict</option></select>
+    </label>
     <div id="sp-err" class="err"></div>
     <button id="sp-go" class="go">🚀 Lancer la mission</button>
   </div>
 
-  <!-- ===== Modale ÉQUIPE ===== -->
+  <!-- ===================== Modale ÉQUIPE ===================== -->
   <div id="team" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modal-head">
-      <div><h2>👥 Mission d'équipe</h2><div class="modal-sub">plusieurs agents Claude Code collaborent sur le MÊME workspace, coordonnés via TEAM_NOTES.md</div></div>
+      <div><h2>👥 Mission d'équipe</h2><div class="modal-sub">plusieurs agents collaborent sur le MÊME workspace, coordonnés via TEAM_NOTES.md</div></div>
       <button class="icon-btn close" data-close="team" aria-label="fermer">✕</button>
     </div>
     <label class="fld"><span class="fld-l">Nom de l'équipe</span><input id="tm-name" placeholder="Team SaaS" /></label>
-    <label class="fld"><span class="fld-l">Objectif commun</span><textarea id="tm-goal" rows="3" placeholder="Construire une API REST de todos avec front React et CI."></textarea></label>
-    <label class="fld"><span class="fld-l">Workspace partagé <small id="tm-cwd-hint"></small></span><input id="tm-cwd" placeholder="/home/user/projet" /></label>
-    <label class="fld">
-      <span class="fld-l">Rôles de l'équipe</span>
-      <div id="tm-roles" class="tm-roles"></div>
-      <div class="addrole">
-        <input id="tm-newrole" placeholder="nouveau métier (ex. Data Scientist)" autocomplete="off" />
-        <button type="button" id="tm-addrole" class="linkbtn">＋ métier</button>
-      </div>
+    <label class="fld"><span class="fld-l">Objectif commun</span><textarea id="tm-goal" rows="3" placeholder="Construire une API REST avec front React et CI."></textarea></label>
+    <label class="fld"><span class="fld-l">Workspace partagé <small id="tm-cwd-hint"></small></span>
+      <div class="cwd-row"><input id="tm-cwd" placeholder="/home/user/projet" /><button type="button" id="tm-browse" class="browse-btn" title="explorateur">📁 Parcourir</button></div>
+    </label>
+    <label class="fld"><span class="fld-l">Rôles</span><div id="tm-roles" class="tm-roles"></div>
+      <div class="addrole"><input id="tm-newrole" placeholder="nouveau métier (ex. Data Scientist)" autocomplete="off" /><button type="button" id="tm-addrole" class="linkbtn">＋ métier</button></div>
     </label>
     <label class="fld"><span class="fld-l">👑 Chef d'équipe</span><select id="tm-chief"></select></label>
+    <label class="fld" id="tm-prov-fld"><span class="fld-l">Provider</span>
+      <div class="seg" id="tm-prov"><button type="button" class="sel" data-prov="anthropic">Anthropic</button><button type="button" data-prov="bedrock">AWS Bedrock (Askeal)</button></div>
+    </label>
     <div class="fld-grid2">
-      <label class="fld"><span class="fld-l">Modèle</span>
-        <select id="tm-model"><option value="sonnet">Sonnet</option><option value="opus">Opus</option><option value="claude-fable-5">Fable 5</option><option value="haiku">Haiku</option></select>
-      </label>
-      <label class="fld"><span class="fld-l">Permissions</span>
-        <select id="tm-perm"><option value="acceptEdits">Édite (sûr)</option><option value="plan">Plan (lecture)</option><option value="default">Strict</option></select>
-      </label>
+      <label class="fld"><span class="fld-l">Modèle</span><select id="tm-model"></select></label>
+      <label class="fld"><span class="fld-l">Permissions</span><select id="tm-perm"><option value="bypassPermissions">⚡ Bypass</option><option value="acceptEdits">Édite (sûr)</option><option value="plan">Plan</option><option value="default">Strict</option></select></label>
     </div>
     <div id="tm-err" class="err"></div>
     <button id="tm-go" class="go">🚀 Lancer l'équipe</button>
   </div>
 
+  <!-- ===================== Modale SKILL (lecture) ===================== -->
+  <div id="skillview" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-head"><div><h2 id="sk-name">Skill</h2><div class="modal-sub" id="sk-meta"></div></div><button class="icon-btn close" data-close="skillview">✕</button></div>
+    <pre id="sk-body" style="white-space:pre-wrap;word-break:break-word;font-family:var(--mono);font-size:12px;color:#b6b6bd;background:#0c0c0e;border:1px solid var(--line2);border-radius:8px;padding:14px;max-height:64vh;overflow:auto"></pre>
+  </div>
+
+  <!-- ===================== Modale EXPLORATEUR ===================== -->
+  <div id="fx" class="modal fx-modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-head"><div><h2>📁 Choisir un dossier</h2><div class="modal-sub" id="fx-host">local</div></div><button class="icon-btn close" data-close="fx">✕</button></div>
+    <div id="fx-path" class="fx-path">/</div>
+    <div id="fx-list" class="fx-list"></div>
+    <div class="fx-actions"><button type="button" id="fx-up" class="ghost-btn">⬆ Dossier parent</button><button type="button" id="fx-home" class="ghost-btn">🏠 Home</button><span style="flex:1"></span><button type="button" id="fx-pick" class="go" style="width:auto;padding:10px 20px">✓ Choisir ce dossier</button></div>
+  </div>
+
+  <!-- ===================== Modale TERMINAL (shell PTY direct) ===================== -->
+  <div id="term" class="modal term-modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <div><h2>▹_ Terminal</h2><div class="modal-sub" id="term-sub">—</div></div>
+      <span id="term-status" class="term-status">connexion…</span>
+      <button class="icon-btn close" data-close="term">✕</button>
+    </div>
+    <div id="term-body" class="term-body"></div>
+  </div>
+
   <div id="backdrop" class="backdrop hidden"></div>
   <div id="toast" class="toast"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.js"></script>
   <script src="./lite.js"></script>
 </body>
 </html>

@@ -28,7 +28,6 @@ Ou `npm start`. **Aucune dépendance à installer** : Node natif + Three.js vend
 | `PORT` | `4173` | port HTTP |
 | `HOST` | `0.0.0.0` | interface d'écoute |
 | `CLAUDE_JOBS_DIR` | `~/.claude/jobs` | dossier des jobs à surveiller |
-| `FLEET_SCAN_SKIP` | *(vide)* | hosts Tailscale à NE PAS scanner en SSH (`hostA,hostB,…`) — nœuds infra/services sans agents Claude |
 
 Le serveur écoute maintenant sur toutes les interfaces par défaut, donc il est joignable
 depuis le réseau local via l'adresse IP LAN de la machine, en plus de `localhost`.
