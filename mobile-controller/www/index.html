@@ -16,7 +16,7 @@
     html, body { margin:0; height:100%; background:var(--bg); color:var(--ink); font-family:"Inter",system-ui,-apple-system,sans-serif; overflow:hidden; }
     #frame { position:fixed; inset:0; width:100%; height:100%; border:0; background:var(--bg); }
     /* bouton réglages flottant (respecte l'encoche) */
-    #gear { position:fixed; top:max(10px,env(safe-area-inset-top)); right:10px; z-index:10; width:40px; height:40px; border-radius:50%;
+    #gear { display:none !important; position:fixed; top:max(10px,env(safe-area-inset-top)); right:10px; z-index:10; width:40px; height:40px; border-radius:50%;
       background:rgba(21,21,23,.82); backdrop-filter:blur(6px); border:1px solid var(--line); color:var(--ink); font-size:17px; cursor:pointer;
       display:grid; place-items:center; box-shadow:0 6px 20px -8px rgba(0,0,0,.8); }
     #gear:active { transform:scale(.92); }
@@ -53,6 +53,7 @@
     <h1>FLEET<b>CTRL</b></h1>
     <div class="sub">AI Agent Command Center</div>
     <div class="st" id="splash-st">connexion au serveur…</div>
+    <button id="splash-cfg" type="button" style="margin-top:6px;background:#161618;border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:10px 16px;font-size:14px;cursor:pointer">⚙ Changer de serveur</button>
   </div>
 
   <div id="sheet">
@@ -92,7 +93,7 @@
         // l'iframe met parfois du temps / échoue silencieusement : on cache le splash au onload,
         // et on propose les réglages si rien ne charge au bout de 8 s.
         clearTimeout(load._t);
-        load._t = setTimeout(function () { splashSt.innerHTML = "ça traîne… vérifie le VPN ou <b>change de serveur</b> (⚙)."; }, 8000);
+        load._t = setTimeout(function () { splashSt.innerHTML = "ça traîne… vérifie le VPN ou <b>change de serveur</b> (bouton ⚙ ci-dessous)."; }, 8000);
       }
       frame.addEventListener("load", function () {
         if (!frame.src) return;
@@ -112,7 +113,14 @@
       function closeSheet() { sheet.classList.remove("open"); }
 
       document.getElementById("gear").onclick = openSheet;
-      document.getElementById("cancel").onclick = function () { closeSheet(); if (!frame.src) splashSt.textContent = "aucun serveur configuré — appuie sur ⚙"; };
+      document.getElementById("splash-cfg").onclick = openSheet;
+      // le front distant ouvre les réglages depuis son menu (⚙ dans la sidebar) : handshake par postMessage
+      window.addEventListener("message", function (e) {
+        if (e.source !== frame.contentWindow || !e.data || !e.data.fleet) return;
+        if (e.data.fleet === "settings") openSheet();
+        if (e.data.fleet === "hello") e.source.postMessage({ fleet: "shell", v: 2 }, "*");
+      });
+      document.getElementById("cancel").onclick = function () { closeSheet(); if (!frame.src) splashSt.textContent = "aucun serveur configuré — appuie sur « Changer de serveur »"; };
       document.getElementById("save").onclick = function () { var u = norm(srv.value); if (!u) return; closeSheet(); load(u); };
       srv.addEventListener("keydown", function (e) { if (e.key === "Enter") document.getElementById("save").click(); });
 

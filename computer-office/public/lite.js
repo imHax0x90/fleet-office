@@ -1059,6 +1059,12 @@ $("backdrop").onclick = () => { closeModal("spawn"); closeModal("team"); closeMo
 $("sp-browse").onclick = () => openBrowser("sp-cwd", spawnHost);
 $("tm-browse").onclick = () => openBrowser("tm-cwd", "local");
 wireBrowser();
+// dans l'APK (iframe) : le ⚙ serveur vit ici, plus en bouton flottant qui masquait le haut à droite
+if (window.parent !== window) {
+  window.addEventListener("message", (e) => { if (e.data && e.data.fleet === "shell") $("open-srv").classList.remove("hidden"); });
+  $("open-srv").onclick = () => window.parent.postMessage({ fleet: "settings" }, "*");
+  try { window.parent.postMessage({ fleet: "hello" }, "*"); } catch {}
+}
 $("q").oninput = (e) => { query = e.target.value.trim().toLowerCase(); renderSidebar(); if (view === "board" && !detailId) renderBoard(); };
 wireComposer(); wireDrop($("sp-attach"), attS, $("sp-attach-list")); wireDrop($("composer"), attC, $("c-attach"));
 wireResize($("rail-resize"), "--rail-w", { min: 240, max: 460, storeKey: "fleetoffice.railW" });
