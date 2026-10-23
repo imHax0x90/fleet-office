@@ -219,3 +219,28 @@ svg.i { flex: 0 0 auto; display: block; }
   .mbar { background: var(--bg2); border-bottom: 1px solid var(--line); } .mbar button { border: 0; background: none; width: 36px; height: 36px; } .mbar button:hover { background: var(--fg-8); }
   .board-cols { padding: 12px; }
 }
+
+/* ===== Automations ===== */
+.auto-wrap { overflow-y: auto; }
+.auto-inner { max-width: 60rem; margin: 0 auto; padding: 26px 22px 40px; }
+.auto-head { display: flex; align-items: flex-start; gap: 18px; margin-bottom: 18px; } .auto-head > div { flex: 1; min-width: 0; }
+.auto-head h2 { margin: 0 0 4px; font-size: 18px; font-weight: 600; letter-spacing: -0.02em; } .auto-head p { margin: 0; color: var(--mut); font-size: 12.5px; line-height: 1.55; max-width: 38rem; }
+.auto-list { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--bg2); }
+.arow { display: grid; grid-template-columns: auto minmax(0, 1fr) 150px 128px auto; align-items: center; gap: 14px; padding: 12px 14px; border-bottom: 1px solid var(--line); transition: background-color .12s; }
+.arow:last-child { border-bottom: 0; } .arow:hover { background: var(--fg-4); } .arow.off .ar-main, .arow.off .ar-last { opacity: .5; }
+.ar-name { font-size: 13px; font-weight: 500; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ar-sub { display: flex; align-items: center; gap: 12px; margin-top: 3px; font-size: 11px; color: var(--mut2); min-width: 0; } .ar-sub > span { display: inline-flex; align-items: center; gap: 4px; flex: 0 0 auto; } .ar-sub .ellip { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .mono { font-family: var(--mono); }
+.ar-last, .ar-next { font-size: 11.5px; color: var(--mut); } .ar-next small { display: block; font-size: 10px; color: var(--mut2); }
+.ar-ok, .ar-err, .ar-skip { display: inline-flex; align-items: center; gap: 6px; } .ar-ok.link { cursor: pointer; } .ar-ok.link:hover { color: var(--ink); } .ar-err { color: var(--s-fail); } .ar-skip { color: var(--s-ask); } .ar-none { color: var(--mut2); }
+.ar-act { display: flex; gap: 1px; } .ar-act .icon-btn.arm { color: var(--s-fail); background: color-mix(in srgb, var(--s-fail) 14%, transparent); }
+.switch { position: relative; display: inline-block; width: 30px; height: 18px; cursor: pointer; } .switch input { position: absolute; opacity: 0; inset: 0; cursor: pointer; margin: 0; }
+.switch i { position: absolute; inset: 0; border-radius: 10px; background: var(--fg-15); transition: background-color .15s; } .switch i::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--ink); transition: transform .15s; }
+.switch input:checked + i { background: var(--s-done); } .switch input:checked + i::after { transform: translateX(12px); background: #fff; } .switch input:focus-visible + i { outline: 2px solid var(--fg-60); outline-offset: 2px; }
+.auto-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; padding: 56px 20px; border: 1px dashed var(--line2); border-radius: 12px; color: var(--mut); font-size: 12.5px; } .auto-empty b { color: var(--ink); font-size: 14px; font-weight: 600; } .auto-empty .big { color: var(--fg-30); display: inline-flex; margin-bottom: 4px; } .auto-empty .ghost-btn { margin-top: 8px; }
+.au-sched { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 8px; } .au-sched input, .au-sched select { background: transparent; border: 1px solid color-mix(in srgb, var(--ink) 14%, transparent); border-radius: 8px; padding: 7px 10px; font-size: 13px; }
+.au-inl { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--mut); } .au-inl input[type=number] { width: 70px; }
+.au-days { display: flex; gap: 4px; flex-basis: 100%; } .au-days label { cursor: pointer; } .au-days input { display: none; } .au-days span { display: inline-grid; place-items: center; width: 38px; height: 28px; border-radius: 6px; border: 1px solid var(--line2); font-size: 12px; color: var(--mut); } .au-days input:checked + span { background: var(--acc); border-color: var(--acc); color: var(--on-acc); font-weight: 500; }
+#au-cron { width: 100%; }
+@media (max-width: 860px) { .arow { grid-template-columns: auto minmax(0, 1fr) auto; row-gap: 6px; } .ar-last { grid-column: 2; } .ar-next { grid-column: 2; } .ar-act { grid-column: 3; grid-row: 1 / span 3; flex-direction: column; } .auto-head { flex-direction: column; } }
+
+.chk-fld small { display: block; margin-top: 2px; } .chk-fld b { font-weight: 500; }

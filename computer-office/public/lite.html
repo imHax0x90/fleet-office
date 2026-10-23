@@ -204,6 +204,37 @@
     <button id="sp-go" class="go">🚀 Lancer la mission</button>
   </div>
 
+
+  <!-- ===================== Modale AUTOMATION ===================== -->
+  <div id="autom" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <div><h2 id="au-title">Nouvelle automation</h2><div class="modal-sub">un prompt lancé automatiquement sur un nœud, selon un horaire</div></div>
+      <button class="icon-btn close" data-close="autom" aria-label="fermer" data-ico="x" data-s="16"></button>
+    </div>
+    <label class="fld"><span class="fld-l">Nom</span><input id="au-name" placeholder="Revue des dépendances, point matinal…" maxlength="80" autocomplete="off" /></label>
+    <label class="fld"><span class="fld-l">Prompt</span><textarea id="au-prompt" rows="4" placeholder="Ce que l'agent doit faire à chaque exécution."></textarea></label>
+    <div class="fld-grid2">
+      <label class="fld"><span class="fld-l">Machine</span><select id="au-host"></select></label>
+      <label class="fld"><span class="fld-l">Dossier de travail</span><input id="au-cwd" list="au-dirs" placeholder="/home/user/projet" autocomplete="off" /><datalist id="au-dirs"></datalist></label>
+    </div>
+    <div class="fld-grid2">
+      <label class="fld"><span class="fld-l">Modèle</span><select id="au-model"></select></label>
+      <label class="fld"><span class="fld-l">Provider</span><select id="au-prov"><option value="anthropic">Anthropic</option><option value="bedrock">AWS Bedrock</option></select></label>
+    </div>
+    <label class="fld chk-fld"><input type="checkbox" id="au-wt" /><span><b>Nouveau worktree à chaque exécution</b><small>chaque run travaille sur sa propre branche git, à relire puis merger</small></span></label>
+    <div class="fld"><span class="fld-l">Planification</span>
+      <select id="au-kind">
+        <option value="daily">Tous les jours</option><option value="weekdays">Du lundi au vendredi</option><option value="weekly">Chaque semaine</option>
+        <option value="hourly">Toutes les heures</option><option value="interval">Toutes les N minutes / heures</option><option value="cron">Expression cron</option>
+      </select>
+      <div id="au-sched" class="au-sched"></div>
+      <div class="modal-sub" id="au-tz"></div>
+    </div>
+    <label class="fld chk-fld"><input type="checkbox" id="au-en" checked /><span><b>Activée</b><small>désactive pour mettre en pause sans supprimer</small></span></label>
+    <div id="au-err" class="err"></div>
+    <button id="au-go" class="go" type="button">Enregistrer</button>
+  </div>
+
   <!-- ===================== Modale ÉQUIPE ===================== -->
   <div id="team" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modal-head">

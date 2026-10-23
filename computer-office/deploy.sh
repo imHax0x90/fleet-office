@@ -12,7 +12,8 @@ for f in "${FILES[@]}"; do scp -q -o BatchMode=yes "$f" "$H:/tmp/$(basename "$f"
 scp -q -o BatchMode=yes public/fonts/* "$H:$R/public/fonts/"
 $SSH $H "cd $R/public && for f in ${FILES[*]##public/}; do [ -f \$f ] && cp \$f \$f.bak.$TS; mv /tmp/\$f.new \$f; done; ls -1 | head -0"
 if [[ "${1:-}" == server ]]; then
-  node --check server.js
+  node --check server.js; node --check automations.js
+  scp -q -o BatchMode=yes automations.js "$H:$R/automations.js"
   scp -q -o BatchMode=yes server.js "$H:/tmp/server.check.js"
   $SSH $H "node --check /tmp/server.check.js && cp $R/server.js $R/server.js.bak.$TS && mv /tmp/server.check.js $R/server.js && sudo -n systemctl restart fleet-orchestrator && sleep 2 && systemctl is-active fleet-orchestrator"
 fi

@@ -349,6 +349,7 @@ function applyCenterVisibility() {
   $("skills").classList.toggle("hidden", sess || view !== "skills");
   $("audit").classList.toggle("hidden", sess || view !== "audit");
   $("design").classList.toggle("hidden", sess || view !== "design");
+  $("auto").classList.toggle("hidden", sess || view !== "auto");
   if (sess) {
     $("conv").classList.toggle("hidden", centerTab !== "conv");
     $("composer").classList.toggle("hidden", centerTab !== "conv");
@@ -707,12 +708,13 @@ function wireFtree(el, rerenderFn) {
 function setView(v) {
   view = v; detailId = null; applySessionTheme(null); teardownTerminal(); clearInterval(feedTimer); clearInterval(hostTimer);
   $("nav").querySelectorAll(".nav-item").forEach((b) => b.classList.toggle("sel", b.dataset.view === v));
-  clearInterval(machTimer); applyCenterVisibility(); renderSidebar(); renderTabbar();
+  clearInterval(machTimer); clearInterval(autoTimer); applyCenterVisibility(); renderSidebar(); renderTabbar();
   if (v === "board") renderBoard();
   if (v === "machines") { renderMachines(); machTimer = setInterval(renderMachines, 15000); }
   if (v === "skills") renderSkills();
   if (v === "audit") renderAudit();
   if (v === "design") renderDesign();
+  if (v === "auto") { renderAuto(); loadAuto(); autoTimer = setInterval(loadAuto, 15000); }
   closeDrawers();
 }
 $("nav").querySelectorAll(".nav-item").forEach((b) => (b.onclick = () => setView(b.dataset.view)));
@@ -885,6 +887,88 @@ async function doTeam() {
   closeModal("team"); toast("🚀 équipe lancée"); $("tm-name").value = $("tm-goal").value = $("tm-cwd").value = "";
 }
 
+
+// ---- AUTOMATIONS : tâches récurrentes ------------------------------------------
+let autos = [], autoTz = "Europe/Paris", autoEdit = null, autoTimer = null, autoDelArm = null;
+const fmtNext = (ms) => ms ? new Intl.DateTimeFormat("fr-FR", { timeZone: autoTz, weekday: "short", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }).format(ms) : "—";
+async function loadAuto() { try { const j = await getJSON("/api/automations"); autos = j.automations || []; autoTz = j.tz || autoTz; $("nav-auto").textContent = autos.length; if (view === "auto") renderAuto(); } catch {} }
+function renderAuto() {
+  const el = $("auto"); if (!el) return;
+  const rows = autos.map((a) => {
+    const ag = a.lastAgentId ? agentById(a.lastAgentId) : null;
+    const last = !a.lastRunAt ? `<span class="ar-none">jamais exécutée</span>` :
+      a.lastStatus === "error" ? `<span class="ar-err" title="${esc(a.lastError || "")}">${ico("xc", 12)} erreur · ${esc(relT(a.lastRunAt))}</span>` :
+      a.lastStatus === "skipped" ? `<span class="ar-skip" title="${esc(a.lastError || "")}">${ico("clock", 12)} sautée · ${esc(relT(a.lastRunAt))}</span>` :
+      `<span class="ar-ok ${ag ? "link" : ""}" ${ag ? `data-auopen="${esc(a.lastAgentId)}"` : ""}>${ag ? stGlyph(ag) : ico("checkc", 12)} ${esc(relT(a.lastRunAt))}</span>`;
+    return `<div class="arow ${a.enabled ? "" : "off"}" data-au="${esc(a.id)}">
+      <label class="switch" title="${a.enabled ? "Désactiver" : "Activer"}"><input type="checkbox" data-autog="${esc(a.id)}" ${a.enabled ? "checked" : ""} /><i></i></label>
+      <div class="ar-main"><div class="ar-name">${esc(a.name)}</div>
+        <div class="ar-sub"><span>${ico("clock", 11)}${esc(a.when)}</span><span>${ico("server", 11)}${esc(a.host || "local")}</span><span class="mono ellip">${esc(a.cwd)}</span>${a.worktree ? `<span>${ico("branch", 11)}worktree</span>` : ""}</div></div>
+      <div class="ar-last">${last}</div>
+      <div class="ar-next">${a.enabled ? `<small>Prochaine</small>${esc(fmtNext(a.nextRunAt))}` : `<small>en pause</small>`}</div>
+      <div class="ar-act">
+        <button class="icon-btn" data-aurun="${esc(a.id)}" title="Lancer maintenant">${ico("play", 14)}</button>
+        <button class="icon-btn" data-auedit="${esc(a.id)}" title="Modifier">${ico("pencil", 14)}</button>
+        <button class="icon-btn" data-audel="${esc(a.id)}" title="Supprimer">${ico("trash", 14)}</button>
+      </div></div>`;
+  }).join("");
+  el.innerHTML = `<div class="auto-inner">
+    <div class="auto-head"><div><h2>Automations</h2><p>Lance un prompt sur un nœud de ton tailnet selon un horaire, dans un worktree neuf à chaque exécution si tu veux. Fuseau : ${esc(autoTz)}.</p></div><button class="primary" id="au-new" type="button">Nouvelle automation</button></div>
+    ${autos.length ? `<div class="auto-list">${rows}</div>` : `<div class="auto-empty"><span class="big" data-ico="zap" data-s="30"></span><b>Aucune automation</b><span>Planifie un revue de dépendances, un point matinal, un audit nocturne…</span><button class="ghost-btn" id="au-new2" type="button">Créer la première</button></div>`}
+  </div>`;
+  hydrateIcons(el);
+  const n1 = $("au-new"), n2 = $("au-new2"); if (n1) n1.onclick = () => openAuto(); if (n2) n2.onclick = () => openAuto();
+  el.querySelectorAll("[data-autog]").forEach((c) => (c.onchange = async () => { const j = await post("/api/automations/toggle", { id: c.dataset.autog, enabled: c.checked }); if (!j.ok) toast(j.error || "échec"); loadAuto(); }));
+  el.querySelectorAll("[data-aurun]").forEach((b) => (b.onclick = async () => { b.disabled = true; const j = await post("/api/automations/run", { id: b.dataset.aurun }); b.disabled = false; toast(j.ok ? "Automation lancée" : (j.error || "échec")); loadAuto(); }));
+  el.querySelectorAll("[data-auedit]").forEach((b) => (b.onclick = () => openAuto(autos.find((x) => x.id === b.dataset.auedit))));
+  el.querySelectorAll("[data-audel]").forEach((b) => (b.onclick = async () => {
+    if (autoDelArm !== b.dataset.audel) { autoDelArm = b.dataset.audel; b.classList.add("arm"); b.title = "Cliquer encore pour confirmer"; setTimeout(() => { if (autoDelArm === b.dataset.audel) { autoDelArm = null; b.classList.remove("arm"); } }, 3000); return; }
+    autoDelArm = null; const j = await post("/api/automations/delete", { id: b.dataset.audel }); if (!j.ok) toast(j.error || "échec"); loadAuto();
+  }));
+  el.querySelectorAll("[data-auopen]").forEach((s) => (s.onclick = () => select(s.dataset.auopen)));
+}
+const AU_DOW = [["1", "lun"], ["2", "mar"], ["3", "mer"], ["4", "jeu"], ["5", "ven"], ["6", "sam"], ["0", "dim"]];
+function schedFields(kind, s) {
+  s = s || {}; const t = s.time || "09:00";
+  if (kind === "hourly") return `<label class="au-inl">à la minute <input id="au-min" type="number" min="0" max="59" value="${+s.minute || 0}" /></label>`;
+  if (kind === "interval") return `<label class="au-inl">toutes les <input id="au-every" type="number" min="1" max="59" value="${+s.every || 30}" /> <select id="au-unit"><option value="min" ${s.unit !== "h" ? "selected" : ""}>minutes</option><option value="h" ${s.unit === "h" ? "selected" : ""}>heures</option></select></label>`;
+  if (kind === "cron") return `<input id="au-cron" class="mono" placeholder="*/15 9-18 * * 1-5" value="${esc(s.cron || "")}" /><div class="modal-sub">min heure jour-du-mois mois jour-de-semaine</div>`;
+  const days = kind === "weekly" ? `<div class="au-days">${AU_DOW.map(([v, l]) => `<label><input type="checkbox" data-dow="${v}" ${(s.dow || [1]).map(String).includes(v) ? "checked" : ""} /><span>${l}</span></label>`).join("")}</div>` : "";
+  return `${days}<label class="au-inl">à <input id="au-time" type="time" value="${esc(t)}" /></label>`;
+}
+function readSched() {
+  const kind = $("au-kind").value;
+  if (kind === "hourly") return { kind, minute: +$("au-min").value || 0 };
+  if (kind === "interval") return { kind, every: +$("au-every").value || 1, unit: $("au-unit").value };
+  if (kind === "cron") return { kind, cron: $("au-cron").value.trim() };
+  const s = { kind, time: $("au-time").value || "09:00" };
+  if (kind === "weekly") s.dow = [...$("au-sched").querySelectorAll("[data-dow]:checked")].map((c) => c.dataset.dow);
+  return s;
+}
+async function openAuto(a) {
+  autoEdit = a || null; $("au-err").textContent = ""; $("au-title").textContent = a ? "Modifier l'automation" : "Nouvelle automation";
+  if (!railHostsCache.length) await pollRailHosts();
+  const hosts = railHostsCache.length ? railHostsCache : [{ id: "local", label: "local", online: true }];
+  $("au-host").innerHTML = hosts.map((h) => `<option value="${esc(h.id)}" ${h.online === false ? "disabled" : ""}>${esc(h.label || h.id)}${h.online === false ? " (hors-ligne)" : ""}</option>`).join("");
+  $("au-model").innerHTML = MODELS.map((m) => `<option value="${m.v}">${m.l}</option>`).join("");
+  const dirs = [...new Set((snap.agents || []).map((x) => x.cwd).filter((c) => c && c.startsWith("/")))];
+  $("au-dirs").innerHTML = dirs.map((d) => `<option value="${esc(d)}"></option>`).join("");
+  const bed = $("au-prov").querySelector('[value="bedrock"]'); if (bed) bed.disabled = !snap.bedrock;
+  $("au-name").value = a ? a.name : ""; $("au-prompt").value = a ? a.prompt : ""; $("au-cwd").value = a ? a.cwd : (detailId && agentById(detailId) && agentById(detailId).cwd) || "";
+  $("au-host").value = a ? (a.host || "local") : ((detailId && agentById(detailId) && agentById(detailId).host) || (hosts.find((h) => h.id !== "local" && h.online !== false) || hosts[0]).id);
+  $("au-model").value = a ? a.model : "sonnet"; $("au-prov").value = a ? a.provider : "anthropic"; $("au-wt").checked = a ? !!a.worktree : false; $("au-en").checked = a ? a.enabled : true;
+  const kind = a ? a.schedule.kind : "daily"; $("au-kind").value = kind; $("au-sched").innerHTML = schedFields(kind, a && a.schedule);
+  $("au-tz").textContent = "Fuseau horaire : " + autoTz;
+  openModal("autom"); setTimeout(() => $("au-name").focus(), 60);
+}
+$("au-kind").onchange = () => { $("au-sched").innerHTML = schedFields($("au-kind").value, null); };
+$("au-go").onclick = async () => {
+  const body = { id: autoEdit && autoEdit.id, name: $("au-name").value, prompt: $("au-prompt").value, cwd: $("au-cwd").value, host: $("au-host").value, model: $("au-model").value, provider: $("au-prov").value, worktree: $("au-wt").checked, enabled: $("au-en").checked, schedule: readSched() };
+  $("au-go").disabled = true; const j = await post("/api/automations/save", body); $("au-go").disabled = false;
+  if (!j.ok) { $("au-err").textContent = j.error || "échec"; return; }
+  closeModal("autom"); toast(autoEdit ? "Automation mise à jour" : "Automation créée"); loadAuto();
+};
+
 // ---- modales / toast / pièces jointes -----------------------------------------
 function openModal(id) { $("backdrop").classList.remove("hidden"); $(id).classList.remove("hidden"); }
 function closeModal(id) { $(id).classList.add("hidden"); $("backdrop").classList.add("hidden"); }
@@ -968,7 +1052,7 @@ function paletteSource() {
   if (window.FleetTheme && detailId) FleetTheme.list().forEach((p) => items.push({ kind: "conversation", ic: "◐", name: "Palette de cette conversation : " + p.name, run: () => { closePalette(); setSessionTheme(detailId, p.id); } }));
   if (window.FleetTheme) FleetTheme.list().forEach((p) => items.push({ kind: "thème", ic: "◐", name: "Thème : " + p.name, run: () => { closePalette(); FleetTheme.use(p.id); } }));
   if (detailId) items.push({ kind: "action", ic: "×", name: "Fermer l'onglet courant", run: () => { closePalette(); closeTab(detailId); } });
-  [["board", "Board"], ["machines", "Machines"], ["skills", "Skills"], ["audit", "Audit"], ["design", "Design"]].forEach(([v, l]) => items.push({ kind: "vue", ic: "›", name: "Aller à " + l, run: () => { closePalette(); setView(v); } }));
+  [["board", "Board"], ["auto", "Automations"], ["machines", "Machines"], ["skills", "Skills"], ["audit", "Audit"], ["design", "Design"]].forEach(([v, l]) => items.push({ kind: "vue", ic: "›", name: "Aller à " + l, run: () => { closePalette(); setView(v); } }));
   (snap.agents || []).filter((a) => !a.internal).forEach((a) => items.push({ kind: "session", ic: "🤖", name: a.name, sub: (a.worktree && a.branch ? "⑂ " + a.branch + " · " : "") + (a.host || "local"), dot: st(a).c, run: () => { closePalette(); select(a.id); } }));
   (railHostsCache || []).forEach((h) => items.push({ kind: "machine", ic: "🖥", name: h.label || h.id, sub: h.ip || "", run: () => { closePalette(); machSelectedHost = h.id; setView("machines"); } }));
   if (_skillsData && _skillsData.categories) _skillsData.categories.forEach((c) => c.skills.forEach((s) => items.push({ kind: "skill", ic: "◈", name: s.name, sub: c.category, run: () => { closePalette(); setView("skills"); setTimeout(() => openSkill(s.path), 150); } })));
@@ -1129,6 +1213,7 @@ if (window.parent !== window) {
   try { window.parent.postMessage({ fleet: "hello" }, "*"); } catch {}
 }
 $("nav-search").onclick = () => openPalette();
+loadAuto();
 $("rail-filter-btn").onclick = () => { $("rail-fp").classList.toggle("hidden"); if (!$("rail-fp").classList.contains("hidden")) $("q").focus(); };
 hydrateIcons();
 $("q").oninput = (e) => { query = e.target.value.trim().toLowerCase(); renderSidebar(); if (view === "board" && !detailId) renderBoard(); };

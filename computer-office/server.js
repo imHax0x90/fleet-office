@@ -1884,6 +1884,13 @@ function refreshWorktreeChanges() {
 }
 setInterval(refreshWorktreeChanges, 15000).unref?.();
 
+// ---- Automations : tâches récurrentes (voir automations.js) -------------------------------------
+const automations = require("./automations").createAutomations({
+  spawnAgent: (o) => spawnAgent(o), logAudit: (a, d) => logAudit(a, d), broadcast: (f) => broadcast(f), dir: FLEET_DIR,
+  isBusy: (id) => { const r = managed.get(id); return !!(r && r.busy); },
+});
+automations.start();
+
 // Fan-out : une mission -> N variantes en parallèle, chacune dans son worktree (modèles/efforts
 // différents). Tag commun fanoutId pour la vue comparative. Les worktrees isolent les variantes.
 function spawnFanout({ name, cwd, prompt, host, perm, provider, effort, variants }) {
@@ -1959,6 +1966,18 @@ const server = http.createServer(async (req, res) => {
     const b = await readBody(req);
     try { return sendJSON(res, 200, { ok: true, roles: addRole(b.role) }); }
     catch (e) { return sendJSON(res, 400, { ok: false, error: String(e.message || e) }); }
+  }
+  if (p === "/api/automations" && req.method === "GET") return sendJSON(res, 200, { ok: true, automations: automations.list(), tz: require("./automations").TZ });
+  if (req.method === "POST" && p.startsWith("/api/automations/")) {
+    const b = await readBody(req);
+    try {
+      const act = p.slice("/api/automations/".length);
+      if (act === "save") return sendJSON(res, 200, { ok: true, automation: automations.upsert(b) });
+      if (act === "toggle") return sendJSON(res, 200, { ok: true, automation: automations.toggle(b.id, b.enabled) });
+      if (act === "delete") { automations.remove(b.id); return sendJSON(res, 200, { ok: true }); }
+      if (act === "run") { const id = automations.runNow(b.id); return sendJSON(res, 200, { ok: true, id }); }
+      return sendJSON(res, 404, { ok: false, error: "action inconnue" });
+    } catch (e) { return sendJSON(res, 400, { ok: false, error: String(e.message || e) }); }
   }
   if (req.method === "POST" && p === "/api/spawn") {
     const b = await readBody(req);
