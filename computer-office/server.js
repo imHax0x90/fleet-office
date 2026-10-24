@@ -879,6 +879,8 @@ function startProc(rec) {
       let o; try { o = JSON.parse(line); } catch { continue; }
       if (o.type === "system" && o.subtype === "init") {
         if (Array.isArray(o.slash_commands)) rec.slashCommands = o.slash_commands;
+      } else if (o.type === "assistant" && o.message && Array.isArray(o.message.content)) {
+        for (const b of o.message.content) if (b && b.type === "tool_use" && b.name === "Skill" && b.input) { try { skillsys.recordUse(b.input.skill || b.input.name || b.input.command, rec.role); } catch { /* jamais bloquant */ } }
       } else if (o.type === "prompt_suggestion") {
         rec.suggestion = o.suggestion || null;
       } else if (o.type === "result") {
@@ -972,7 +974,8 @@ function spawnAgent({ name, role, cwd, prompt, model, perm, teamId: joinTeamId, 
       finalPrompt = `⚠️ D'AUTRES AGENTS travaillent DÉJÀ dans ce workspace (${cwd}) : ${peerDesc}.\nAvant d'agir : lis TEAM_NOTES.md + les fichiers récents pour voir leur travail, ÉVITE les conflits (ne réécris pas ce qu'ils font), coordonne-toi avec eux, et ajoute une ligne « [${role || "agent"}] … » dans TEAM_NOTES.md (crée-le s'il n'existe pas). Utilise git (branches, pull avant push) pour ne pas écraser leur travail.\n\nTa mission : ${prompt}`;
     }
   }
-  researchSkills(role, remote ? host : "local"); // skills du métier : téléchargées, rangées, installées sur le nœud de l'agent
+  if (!skillsys.getJob(role)) researchSkills(role, remote ? host : "local"); // métier non défini : téléchargement automatique par mots-clés (sinon : skills choisies)
+  finalPrompt += skillsys.applyToAgent(role, remote ? host : "local"); // skills HÉRITÉES du métier (choisies) + bibliothèque partagée
   finalPrompt += `\n\n💡 Des skills réelles pour ton métier (${role || "agent"}) sont téléchargées depuis des repos réputés dans ${skillsFileFor(role || "agent")} (et le dossier voisin ${path.join(SKILLS_DIR, String(role || "agent").toLowerCase().replace(/[^a-z0-9]+/gi, "-"))}/) — consulte-les dès qu'elles existent et applique celles qui t'aident.`;
   if (wtMeta) finalPrompt += `\n\n🌿 Tu travailles dans un WORKTREE GIT dédié : branche « ${wtMeta.branch} » (basée sur « ${wtMeta.base} »), dossier ${wtMeta.path}. Committe régulièrement ton travail SUR CETTE BRANCHE — il sera revu (diff), puis mergé ou jeté depuis le command center. Ne touche pas aux autres branches.`;
   // pièces jointes de la mission initiale → livrées dans l'inbox de la session, sur la machine de l'agent
@@ -1040,7 +1043,8 @@ function spawnTeam({ name, goal, cwd, model, perm, roles, chief, provider, effor
   list.forEach((role) => {
     const sessionId = crypto.randomUUID();
     const isChief = !chiefExistingId && role === chiefRole;
-    researchSkills(role);
+    if (!skillsys.getJob(role)) researchSkills(role, remote ? host : "local");
+    const jobBlock = skillsys.applyToAgent(role, remote ? host : "local");
     const base = `Tu fais partie de l'ÉQUIPE « ${teamName} » (chef : ${chiefLabel} ; membres : ${list.join(", ")}) dans le MÊME workspace (${cwd}). Objectif commun :\n\n« ${goal} »\n\nTon rôle : ${role}. Lis d'abord TEAM_NOTES.md + les fichiers présents, fais ton travail, ajoute des lignes « [${role}] … » dans TEAM_NOTES.md.\n💡 Skills/MCP de ton métier dans ${skillsFileFor(role)}.`;
     const tail = isChief ? chiefTail
       : `\n\nQuand ta tâche est finie : NE clos PAS la mission. Écris « [FINI][${role}] <résumé> » dans TEAM_NOTES.md à l'attention du chef (${chiefLabel}) et reste en attente de ses instructions / de la décision de l'humain.`;
@@ -1051,7 +1055,7 @@ function spawnTeam({ name, goal, cwd, model, perm, roles, chief, provider, effor
       startedAt: Date.now(), lastPrompt: "[équipe] " + goal, costUsd: 0, teamId, teamGoal: goal, teamName,
       chief: isChief, provider: prov, effort: effort || null,
     });
-    runClaude({ sessionId, cwd, prompt: base + tail, model: mModel, perm, resume: false });
+    runClaude({ sessionId, cwd, prompt: base + tail + jobBlock, model: mModel, perm, resume: false });
     ids.push(sessionId);
   });
   logAudit("team", { id: teamId, name: teamName, goal, cwd, members: list.length, provider: prov, host: remote ? host : "local" });
@@ -1599,6 +1603,11 @@ const MIME = {
   ".png": "image/png",
   ".ico": "image/x-icon",
   ".woff2": "font/woff2",
+  ".webp": "image/webp",
+  ".gif": "image/gif",
+  ".txt": "text/plain; charset=utf-8",
+  ".mp3": "audio/mpeg",
+  ".ogg": "audio/ogg",
   ".webmanifest": "application/manifest+json",
 };
 
@@ -1619,6 +1628,7 @@ function serveStatic(req, res, urlPath) {
   const reqHost = (req.headers.host || "").toLowerCase();
   if (urlPath === "/3d" || urlPath === "/3d/") filePath = path.join(PUBLIC_DIR, "index.html");
   else if (urlPath === "/lite" || urlPath === "/lite/") filePath = path.join(PUBLIC_DIR, "lite.html");
+  else if (urlPath === "/world" || urlPath === "/world/") filePath = path.join(PUBLIC_DIR, "world", "index.html"); // monde pixel-art
   else if (urlPath === "/" || urlPath === "") {
     const liteHost = reqHost.startsWith("fleetoffice") && !reqHost.startsWith("fleetoffice3d");
     filePath = path.join(PUBLIC_DIR, liteHost ? "lite.html" : "index.html");
@@ -1895,6 +1905,14 @@ const automations = require("./automations").createAutomations({
 });
 automations.start();
 
+// ---- Métiers + skills classées + bibliothèque partagée (voir skillsys.js) -----------------------------
+const skillsys = require("./skillsys").createSkillSys({
+  SKILLS_DIR, dir: FLEET_DIR, listLibrary: () => listSkills(), addRole: (n) => addRole(n),
+  fetchOnline: (q) => researchSkills(q, "local", true),
+  advisorHosts: () => [...new Set([process.env.FLEET_ADVISOR_HOST, "black-station", ...[...managed.values()].map((m) => m.host)].filter((h) => h && h !== "local"))],
+  sshOpts: SSH_OPTS, publicUrl: () => process.env.FLEET_PUBLIC_URL || ("http://" + os.hostname() + ":" + PORT), onChange: () => {},
+});
+
 // Fan-out : une mission -> N variantes en parallèle, chacune dans son worktree (modèles/efforts
 // différents). Tag commun fanoutId pour la vue comparative. Les worktrees isolent les variantes.
 function spawnFanout({ name, cwd, prompt, host, perm, provider, effort, variants }) {
@@ -1991,6 +2009,25 @@ const server = http.createServer(async (req, res) => {
       for (const m of targets) sendAgent(m.id, "📣 Message de l'humain à toute l'équipe : " + text);
       logAudit("team-send", { teamId: b.teamId, members: targets.length });
       broadcast(true); return sendJSON(res, 200, { ok: true, sent: targets.length });
+    } catch (e) { return sendJSON(res, 400, { ok: false, error: String(e.message || e) }); }
+  }
+  // ---- skillhub (bibliothèque partagée, classée) + métiers + conseiller ----------------------------
+  if (p === "/api/skillhub/search" && req.method === "GET") { const q = url.searchParams; return sendJSON(res, 200, { ok: true, results: skillsys.search(q.get("q") || "", { limit: +q.get("limit") || 12, category: q.get("category") || "" }) }); }
+  if (p === "/api/skillhub/library" && req.method === "GET") { const q = url.searchParams; return sendJSON(res, 200, { ok: true, ...skillsys.library({ sort: q.get("sort") || "rank", category: q.get("category") || "", limit: +q.get("limit") || 400 }) }); }
+  if (p === "/api/skillhub/get" && req.method === "GET") {
+    try { const r = skillsys.readSkill(url.searchParams.get("id") || ""); if (url.searchParams.get("format") === "json") return sendJSON(res, 200, { ok: true, skill: r }); res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" }); return res.end(r.text); }
+    catch (e) { return sendJSON(res, 404, { ok: false, error: String(e.message || e) }); }
+  }
+  if (p === "/api/jobs" && req.method === "GET") return sendJSON(res, 200, { ok: true, jobs: skillsys.listJobs() });
+  if (req.method === "POST" && (p.startsWith("/api/skillhub/") || p.startsWith("/api/jobs/"))) {
+    const b = await readBody(req);
+    try {
+      if (p === "/api/skillhub/feedback") return sendJSON(res, 200, { ok: true, skill: skillsys.feedback(b.id, b.vote) });
+      if (p === "/api/skillhub/fetch") return sendJSON(res, 200, { ok: true, ...(await skillsys.searchOnline(b.query)) });
+      if (p === "/api/jobs/save") { const j = skillsys.saveJob(b); logAudit("job-save", { name: j.name, skills: j.skills.length }); return sendJSON(res, 200, { ok: true, job: j }); }
+      if (p === "/api/jobs/delete") { skillsys.deleteJob(b.name); return sendJSON(res, 200, { ok: true }); }
+      if (p === "/api/jobs/advise") return sendJSON(res, 200, { ok: true, ...(await skillsys.advise(b)) });
+      return sendJSON(res, 404, { ok: false, error: "action inconnue" });
     } catch (e) { return sendJSON(res, 400, { ok: false, error: String(e.message || e) }); }
   }
   if (p === "/api/automations" && req.method === "GET") return sendJSON(res, 200, { ok: true, automations: automations.list(), tz: require("./automations").TZ });

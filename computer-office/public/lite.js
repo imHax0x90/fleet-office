@@ -53,6 +53,9 @@ const IP = {
   panel: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/>',
   power: '<path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.77.04"/>',
   expand: '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>',
+  cap: '<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>',
+  tup: '<path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/>',
+  tdown: '<path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z"/>',
   logo: '<path d="M2 18c2.5-4 5-6 8-6s4 3 7 3 3.5-2 5-5"/><path d="M5 6c1-1.5 2.5-2 4-1.5"/><circle cx="17" cy="6.5" r="1.2" fill="currentColor"/>',
 };
 const ico = (n, s = 16) => `<svg class="i" viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IP[n] || ""}</svg>`;
@@ -372,6 +375,7 @@ function applyCenterVisibility() {
   $("design").classList.toggle("hidden", sess || view !== "design");
   $("auto").classList.toggle("hidden", sess || view !== "auto");
   $("teams").classList.toggle("hidden", sess || view !== "teams");
+  $("jobs").classList.toggle("hidden", sess || view !== "jobs");
   if (sess) {
     $("conv").classList.toggle("hidden", centerTab !== "conv");
     $("composer").classList.toggle("hidden", centerTab !== "conv");
@@ -736,6 +740,7 @@ function setView(v) {
   if (v === "skills") renderSkills();
   if (v === "audit") renderAudit();
   if (v === "design") renderDesign();
+  if (v === "jobs") { renderJobs(); loadJobs(); loadLib(); }
   if (v === "teams") { renderTeams(); pollTeams(true); tvTimer = setInterval(pollTeams, 3000); }
   if (v === "auto") { renderAuto(); loadAuto(); autoTimer = setInterval(loadAuto, 15000); }
   closeDrawers();
@@ -858,16 +863,18 @@ function renderVariants() {
   box.querySelectorAll("[data-ve]").forEach((s) => (s.onchange = () => (variantRows[+s.dataset.ve].effort = s.value)));
   box.querySelectorAll("[data-vx]").forEach((b) => (b.onclick = () => { variantRows.splice(+b.dataset.vx, 1); renderVariants(); }));
 }
-async function openSpawn() {
+async function openSpawn(opts) {
   openModal("spawn"); $("sp-err").textContent = ""; fillModels();
   if (!variantRows.length) variantRows = [{ model: "opus" }, { model: "sonnet" }];
   setSpawnMode("solo"); renderVariants();
+  $("sp-roles").innerHTML = jbData.map((jb) => `<option value="${esc(jb.name)}">${esc(jb.icon)} niv. ${jb.level} · ${jb.skills.length} skills</option>`).join("");
+  if (opts && typeof opts.role === "string") { $("sp-role").value = opts.role; setTimeout(() => $("sp-name").focus(), 50); }
   attS.length = 0; renderTray($("sp-attach-list"), attS); resumeId = null; renderResumeList();
   spawnProv = "anthropic"; provSeg("sp-prov", spawnProv, (v) => (spawnProv = v));
   const wrap = $("sp-hosts"); wrap.innerHTML = `<div class="host-pick sel">chargement…</div>`;
   let hosts = [{ id: "local", label: "local", ip: "127.0.0.1", online: true }]; try { const j = await getJSON("/api/hosts"); if (j.hosts && j.hosts.length) hosts = j.hosts; } catch {}
-  spawnHost = "local";
-  wrap.innerHTML = hosts.map((h) => `<button type="button" class="host-pick ${h.id === "local" ? "sel" : ""}" data-host="${esc(h.id)}" ${h.online ? "" : "disabled style='opacity:.45'"}><div class="hn"><span class="hdot ${h.online ? "" : "off"}"></span>${esc(h.label)}</div><div class="hi">${esc(h.ip || "")}${h.id === "local" ? "" : (h.online ? " · ssh" : " · hors-ligne")}</div></button>`).join("");
+  spawnHost = (hosts.find((h) => h.id !== "local" && h.online) || hosts[0]).id;
+  wrap.innerHTML = hosts.map((h) => `<button type="button" class="host-pick ${h.id === spawnHost ? "sel" : ""}" data-host="${esc(h.id)}" ${h.online ? "" : "disabled style='opacity:.45'"}><div class="hn"><span class="hdot ${h.online ? "" : "off"}"></span>${esc(h.label)}</div><div class="hi">${esc(h.ip || "")}${h.id === "local" ? "" : (h.online ? " · ssh" : " · hors-ligne")}</div></button>`).join("");
   wrap.querySelectorAll(".host-pick").forEach((b) => (b.onclick = () => { if (b.disabled) return; wrap.querySelectorAll(".host-pick").forEach((x) => x.classList.remove("sel")); b.classList.add("sel"); spawnHost = b.dataset.host; $("sp-cwd-hint").textContent = spawnHost === "local" ? "" : "(sur " + spawnHost + ")"; }));
 }
 async function doSpawn() {
@@ -1109,6 +1116,159 @@ async function pollTeams(force) {
   }
 }
 
+
+// ---- MÉTIERS & SKILLS : classes, bibliothèque classée, conseiller de recrutement ----------------------------
+let jbData = [], jbLib = null, jbTab = LSJ("fleet.jbTab", "jobs"), jbSel = null, jbDraft = null, jbBase = "", jbHist = {}, jbWait = false, jbDelArm = false;
+let jbQ = "", jbCat = "", jbSort = "rank", jbTier = "";
+const jbIcons = ["🛠️", "⚔️", "🧪", "🔮", "📜", "🛡️", "🏹", "🧭", "⚙️", "🎯", "🧬", "🪄"];
+const tierBadge = (t, sc) => `<span class="tier t-${t}" title="rang ${t} · score ${sc}">${t}</span>`;
+const lvNeed = (L) => 8 * (L - 1) * (L - 1);
+const jbIds = () => (jbDraft ? jbDraft.skills.map((s) => s.id) : []);
+const jbSig = () => jbDraft ? JSON.stringify([jbDraft.desc, jbDraft.icon, jbIds()]) : "";
+async function loadJobs() { try { const r = await getJSON("/api/jobs"); jbData = r.jobs || []; $("nav-jobs").textContent = jbData.length; if (view === "jobs") { renderJobList(); } } catch {} }
+async function loadLib() { try { jbLib = await getJSON("/api/skillhub/library?sort=" + jbSort + "&limit=500"); if (view === "jobs") { if (jbTab === "lib") renderLib(); else renderJobEditor(); } } catch {} }
+function renderJobs() {
+  const el = $("jobs"); if (!el) return;
+  if (!el.dataset.built) {
+    el.dataset.built = "1";
+    el.innerHTML = `<div class="jb"><div class="jb-bar"><div class="psegs"><button class="pseg" data-jbtab="jobs" type="button">Métiers</button><button class="pseg" data-jbtab="lib" type="button">Bibliothèque</button></div><span class="jb-sum" id="jb-sum"></span><span class="sp"></span><button class="primary sm" id="jb-new" type="button">Nouveau métier</button></div>
+      <div class="jb-jobs" id="jb-jobs"><aside class="jb-list" id="jb-list"></aside><section class="jb-edit" id="jb-edit"></section><aside class="jb-chat" id="jb-chat"></aside></div>
+      <div class="jb-lib hidden" id="jb-lib"></div></div>`;
+    el.querySelectorAll("[data-jbtab]").forEach((b) => (b.onclick = () => { jbTab = b.dataset.jbtab; LSW("fleet.jbTab", jbTab); renderJobs(); }));
+    $("jb-new").onclick = () => jbOpen("__new");
+  }
+  el.querySelectorAll("[data-jbtab]").forEach((b) => b.classList.toggle("sel", b.dataset.jbtab === jbTab));
+  $("jb-jobs").classList.toggle("hidden", jbTab !== "jobs"); $("jb-lib").classList.toggle("hidden", jbTab !== "lib");
+  const n = jbLib ? jbLib.total : 0; $("jb-sum").textContent = n ? `${jbData.length} métier${jbData.length > 1 ? "s" : ""} · ${n} skills partagées` : "";
+  if (jbTab === "jobs") { renderJobList(); renderJobEditor(); renderJobChat(); } else renderLib();
+}
+function jbOpen(name) {
+  if (jbDraft && jbSig() !== jbBase && !jbDraft.__new0) { /* brouillon non enregistré : on le garde simplement remplacé */ }
+  jbSel = name; jbDelArm = false;
+  if (name === "__new") { jbDraft = { name: "", desc: "", icon: "🛠️", skills: [], isNew: true, xp: 0, level: 1 }; }
+  else { const jb = jbData.find((x) => x.name === name); jbDraft = jb ? JSON.parse(JSON.stringify(jb)) : null; }
+  jbBase = jbSig(); if (!jbHist[jbSel]) jbHist[jbSel] = [];
+  if (jbTab !== "jobs") { jbTab = "jobs"; LSW("fleet.jbTab", jbTab); } renderJobs();
+  setTimeout(() => { const i = $("je-name") && !$("je-name").readOnly ? $("je-name") : $("jc-in"); if (i) i.focus(); }, 40);
+}
+function renderJobList() {
+  const el = $("jb-list"); if (!el) return;
+  if (!jbData.length) { el.innerHTML = `<div class="jb-empty-l"><span class="big" data-ico="cap" data-s="26"></span><b>Aucun métier</b><span>Un métier = une classe d'agent. Crée-en un, le conseiller te propose ses skills.</span></div>`; hydrateIcons(el); return; }
+  el.innerHTML = jbData.map((jb) => {
+    const lo = lvNeed(jb.level), hi = lvNeed(jb.level + 1), pct = Math.max(2, Math.min(100, Math.round(((jb.xp - lo) / (hi - lo)) * 100)));
+    return `<button class="jcard ${jbSel === jb.name ? "sel" : ""}" data-jb="${esc(jb.name)}" type="button"><span class="jc-ic">${esc(jb.icon)}</span><span class="jc-main"><b>${esc(jb.name)}</b><span class="jc-sub">Niv. ${jb.level} · ${jb.skills.length} skill${jb.skills.length > 1 ? "s" : ""}</span><span class="jc-xp"><i style="width:${pct}%"></i></span></span></button>`;
+  }).join("");
+  el.querySelectorAll("[data-jb]").forEach((b) => (b.onclick = () => jbOpen(b.dataset.jb)));
+}
+function renderJobEditor() {
+  const el = $("jb-edit"); if (!el) return;
+  if (!jbDraft) { el.innerHTML = `<div class="jb-empty"><span class="big" data-ico="cap" data-s="34"></span><b>Choisis un métier ou crée-en un</b><span>Les skills d'un métier sont héritées par tout agent créé avec ce métier, sur n'importe quel nœud.</span><button class="primary" id="jb-new2" type="button">Nouveau métier</button></div>`; hydrateIcons(el); $("jb-new2").onclick = () => jbOpen("__new"); return; }
+  const d = jbDraft, dirty = jbSig() !== jbBase || d.isNew;
+  const lo = lvNeed(d.level), hi = lvNeed(d.level + 1), pct = Math.max(2, Math.min(100, Math.round(((d.xp - lo) / (hi - lo)) * 100)));
+  const cards = d.skills.map((s) => `<div class="sk" data-sk="${esc(s.id)}"><div class="sk-h">${tierBadge(s.tier, s.score)}<b class="sk-n" data-skview="${esc(s.id)}" title="voir la skill">${esc(s.name)}</b><button class="sk-x" data-skrm="${esc(s.id)}" title="Retirer" type="button">${ico("x", 12)}</button></div><div class="sk-c">${esc(s.category)}${s.uses ? ` · ${s.uses} usage${s.uses > 1 ? "s" : ""}` : ""}</div><div class="sk-d">${esc(s.desc || "")}</div></div>`).join("");
+  el.innerHTML = `<div class="je">
+    <div class="je-head"><button class="je-icon" id="je-icon" type="button" title="changer l'icône">${esc(d.icon)}</button>
+      <div class="je-id"><input id="je-name" class="je-name" placeholder="Nom du métier (ex. Pentester Web)" maxlength="40" value="${esc(d.name)}" ${d.isNew ? "" : "readonly"} autocomplete="off" />${d.isNew ? "" : `<div class="je-lvl">Niv. ${d.level} · ${d.xp} XP · ${d.spawns} recrutement${d.spawns > 1 ? "s" : ""}</div>`}</div></div>
+    ${d.isNew ? "" : `<div class="je-xp"><i style="width:${pct}%"></i></div>`}
+    <div class="je-icons hidden" id="je-icons">${jbIcons.map((i) => `<button type="button" data-ic="${i}">${i}</button>`).join("")}</div>
+    <label class="je-l">Description du métier</label><textarea id="je-desc" rows="3" placeholder="Ce que ce métier fait, ses outils, son niveau d'exigence… (le conseiller s'en sert)">${esc(d.desc)}</textarea>
+    <div class="je-sh"><b>Skills</b><span class="jb-n">${d.skills.length}</span><span class="sp"></span><button class="ghost-btn sm" id="je-ask" type="button">${ico("plus", 13)}Depuis la bibliothèque</button></div>
+    <div class="je-skills">${cards || `<div class="je-none">Aucune skill pour l'instant — demande au conseiller, ou ajoute-en depuis la bibliothèque.</div>`}</div>
+    <div class="je-act"><button class="primary sm" id="je-save" type="button" ${dirty && (d.name.trim() || !d.isNew) ? "" : "disabled"}>${d.isNew ? "Créer le métier" : "Enregistrer"}</button>${d.isNew ? "" : `<button class="ghost-btn sm" id="je-hire" type="button">${ico("users", 13)}Recruter un agent</button><span class="sp"></span><button class="ghost-btn sm danger" id="je-del" type="button">${ico("trash", 13)}<span>Supprimer</span></button>`}</div></div>`;
+  $("je-name").oninput = (e) => { d.name = e.target.value; const b = $("je-save"); if (b) b.disabled = !(d.name.trim()); };
+  $("je-desc").oninput = (e) => { d.desc = e.target.value; const b = $("je-save"); if (b && !d.isNew) b.disabled = jbSig() === jbBase; };
+  $("je-icon").onclick = () => $("je-icons").classList.toggle("hidden");
+  el.querySelectorAll("[data-ic]").forEach((b) => (b.onclick = () => { d.icon = b.dataset.ic; renderJobEditor(); }));
+  el.querySelectorAll("[data-skrm]").forEach((b) => (b.onclick = () => { d.skills = d.skills.filter((s) => s.id !== b.dataset.skrm); renderJobEditor(); renderJobChat(); }));
+  el.querySelectorAll("[data-skview]").forEach((b) => (b.onclick = () => openSkill(b.dataset.skview)));
+  $("je-ask").onclick = () => { jbTab = "lib"; LSW("fleet.jbTab", jbTab); renderJobs(); };
+  $("je-save").onclick = () => jbSave();
+  if ($("je-hire")) $("je-hire").onclick = () => openSpawn({ role: d.name });
+  if ($("je-del")) $("je-del").onclick = async () => {
+    const b = $("je-del"); if (!jbDelArm) { jbDelArm = true; b.classList.add("arm"); b.lastChild.textContent = "Confirmer ?"; setTimeout(() => { jbDelArm = false; const x = $("je-del"); if (x) { x.classList.remove("arm"); x.lastChild.textContent = "Supprimer"; } }, 3500); return; }
+    jbDelArm = false; const r = await post("/api/jobs/delete", { name: d.name }); if (!r.ok) return toast(r.error || "échec"); toast("Métier supprimé"); jbDraft = null; jbSel = null; await loadJobs(); renderJobs();
+  };
+}
+async function jbSave(quiet) {
+  const d = jbDraft; if (!d || !d.name.trim()) return toast("Donne un nom au métier");
+  const r = await post("/api/jobs/save", { name: d.name.trim(), desc: d.desc, icon: d.icon, skills: jbIds() });
+  if (!r.ok) return toast(r.error || "échec");
+  const was = jbSel; jbSel = r.job.name; jbDraft = JSON.parse(JSON.stringify(r.job)); jbBase = jbSig();
+  if (was === "__new") { jbHist[jbSel] = jbHist["__new"] || []; delete jbHist["__new"]; }
+  if (!quiet) toast("Métier enregistré"); await loadJobs(); if (view === "jobs") { renderJobList(); renderJobEditor(); renderJobChat(); }
+}
+function jbAdd(sk) {
+  if (!jbDraft) return toast("Ouvre ou crée un métier d'abord");
+  if (jbDraft.isNew && !jbDraft.name.trim()) { toast("Donne d'abord un nom au métier"); return false; }
+  if (jbDraft.skills.some((s) => s.id === sk.id)) return true;
+  jbDraft.skills.push(sk); renderJobEditor(); renderJobChat();
+  if (!jbDraft.isNew) jbSave(true); // métier existant : enregistré tout de suite
+  return true;
+}
+// ---- conseiller de recrutement (chat) ----
+function renderJobChat() {
+  const el = $("jb-chat"); if (!el) return;
+  if (!jbDraft) { el.innerHTML = `<div class="jc-h">${ico("msg", 14)}<b>Conseiller de recrutement</b></div><div class="jc-feed"><div class="jc-note">Ouvre un métier pour discuter de ses skills avec le conseiller.</div></div>`; return; }
+  const keep = $("jc-in") ? $("jc-in").value : "", hist = jbHist[jbSel] || (jbHist[jbSel] = []), have = new Set(jbIds());
+  const msg = (m, i) => m.role === "user" ? `<div class="jm you">${esc(m.text)}</div>` : m.pending ? `<div class="jm bot"><span class="jm-dots"><i></i><i></i><i></i></span></div>`
+    : `<div class="jm bot"><div class="jm-t">${esc(m.text)}</div>${(m.propose || []).map((p, k) => `<div class="jp"><div class="jp-h">${tierBadge(p.tier, p.score)}<b data-skview="${esc(p.id)}">${esc(p.name)}</b><span class="jp-c">${esc(p.category)}</span><button class="jp-add ${have.has(p.id) ? "on" : ""}" data-padd="${i}:${k}" type="button">${have.has(p.id) ? "✓ Ajoutée" : "+ Ajouter"}</button></div>${p.why ? `<div class="jp-w">${esc(p.why)}</div>` : ""}</div>`).join("")}${(m.propose || []).filter((p) => !have.has(p.id)).length > 1 ? `<button class="jp-all" data-pall="${i}" type="button">Tout ajouter</button>` : ""}${(m.searchOnline || []).length ? `<div class="jp-on"><span>Chercher en ligne :</span>${m.searchOnline.map((q) => `<button type="button" data-ponline="${esc(q)}">${esc(q)}</button>`).join("")}</div>` : ""}</div>`;
+  el.innerHTML = `<div class="jc-h">${ico("msg", 14)}<b>Conseiller de recrutement</b><span class="jc-hint">propose des skills pour « ${esc(jbDraft.name || "ce métier")} »</span></div>
+    <div class="jc-feed" id="jc-feed">${hist.length ? hist.map(msg).join("") : `<div class="jc-note">Décris ce que ce métier doit savoir faire, ou demande directement des suggestions. Les skills que tu valides seront héritées par chaque agent de ce métier.</div><button class="ghost-btn sm" id="jc-sugg" type="button">${ico("zap", 13)}Suggère-moi des skills</button>`}</div>
+    <div class="jc-f"><textarea id="jc-in" rows="1" placeholder="Ex. il doit aussi savoir faire des revues de sécurité…"></textarea><button class="send-btn sm" id="jc-send" type="button" title="Envoyer">${ico("up", 14)}</button></div>`;
+  const inp = $("jc-in"); inp.value = keep;
+  const send = () => { const v = inp.value.trim(); if (v) { inp.value = ""; inp.style.height = ""; jbAdvise(v); } };
+  $("jc-send").onclick = send; inp.onkeydown = (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }; inp.oninput = () => { inp.style.height = "auto"; inp.style.height = Math.min(inp.scrollHeight, 110) + "px"; };
+  if ($("jc-sugg")) $("jc-sugg").onclick = () => jbAdvise("Propose-moi les meilleures skills pour ce métier.");
+  el.querySelectorAll("[data-skview]").forEach((b) => (b.onclick = () => openSkill(b.dataset.skview)));
+  el.querySelectorAll("[data-padd]").forEach((b) => (b.onclick = () => { const [i, k] = b.dataset.padd.split(":").map(Number), p = hist[i].propose[k]; if (!have.has(p.id)) jbAdd(p); }));
+  el.querySelectorAll("[data-pall]").forEach((b) => (b.onclick = () => { const m = hist[+b.dataset.pall]; for (const p of m.propose) if (!jbIds().includes(p.id) && jbAdd(p) === false) break; }));
+  el.querySelectorAll("[data-ponline]").forEach((b) => (b.onclick = async () => { b.disabled = true; const r = await post("/api/skillhub/fetch", { query: b.dataset.ponline }); toast(r.ok ? "Recherche en ligne lancée — la bibliothèque se met à jour dans ~30 s" : (r.error || "échec")); if (r.ok) setTimeout(() => { loadLib(); }, 32000); }));
+  const f = $("jc-feed"); if (f) f.scrollTop = f.scrollHeight;
+}
+async function jbAdvise(text) {
+  if (!jbDraft || jbWait) return; const hist = jbHist[jbSel] || (jbHist[jbSel] = []);
+  const past = hist.filter((m) => !m.pending).map((m) => ({ role: m.role === "user" ? "user" : "assistant", text: m.text }));
+  hist.push({ role: "user", text }); hist.push({ role: "bot", pending: true }); jbWait = true; renderJobChat();
+  const r = await post("/api/jobs/advise", { name: jbDraft.name, desc: jbDraft.desc, skills: jbIds(), history: past, message: text });
+  jbWait = false; const h = jbHist[jbSel] || []; const k = h.findIndex((m) => m.pending); if (k >= 0) h.splice(k, 1);
+  h.push(r.ok ? { role: "bot", text: r.reply, propose: r.propose || [], searchOnline: r.searchOnline || [] } : { role: "bot", text: "Le conseiller est indisponible : " + (r.error || "erreur") });
+  if (r.ok && r.error) h[h.length - 1].text += "\n(mode dégradé : " + r.error + ")";
+  if (view === "jobs") renderJobChat();
+}
+// ---- bibliothèque classée ----
+function renderLib() {
+  const el = $("jb-lib"); if (!el) return; if (!jbLib) { el.innerHTML = `<div class="tp-wait" style="padding:60px">chargement de la bibliothèque…</div>`; loadLib(); return; }
+  if (!el.dataset.built) {
+    el.dataset.built = "1";
+    el.innerHTML = `<div class="lib-bar"><div class="lib-s">${ico("search", 13)}<input id="lib-q" placeholder="Filtrer par nom, catégorie, description…" autocomplete="off" /></div><select id="lib-cat"></select><select id="lib-sort"><option value="rank">Meilleur rang</option><option value="used">Plus utilisées</option><option value="name">Nom</option></select><div class="lib-tiers" id="lib-tiers"></div><div class="lib-on"><input id="lib-on" placeholder="Chercher de nouvelles skills en ligne…" autocomplete="off" /><button class="ghost-btn sm" id="lib-on-go" type="button">${ico("globe", 13)}Chercher</button></div></div><div class="lib-list" id="lib-list"></div>`;
+    $("lib-q").oninput = (e) => { jbQ = e.target.value.trim().toLowerCase(); libRows(); };
+    $("lib-cat").onchange = (e) => { jbCat = e.target.value; libRows(); };
+    $("lib-sort").onchange = (e) => { jbSort = e.target.value; loadLib(); };
+    const go = async () => { const q = $("lib-on").value.trim(); if (!q) return; const r = await post("/api/skillhub/fetch", { query: q }); toast(r.ok ? "Recherche lancée — résultats dans ~30 s" : (r.error || "échec")); if (r.ok) { $("lib-on").value = ""; setTimeout(loadLib, 32000); } };
+    $("lib-on-go").onclick = go; $("lib-on").onkeydown = (e) => { if (e.key === "Enter") go(); };
+  }
+  $("lib-cat").innerHTML = `<option value="">Toutes catégories (${jbLib.total})</option>` + jbLib.categories.map((c) => `<option value="${esc(c.name)}" ${c.name === jbCat ? "selected" : ""}>${esc(c.name)} (${c.count})</option>`).join(""); $("lib-sort").value = jbSort;
+  $("lib-tiers").innerHTML = ["S", "A", "B", "C", "D", "E"].filter((t) => jbLib.tiers[t]).map((t) => `<button class="lt ${jbTier === t ? "sel" : ""}" data-lt="${t}" type="button">${tierBadge(t, "")}<span>${jbLib.tiers[t]}</span></button>`).join("");
+  $("lib-tiers").querySelectorAll("[data-lt]").forEach((b) => (b.onclick = () => { jbTier = jbTier === b.dataset.lt ? "" : b.dataset.lt; renderLib(); }));
+  libRows();
+}
+function libRows() {
+  const list = $("lib-list"); if (!list || !jbLib) return;
+  let L = jbLib.skills; if (jbCat) L = L.filter((s) => s.category === jbCat); if (jbTier) L = L.filter((s) => s.tier === jbTier);
+  if (jbQ) L = L.filter((s) => (s.name + " " + s.category + " " + s.desc).toLowerCase().includes(jbQ));
+  const opts = `<option value="">+ métier…</option>` + jbData.map((jb) => `<option value="${esc(jb.name)}">${esc(jb.icon)} ${esc(jb.name)}</option>`).join("");
+  list.innerHTML = L.slice(0, 200).map((s) => `<div class="lrow">${tierBadge(s.tier, s.score)}<div class="lr-m"><div class="lr-t"><b data-skview="${esc(s.id)}">${esc(s.name)}</b><span class="lr-c">${esc(s.category)}</span>${s.repo ? `<span class="lr-c">${esc(s.repo)}</span>` : ""}</div><div class="lr-d">${esc(s.desc || "")}</div></div>
+    <div class="lr-s" title="usages réels par les agents · votes">${s.uses ? `<span>${ico("play", 11)}${s.uses}</span>` : ""}<span class="lr-sc">${Math.round(s.score * 100)}</span></div>
+    <div class="lr-a"><button class="icon-btn ${s.up ? "on" : ""}" data-vote="up:${esc(s.id)}" title="Utile${s.up ? " (" + s.up + ")" : ""}" type="button">${ico("tup", 14)}</button><button class="icon-btn ${s.down ? "on bad" : ""}" data-vote="down:${esc(s.id)}" title="Peu utile${s.down ? " (" + s.down + ")" : ""}" type="button">${ico("tdown", 14)}</button><select class="lr-add" data-ladd="${esc(s.id)}">${opts}</select></div></div>`).join("") + (L.length > 200 ? `<div class="tp-wait">… ${L.length - 200} autres — affine le filtre</div>` : "") + (!L.length ? `<div class="tp-wait" style="padding:40px">Aucune skill pour ce filtre.</div>` : "");
+  list.querySelectorAll("[data-skview]").forEach((b) => (b.onclick = () => openSkill(b.dataset.skview)));
+  list.querySelectorAll("[data-vote]").forEach((b) => (b.onclick = async () => { const [v, id] = [b.dataset.vote.split(":")[0], b.dataset.vote.slice(b.dataset.vote.indexOf(":") + 1)]; const r = await post("/api/skillhub/feedback", { id, vote: v }); if (!r.ok) return toast(r.error || "échec"); toast(v === "up" ? "Merci — rang mis à jour" : "Noté"); loadLib(); }));
+  list.querySelectorAll("[data-ladd]").forEach((s) => (s.onchange = async () => {
+    const name = s.value; if (!name) return; const sk = jbLib.skills.find((x) => x.id === s.dataset.ladd); s.value = "";
+    const jb = jbData.find((x) => x.name === name); if (!jb || !sk) return; if (jb.skills.some((x) => x.id === sk.id)) return toast("Déjà dans ce métier");
+    const r = await post("/api/jobs/save", { name: jb.name, desc: jb.desc, icon: jb.icon, skills: [...jb.skills.map((x) => x.id), sk.id] }); toast(r.ok ? `Ajoutée à « ${jb.name} »` : (r.error || "échec")); if (r.ok) { await loadJobs(); if (jbSel === jb.name) { jbDraft = JSON.parse(JSON.stringify(r.job)); jbBase = jbSig(); } }
+  }));
+}
+
 // ---- modales / toast / pièces jointes -----------------------------------------
 function openModal(id) { $("backdrop").classList.remove("hidden"); $(id).classList.remove("hidden"); }
 function closeModal(id) { $(id).classList.add("hidden"); $("backdrop").classList.add("hidden"); }
@@ -1192,7 +1352,7 @@ function paletteSource() {
   if (window.FleetTheme && detailId) FleetTheme.list().forEach((p) => items.push({ kind: "conversation", ic: "◐", name: "Palette de cette conversation : " + p.name, run: () => { closePalette(); setSessionTheme(detailId, p.id); } }));
   if (window.FleetTheme) FleetTheme.list().forEach((p) => items.push({ kind: "thème", ic: "◐", name: "Thème : " + p.name, run: () => { closePalette(); FleetTheme.use(p.id); } }));
   if (detailId) items.push({ kind: "action", ic: "×", name: "Fermer l'onglet courant", run: () => { closePalette(); closeTab(detailId); } });
-  [["board", "Board"], ["auto", "Automations"], ["machines", "Machines"], ["skills", "Skills"], ["audit", "Audit"], ["design", "Design"]].forEach(([v, l]) => items.push({ kind: "vue", ic: "›", name: "Aller à " + l, run: () => { closePalette(); setView(v); } }));
+  [["board", "Board"], ["jobs", "Métiers"], ["auto", "Automations"], ["machines", "Machines"], ["skills", "Skills"], ["audit", "Audit"], ["design", "Design"]].forEach(([v, l]) => items.push({ kind: "vue", ic: "›", name: "Aller à " + l, run: () => { closePalette(); setView(v); } }));
   (snap.agents || []).filter((a) => !a.internal).forEach((a) => items.push({ kind: "session", ic: "🤖", name: a.name, sub: (a.worktree && a.branch ? "⑂ " + a.branch + " · " : "") + (a.host || "local"), dot: st(a).c, run: () => { closePalette(); select(a.id); } }));
   (railHostsCache || []).forEach((h) => items.push({ kind: "machine", ic: "🖥", name: h.label || h.id, sub: h.ip || "", run: () => { closePalette(); machSelectedHost = h.id; setView("machines"); } }));
   if (_skillsData && _skillsData.categories) _skillsData.categories.forEach((c) => c.skills.forEach((s) => items.push({ kind: "skill", ic: "◈", name: s.name, sub: c.category, run: () => { closePalette(); setView("skills"); setTimeout(() => openSkill(s.path), 150); } })));
@@ -1231,7 +1391,7 @@ function closeTab(id) {
   if (detailId === id) { const next = openTabs[i] || openTabs[i - 1]; if (next && agentById(next)) select(next); else setView(view); }
   else renderTabbar();
 }
-const VIEW_LABEL = { board: ["board", "Board"], teams: ["users", "Équipes"], auto: ["zap", "Automations"], machines: ["server", "Machines"], skills: ["book", "Skills"], audit: ["file", "Audit"], design: ["palette", "Design"] };
+const VIEW_LABEL = { board: ["board", "Board"], jobs: ["cap", "Métiers"], teams: ["users", "Équipes"], auto: ["zap", "Automations"], machines: ["server", "Machines"], skills: ["book", "Skills"], audit: ["file", "Audit"], design: ["palette", "Design"] };
 function renderTabbar() {
   const el = $("tabbar"); if (!el || tabDrag) return;
   const ags = snap.agents || [];
@@ -1353,7 +1513,7 @@ if (window.parent !== window) {
   try { window.parent.postMessage({ fleet: "hello" }, "*"); } catch {}
 }
 $("nav-search").onclick = () => openPalette();
-loadAuto();
+loadAuto(); loadJobs();
 $("rail-filter-btn").onclick = () => { $("rail-fp").classList.toggle("hidden"); if (!$("rail-fp").classList.contains("hidden")) $("q").focus(); };
 hydrateIcons();
 $("q").oninput = (e) => { query = e.target.value.trim().toLowerCase(); renderSidebar(); if (view === "board" && !detailId) renderBoard(); };
