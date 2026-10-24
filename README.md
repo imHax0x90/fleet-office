@@ -81,6 +81,19 @@ appareil (téléphone / iPad / web via Fleet Office). Voir [`sync/sync.md`](sync
 
 ---
 
+## Console « Orca-like » (`computer-office/public/lite.*`)
+
+La console 2D (servie sur le host `fleetoffice`, et chargée telle quelle par l'APK) reprend l'UX d'[Orca](https://github.com/stablyai/orca) (MIT) — valeurs de design relevées dans leur code : surfaces neutres, police Geist, icônes Lucide, indicateurs d'état (anneau = travaille, « ? » = attend).
+
+- **Sessions par projet/client**, favoris ★, onglets de sessions, board kanban (par statut ou par projet), diff avec commentaires renvoyés à l'agent.
+- **Worktrees git isolés** par agent (créer → relire le diff → merger/jeter) et **fan-out parallèle** (un prompt → N variantes comparables).
+- **Équipes** : volets multi-agents (chef en grand ou grille), `TEAM_NOTES.md` en direct, message à toute l'équipe, lancement sur n'importe quel nœud tailnet.
+- **Automations** : tâches récurrentes (préréglages ou cron, fuseau Europe/Paris, worktree neuf par exécution) — `automations.js`, stockage `~/.fleet/automations.json`.
+- **Palettes** (Orca par défaut, personnalisables, et **par conversation**), rendu **Markdown** complet (`md.js` : tableaux, code coloré, listes imbriquées), AWS Bedrock par agent.
+- **Déploiement** : `./deploy.sh` (front statique) ou `./deploy.sh server` (+ `server.js`, `automations.js`, redémarrage). L'APK ne change pas pour une évolution d'interface : il charge ce front à distance.
+
+---
+
 ## Architecture en bref
 
 ```
