@@ -242,13 +242,13 @@ function parseTranscriptChunk(text) {
       if (typeof c === "string") { const t = cleanPrompt(c); if (t) feed.push({ kind: "prompt", text: clip(t, 20000), at }); }
       else if (Array.isArray(c)) for (const b of c) {
         if (b.type === "text") { const t = cleanPrompt(b.text); if (t) feed.push({ kind: "prompt", text: clip(t, 20000), at }); }
-        else if (b.type === "tool_result") { const t = clip(resultText(b.content), 8000); if (t) feed.push({ kind: "result", text: t, at }); }
+        else if (b.type === "tool_result") { const t = clip(resultText(b.content), 8000); if (t) feed.push({ kind: "result", text: t, at, err: b.is_error ? 1 : 0 }); }
       }
     } else if (o.type === "assistant" && o.message) {
       for (const b of (o.message.content || [])) {
         if (b.type === "text" && b.text.trim()) feed.push({ kind: "say", text: clip(b.text, 20000), at });
         else if (b.type === "thinking" && (b.thinking || "").trim()) feed.push({ kind: "think", text: clip(b.thinking, 8000), at });
-        else if (b.type === "tool_use") feed.push({ kind: "tool", text: toolLine(b.name, b.input), at });
+        else if (b.type === "tool_use") { const inp = b.input || {}; feed.push({ kind: "tool", text: toolLine(b.name, b.input), at, name: b.name, arg: String(inp.skill || inp.file_path || inp.path || inp.command || "").slice(0, 160) }); }
       }
     }
   }
@@ -1905,12 +1905,22 @@ const automations = require("./automations").createAutomations({
 });
 automations.start();
 
+// ---- Évaluation des agents : « l'Arène » (voir reviews.js) — défini après skillsys (usage plus bas) ----------
+
+// ---- Monde pixel-art : une maison par projet (voir worldsys.js) ---------------------------------------
+const world = require("./worldsys").createWorld({ dir: FLEET_DIR, getAgents: () => snapshot().agents });
+
 // ---- Métiers + skills classées + bibliothèque partagée (voir skillsys.js) -----------------------------
 const skillsys = require("./skillsys").createSkillSys({
   SKILLS_DIR, dir: FLEET_DIR, listLibrary: () => listSkills(), addRole: (n) => addRole(n),
   fetchOnline: (q) => researchSkills(q, "local", true),
   advisorHosts: () => [...new Set([process.env.FLEET_ADVISOR_HOST, "black-station", ...[...managed.values()].map((m) => m.host)].filter((h) => h && h !== "local"))],
   sshOpts: SSH_OPTS, publicUrl: () => process.env.FLEET_PUBLIC_URL || ("http://" + os.hostname() + ":" + PORT), onChange: () => {},
+});
+const reviews = require("./reviews").createReviews({
+  dir: FLEET_DIR, skills: skillsys, llm: (p) => skillsys.runLLM(p),
+  collect: (id) => { let feed = [], before = null; for (let i = 0; i < 4; i++) { const w = renderTranscriptWindow(id, before); feed = w.feed.concat(feed); if (w.atStart || w.nextBefore == null) break; before = w.nextBefore; } return feed; },
+  agentInfo: (id) => { const a = snapshot().agents.find((x) => x.id === id); return a ? { id: a.id, name: a.name, role: a.role, project: a.project, host: a.host, status: a.status, costUsd: a.costUsd } : null; },
 });
 
 // Fan-out : une mission -> N variantes en parallèle, chacune dans son worktree (modèles/efforts
@@ -2030,6 +2040,18 @@ const server = http.createServer(async (req, res) => {
       return sendJSON(res, 404, { ok: false, error: "action inconnue" });
     } catch (e) { return sendJSON(res, 400, { ok: false, error: String(e.message || e) }); }
   }
+  // ---- évaluations (Arène) -------------------------------------------------------------------------------
+  if (p === "/api/reviews" && req.method === "GET") { const q = url.searchParams; return sendJSON(res, 200, { ok: true, ...reviews.list({ agent: q.get("agent") || "", limit: +q.get("limit") || 100 }) }); }
+  if (p === "/api/reviews/get" && req.method === "GET") { try { return sendJSON(res, 200, { ok: true, review: reviews.get(url.searchParams.get("id") || "") }); } catch (e) { return sendJSON(res, 404, { ok: false, error: String(e.message || e) }); } }
+  if (req.method === "POST" && (p === "/api/reviews/run" || p === "/api/reviews/chat")) {
+    const b = await readBody(req);
+    try {
+      if (p === "/api/reviews/run") { const r = await reviews.run(b.id); logAudit("review", { agent: r.agentId, name: r.name, score: r.score }); return sendJSON(res, 200, { ok: true, review: r }); }
+      return sendJSON(res, 200, { ok: true, ...(await reviews.chat(b.id, b.message)) });
+    } catch (e) { return sendJSON(res, 400, { ok: false, error: String(e.message || e) }); }
+  }
+  if (p === "/api/world" && req.method === "GET") { try { return sendJSON(res, 200, { ok: true, ...world.get() }); } catch (e) { return sendJSON(res, 500, { ok: false, error: String(e.message || e) }); } }
+  if (req.method === "POST" && p === "/api/world/remove") { const b = await readBody(req); try { world.remove(b.key); return sendJSON(res, 200, { ok: true }); } catch (e) { return sendJSON(res, 400, { ok: false, error: String(e.message || e) }); } }
   if (p === "/api/automations" && req.method === "GET") return sendJSON(res, 200, { ok: true, automations: automations.list(), tz: require("./automations").TZ });
   if (req.method === "POST" && p.startsWith("/api/automations/")) {
     const b = await readBody(req);

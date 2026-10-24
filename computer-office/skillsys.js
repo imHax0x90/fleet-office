@@ -168,6 +168,12 @@ function createSkillSys({ SKILLS_DIR, dir, listLibrary, addRole, fetchOnline, ad
     const lines = entries.map(([d, , r]) => `- ${d} [${r.tier}] — ${(r.desc || r.name).slice(0, 140)}`).join("\n");
     return `\n\n🎓 MÉTIER « ${j.name} » (niv. ${levelOf(j.xp)}) — skills héritées, installées dans ~/.claude/skills ; invoque-les avec l'outil Skill dès qu'elles sont pertinentes :\n${lines}\n📚 Bibliothèque partagée : skill « fleet-skillhub » (rechercher / lire / noter d'autres skills classées).`;
   }
+  // vote automatique issu d'une évaluation (skill utilisée dans une session réussie / ratée) + XP du métier
+  function autoVote(rawName, vote) {
+    const nm = String(rawName || "").trim().replace(/^\//, ""), id = lib().names.get(nm) || lib().names.get(nm.toLowerCase()); if (!id) return false;
+    const s = st(id); if (vote === "up") s.up++; else if (vote === "down") s.down++; else return false; cache.at = 0; save(); return true;
+  }
+  function awardXp(role, n) { const j = getJob(role); if (!j || !(n > 0)) return 0; j.xp = (j.xp || 0) + Math.round(n); cache.at = 0; save(); return Math.round(n); }
   // un agent vient d'appeler l'outil Skill : on crédite la skill (et le métier de l'agent)
   function recordUse(rawName, role) {
     const nm = String(rawName || "").trim().replace(/^\//, ""); if (!nm) return;
@@ -211,7 +217,7 @@ function createSkillSys({ SKILLS_DIR, dir, listLibrary, addRole, fetchOnline, ad
   }
   async function searchOnline(query) { const q = String(query || "").trim().slice(0, 60); if (!q) throw new Error("requête vide"); fetchOnline(q); setTimeout(() => { cache.at = 0; onChange && onChange(); }, 25000).unref?.(); return { started: true, query: q }; }
 
-  return { library, search, readSkill, feedback, listJobs, saveJob, deleteJob, getJob, applyToAgent, recordUse, advise, searchOnline, refresh, installName, hubSkillText, flush: saveNow };
+  return { runLLM, autoVote, awardXp, library, search, readSkill, feedback, listJobs, saveJob, deleteJob, getJob, applyToAgent, recordUse, advise, searchOnline, refresh, installName, hubSkillText, flush: saveNow };
 }
 
 module.exports = { createSkillSys, tierOf, levelOf };

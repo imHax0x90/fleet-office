@@ -56,6 +56,7 @@ const IP = {
   cap: '<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>',
   tup: '<path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/>',
   tdown: '<path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z"/>',
+  trophy: '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>',
   logo: '<path d="M2 18c2.5-4 5-6 8-6s4 3 7 3 3.5-2 5-5"/><path d="M5 6c1-1.5 2.5-2 4-1.5"/><circle cx="17" cy="6.5" r="1.2" fill="currentColor"/>',
 };
 const ico = (n, s = 16) => `<svg class="i" viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IP[n] || ""}</svg>`;
@@ -376,6 +377,7 @@ function applyCenterVisibility() {
   $("auto").classList.toggle("hidden", sess || view !== "auto");
   $("teams").classList.toggle("hidden", sess || view !== "teams");
   $("jobs").classList.toggle("hidden", sess || view !== "jobs");
+  $("reviews").classList.toggle("hidden", sess || view !== "reviews");
   if (sess) {
     $("conv").classList.toggle("hidden", centerTab !== "conv");
     $("composer").classList.toggle("hidden", centerTab !== "conv");
@@ -741,6 +743,7 @@ function setView(v) {
   if (v === "audit") renderAudit();
   if (v === "design") renderDesign();
   if (v === "jobs") { renderJobs(); loadJobs(); loadLib(); }
+  if (v === "reviews") { renderReviews(); loadReviews(); }
   if (v === "teams") { renderTeams(); pollTeams(true); tvTimer = setInterval(pollTeams, 3000); }
   if (v === "auto") { renderAuto(); loadAuto(); autoTimer = setInterval(loadAuto, 15000); }
   closeDrawers();
@@ -1269,6 +1272,92 @@ function libRows() {
   }));
 }
 
+
+// ---- ÉVALUATIONS (l'Arène) : score, bilan, suggestions, chat avec le professeur ----------------------------
+let rvList = { reviews: [], byRole: [], total: 0 }, rvSel = null, rvCur = null, rvBusy = false, rvChatBusy = false;
+const scoreBand = (s) => (s >= 80 ? "ok" : s >= 60 ? "mid" : s >= 40 ? "low" : "bad");
+const rvLatest = (id) => rvList.reviews.find((r) => r.agentId === id) || null;
+async function loadReviews() { try { rvList = await getJSON("/api/reviews?limit=300"); if (view === "reviews") { renderRvList(); } } catch {} }
+function renderReviews() {
+  const el = $("reviews"); if (!el) return;
+  if (!el.dataset.built) {
+    el.dataset.built = "1";
+    el.innerHTML = `<div class="rv"><aside class="rv-list" id="rv-list"></aside><section class="rv-main" id="rv-main"></section><aside class="rv-chat" id="rv-chat"></aside></div>`;
+  }
+  renderRvList(); renderRvMain(); renderRvChat();
+}
+function renderRvList() {
+  const el = $("rv-list"); if (!el) return;
+  const ags = (snap.agents || []).filter((a) => !a.internal).slice().sort((a, b) => ((rvLatest(b.id) ? 1 : 0) - (rvLatest(a.id) ? 1 : 0)) || (b.updatedAt - a.updatedAt));
+  const roles = rvList.byRole.slice(0, 5).map((r) => `<div class="rv-role"><span class="rv-rn">${esc(r.role)}</span><span class="rv-bar"><i class="b-${scoreBand(r.avg)}" style="width:${r.avg}%"></i></span><span class="rv-ra">${r.avg}</span></div>`).join("");
+  el.innerHTML = `<div class="rv-lh">${ico("trophy", 14)}<b>Arène</b><span class="rv-n">${rvList.total} revue${rvList.total > 1 ? "s" : ""}</span></div>${roles ? `<div class="rv-roles"><div class="rv-rt">Moyenne par métier</div>${roles}</div>` : ""}<div class="rv-ag">${ags.map((a) => { const r = rvLatest(a.id); return `<button class="rv-row ${rvSel === a.id ? "sel" : ""}" data-rva="${esc(a.id)}" type="button">${stGlyph(a)}<span class="rv-t"><b>${esc(a.name)}</b><small>${esc(projectOf(a))}${a.role ? " · " + esc(a.role) : ""}</small></span>${r ? `<span class="rv-sc b-${scoreBand(r.score)}" title="${esc(relT(r.at))}">${r.score}</span>` : `<span class="rv-none">—</span>`}</button>`; }).join("") || `<div class="tp-wait">Aucun agent à évaluer.</div>`}</div>`;
+  el.querySelectorAll("[data-rva]").forEach((b) => (b.onclick = () => rvOpen(b.dataset.rva)));
+}
+async function rvOpen(agentId) {
+  rvSel = agentId; rvCur = null; const l = rvLatest(agentId);
+  if (l) { try { const r = await getJSON("/api/reviews/get?id=" + encodeURIComponent(l.id)); rvCur = r.review; } catch {} }
+  renderRvList(); renderRvMain(); renderRvChat();
+}
+async function rvRun() {
+  if (!rvSel || rvBusy) return; rvBusy = true; renderRvMain();
+  const r = await post("/api/reviews/run", { id: rvSel }); rvBusy = false;
+  if (!r.ok) { toast(r.error || "échec de l'évaluation"); renderRvMain(); return; }
+  rvCur = r.review; if (r.review.applied && r.review.applied.xp) toast(`+${r.review.applied.xp} XP pour le métier « ${r.review.role} »`);
+  await loadReviews(); renderRvMain(); renderRvChat();
+}
+function renderRvMain() {
+  const el = $("rv-main"); if (!el) return;
+  const a = rvSel && agentById(rvSel);
+  if (!a) { el.innerHTML = `<div class="jb-empty"><span class="big" data-ico="trophy" data-s="34"></span><b>Choisis un agent à évaluer</b><span>L'Arène analyse son travail (outils, erreurs, tests, durée, coût) et un professeur te dit ce qui a marché, ce qui a raté, et quoi améliorer. La note nourrit le classement des skills et l'XP du métier.</span></div>`; hydrateIcons(el); return; }
+  const r = rvCur;
+  const head = `<div class="rvm-h">${stGlyph(a, true)}<div class="rvm-id"><b>${esc(a.name)}</b><span>${esc(projectOf(a))} · ${esc(a.role || "—")} · ${esc(a.host || "local")}</span></div><span class="sp"></span><button class="primary sm" id="rv-run" type="button" ${rvBusy ? "disabled" : ""}>${rvBusy ? `<span class="spin" style="display:inline-block;vertical-align:-2px;margin-right:7px;border-color:var(--on-acc);border-top-color:transparent"></span>Analyse en cours…` : r ? "Réévaluer" : "Évaluer maintenant"}</button></div>`;
+  if (!r) { el.innerHTML = `<div class="rvm">${head}<div class="jb-empty" style="margin-top:50px"><span class="big" data-ico="trophy" data-s="30"></span><b>Pas encore évalué</b><span>${rvBusy ? "Le professeur lit la trace de l'agent… (≈ 25 s)" : "Lance l'évaluation pour obtenir une note, un bilan et des suggestions."}</span></div></div>`; hydrateIcons(el); const b = $("rv-run"); if (b) b.onclick = rvRun; return; }
+  const m = r.metrics || {}, band = scoreBand(r.score);
+  const chip = (l, v, w) => `<div class="rvc ${w || ""}"><b>${v}</b><span>${l}</span></div>`;
+  const list = (arr, cls) => arr.length ? arr.map((t) => `<li>${esc(t)}</li>`).join("") : `<li class="none">—</li>`;
+  const sugg = (r.suggestions || []).map((s, i) => `<div class="rvs"><span class="rvs-k k-${s.kind}">${s.kind === "skill" ? "skill" : s.kind === "prompt" ? "prompt" : s.kind === "model" ? "modèle" : "méthode"}</span><div class="rvs-t">${esc(s.text)}${s.kind === "skill" && s.query ? `<div class="rvs-a"><button class="ghost-btn sm" data-rvq="${esc(s.query)}" data-rvi="${i}" type="button">${ico("search", 12)}Chercher « ${esc(s.query)} »</button></div><div class="rvs-res" id="rvs-res-${i}"></div>` : ""}</div></div>`).join("");
+  const ap = r.applied || {};
+  el.innerHTML = `<div class="rvm">${head}
+    <div class="rv-score"><div class="rv-big b-${band}"><b>${r.score}</b><small>/100</small></div><div class="rv-sm"><div class="rv-gauge"><i class="b-${band}" style="width:${r.score}%"></i></div><div class="rv-verdict">${esc(r.verdict)}</div><div class="rv-meta">${esc(relT(r.at))} · ${r.llm ? "revue du professeur" : "mode dégradé (métriques seules)"} · indice heuristique ${r.heuristic}${ap.xp ? ` · <b>+${ap.xp} XP</b> métier` : ""}${(ap.votes || []).length ? ` · ${ap.votes.map((v) => (v.vote === "up" ? "👍 " : "👎 ") + esc(v.skill)).join(", ")}` : ""}</div></div></div>
+    <div class="rv-metrics">${chip("appels d'outils", m.toolCalls ?? 0)}${chip("erreurs", m.errors ?? 0, m.errors ? "warn" : "")}${chip("retries", m.retries ?? 0, m.retries > 2 ? "warn" : "")}${chip("tests ok/ko", `${m.testsPassed ?? 0}/${m.testsFailed ?? 0}`, m.testsFailed ? "warn" : "")}${chip("fichiers modifiés", m.filesTouched ?? 0)}${chip("durée", m.durationMin != null ? m.durationMin + " min" : "—")}${chip("coût", m.costUsd != null ? "$" + m.costUsd : "—")}${chip("skills utilisées", (m.skillsUsed || []).length)}</div>
+    <div class="rv-cols"><div class="rv-col ok"><h4>${ico("checkc", 14)}Ce qui a marché</h4><ul>${list(r.worked)}</ul></div><div class="rv-col ko"><h4>${ico("xc", 14)}Ce qui a raté</h4><ul>${list(r.failed)}</ul></div></div>
+    ${sugg ? `<h4 class="rv-sh">Pour faire mieux</h4><div class="rv-sugg">${sugg}</div>` : ""}</div>`;
+  hydrateIcons(el); $("rv-run").onclick = rvRun;
+  el.querySelectorAll("[data-rvq]").forEach((b) => (b.onclick = () => rvSkillSearch(b.dataset.rvq, $("rvs-res-" + b.dataset.rvi), a.role)));
+}
+// recherche de skills dans la bibliothèque partagée + ajout à un métier
+async function rvSkillSearch(q, box, role) {
+  if (!box) return; box.innerHTML = `<div class="tp-wait" style="padding:8px">recherche…</div>`;
+  const [s, jb] = await Promise.all([getJSON("/api/skillhub/search?q=" + encodeURIComponent(q) + "&limit=4").catch(() => ({ results: [] })), getJSON("/api/jobs").catch(() => ({ jobs: [] }))]);
+  const jobs = jb.jobs || [], mine = jobs.find((x) => x.name.toLowerCase() === String(role || "").toLowerCase());
+  const opts = `<option value="">+ métier…</option>` + jobs.map((x) => `<option value="${esc(x.name)}" ${mine && mine.name === x.name ? "selected" : ""}>${esc(x.icon)} ${esc(x.name)}</option>`).join("");
+  box.innerHTML = (s.results || []).map((k) => `<div class="rvs-sk">${tierBadge(k.tier, k.score)}<b data-skview="${esc(k.id)}">${esc(k.name)}</b><span class="jp-c">${esc(k.category)}</span><select class="lr-add" data-rvadd="${esc(k.id)}">${opts}</select></div>`).join("") || `<div class="tp-wait" style="padding:8px">Rien de pertinent dans la bibliothèque — tu peux chercher en ligne depuis Métiers → Bibliothèque.</div>`;
+  box.querySelectorAll("[data-skview]").forEach((b) => (b.onclick = () => openSkill(b.dataset.skview)));
+  box.querySelectorAll("[data-rvadd]").forEach((sel) => (sel.onchange = async () => {
+    const name = sel.value; if (!name) return; const job = jobs.find((x) => x.name === name); sel.value = ""; if (!job) return;
+    if (job.skills.some((x) => x.id === sel.dataset.rvadd)) return toast("Déjà dans ce métier");
+    const r = await post("/api/jobs/save", { name: job.name, desc: job.desc, icon: job.icon, skills: [...job.skills.map((x) => x.id), sel.dataset.rvadd] }); toast(r.ok ? `Ajoutée à « ${job.name} »` : (r.error || "échec")); if (r.ok) loadJobs();
+  }));
+}
+function renderRvChat() {
+  const el = $("rv-chat"); if (!el) return;
+  const r = rvCur; const chat = r ? r.chat || [] : [];
+  el.innerHTML = `<div class="jc-h">${ico("msg", 14)}<b>Le professeur</b><span class="jc-hint">${r ? "discute de la revue de « " + esc(r.name) + " »" : "évalue un agent d'abord"}</span></div>
+    <div class="jc-feed" id="rvc-feed">${!r ? `<div class="jc-note">Une fois l'agent évalué, discute avec le professeur : conteste la note, demande pourquoi ça a raté, ce qu'il faudrait changer dans le prompt ou les skills…</div>` : chat.length ? chat.map((m, i) => m.role === "user" ? `<div class="jm you">${esc(m.text)}</div>` : `<div class="jm bot"><div class="jm-t">${esc(m.text)}</div>${(m.skillQueries || []).length ? `<div class="jp-on"><span>Chercher des skills :</span>${m.skillQueries.map((q) => `<button type="button" data-rvcq="${esc(q)}" data-rvci="${i}">${esc(q)}</button>`).join("")}</div><div class="rvs-res" id="rvc-res-${i}"></div>` : ""}</div>`).join("") + (rvChatBusy ? `<div class="jm bot"><span class="jm-dots"><i></i><i></i><i></i></span></div>` : "") : `<div class="jc-note">Pose ta première question sur cette évaluation.</div><div class="rv-quick"><button class="ghost-btn sm" data-rvq2="Pourquoi cette note ?" type="button">Pourquoi cette note ?</button><button class="ghost-btn sm" data-rvq2="Que changer dans son prompt ?" type="button">Que changer dans son prompt ?</button><button class="ghost-btn sm" data-rvq2="Quelles skills lui manquent ?" type="button">Quelles skills lui manquent ?</button></div>`}</div>
+    <div class="jc-f"><textarea id="rvc-in" rows="1" placeholder="${r ? "Ex. il n'avait pas accès aux tests, la note est dure…" : "Évalue un agent pour discuter"}" ${r ? "" : "disabled"}></textarea><button class="send-btn sm" id="rvc-send" type="button" ${r ? "" : "disabled"} title="Envoyer">${ico("up", 14)}</button></div>`;
+  const inp = $("rvc-in"); const send = (t) => { const v = (t || inp.value).trim(); if (v) { inp.value = ""; rvAsk(v); } };
+  $("rvc-send").onclick = () => send(); inp.onkeydown = (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } };
+  el.querySelectorAll("[data-rvq2]").forEach((b) => (b.onclick = () => send(b.dataset.rvq2)));
+  el.querySelectorAll("[data-rvcq]").forEach((b) => (b.onclick = () => rvSkillSearch(b.dataset.rvcq, $("rvc-res-" + b.dataset.rvci), r && r.role)));
+  const f = $("rvc-feed"); if (f) f.scrollTop = f.scrollHeight;
+}
+async function rvAsk(text) {
+  if (!rvCur || rvChatBusy) return; rvChatBusy = true; rvCur.chat = rvCur.chat || []; rvCur.chat.push({ role: "user", text }); renderRvChat();
+  const r = await post("/api/reviews/chat", { id: rvCur.id, message: text }); rvChatBusy = false;
+  rvCur.chat.push({ role: "bot", text: r.ok ? r.reply : "Le professeur est indisponible : " + (r.error || "erreur"), skillQueries: r.ok ? r.skillQueries : [] });
+  if (view === "reviews") renderRvChat();
+}
+
 // ---- modales / toast / pièces jointes -----------------------------------------
 function openModal(id) { $("backdrop").classList.remove("hidden"); $(id).classList.remove("hidden"); }
 function closeModal(id) { $(id).classList.add("hidden"); $("backdrop").classList.add("hidden"); }
@@ -1352,7 +1441,7 @@ function paletteSource() {
   if (window.FleetTheme && detailId) FleetTheme.list().forEach((p) => items.push({ kind: "conversation", ic: "◐", name: "Palette de cette conversation : " + p.name, run: () => { closePalette(); setSessionTheme(detailId, p.id); } }));
   if (window.FleetTheme) FleetTheme.list().forEach((p) => items.push({ kind: "thème", ic: "◐", name: "Thème : " + p.name, run: () => { closePalette(); FleetTheme.use(p.id); } }));
   if (detailId) items.push({ kind: "action", ic: "×", name: "Fermer l'onglet courant", run: () => { closePalette(); closeTab(detailId); } });
-  [["board", "Board"], ["jobs", "Métiers"], ["auto", "Automations"], ["machines", "Machines"], ["skills", "Skills"], ["audit", "Audit"], ["design", "Design"]].forEach(([v, l]) => items.push({ kind: "vue", ic: "›", name: "Aller à " + l, run: () => { closePalette(); setView(v); } }));
+  [["board", "Board"], ["jobs", "Métiers"], ["reviews", "Évaluations"], ["auto", "Automations"], ["machines", "Machines"], ["skills", "Skills"], ["audit", "Audit"], ["design", "Design"]].forEach(([v, l]) => items.push({ kind: "vue", ic: "›", name: "Aller à " + l, run: () => { closePalette(); setView(v); } }));
   (snap.agents || []).filter((a) => !a.internal).forEach((a) => items.push({ kind: "session", ic: "🤖", name: a.name, sub: (a.worktree && a.branch ? "⑂ " + a.branch + " · " : "") + (a.host || "local"), dot: st(a).c, run: () => { closePalette(); select(a.id); } }));
   (railHostsCache || []).forEach((h) => items.push({ kind: "machine", ic: "🖥", name: h.label || h.id, sub: h.ip || "", run: () => { closePalette(); machSelectedHost = h.id; setView("machines"); } }));
   if (_skillsData && _skillsData.categories) _skillsData.categories.forEach((c) => c.skills.forEach((s) => items.push({ kind: "skill", ic: "◈", name: s.name, sub: c.category, run: () => { closePalette(); setView("skills"); setTimeout(() => openSkill(s.path), 150); } })));
@@ -1391,7 +1480,7 @@ function closeTab(id) {
   if (detailId === id) { const next = openTabs[i] || openTabs[i - 1]; if (next && agentById(next)) select(next); else setView(view); }
   else renderTabbar();
 }
-const VIEW_LABEL = { board: ["board", "Board"], jobs: ["cap", "Métiers"], teams: ["users", "Équipes"], auto: ["zap", "Automations"], machines: ["server", "Machines"], skills: ["book", "Skills"], audit: ["file", "Audit"], design: ["palette", "Design"] };
+const VIEW_LABEL = { board: ["board", "Board"], jobs: ["cap", "Métiers"], reviews: ["trophy", "Évaluations"], teams: ["users", "Équipes"], auto: ["zap", "Automations"], machines: ["server", "Machines"], skills: ["book", "Skills"], audit: ["file", "Audit"], design: ["palette", "Design"] };
 function renderTabbar() {
   const el = $("tabbar"); if (!el || tabDrag) return;
   const ags = snap.agents || [];
@@ -1514,6 +1603,11 @@ if (window.parent !== window) {
 }
 $("nav-search").onclick = () => openPalette();
 loadAuto(); loadJobs();
+{ // ouverture directe d'une vue (?view=jobs) et mode intégré sans chrome (?embed=1), utilisés par la carte pixel-art
+  const qs = new URLSearchParams(location.search), v = qs.get("view");
+  if (qs.get("embed")) $("app").classList.add("embed");
+  if (v && ["board", "teams", "jobs", "reviews", "auto", "machines", "skills", "audit", "design"].includes(v)) setView(v);
+}
 $("rail-filter-btn").onclick = () => { $("rail-fp").classList.toggle("hidden"); if (!$("rail-fp").classList.contains("hidden")) $("q").focus(); };
 hydrateIcons();
 $("q").oninput = (e) => { query = e.target.value.trim().toLowerCase(); renderSidebar(); if (view === "board" && !detailId) renderBoard(); };
