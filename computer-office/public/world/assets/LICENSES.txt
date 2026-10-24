@@ -14,7 +14,11 @@ Fleet Office World - assets licenses
    License: Creative Commons Zero (CC0 1.0)
    Used for: dialogue / HUD / name labels.
 
-3) All other graphics (floor, walls, windows, monitors, server racks, bookshelves,
+3) La ville (herbe, chemins, arbres, maisons, Académie/Arène, fontaine, panneaux, lampadaires, police bitmap 3x5 des enseignes)
+   est entièrement dessinée par script (sprites.js / town.js) : travail original, aucun asset tiers.
+   Kenney Tiny Town (CC0) n'a pas pu être téléchargé automatiquement (lien non résolu) : non utilisé.
+
+4) All other graphics (floor, walls, windows, monitors, server racks, bookshelves,
    rug, lamp, characters, speech bubbles, UI frames) are drawn procedurally in
    world.js (original work, no third-party material).
 

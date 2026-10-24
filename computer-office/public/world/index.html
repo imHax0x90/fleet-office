@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#1c2036">
-<title>Fleet Office · World</title>
+<title>Fleet Office · Ville</title>
 <style>
   html,body{margin:0;height:100%;background:#12142a;overflow:hidden;overscroll-behavior:none;
     -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:none}
@@ -27,6 +27,29 @@
   #right::after{border-left:14px solid #fff;border-right:0}
   body.land #up{bottom:100px}body.land #left{bottom:44px}body.land #right{bottom:44px}body.land #down{bottom:-12px}
   body.land #a{bottom:36px}
+  /* saisie du message à l'agent + panneau (Académie / Arène / session) : cadre pixel-art */
+  #say{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));width:min(680px,calc(100vw - 20px));display:none;flex-direction:column;gap:6px;
+    background:#fbfbff;border:4px solid #1c2240;box-shadow:inset 0 0 0 3px #7f9ad0;padding:10px 12px;font-family:KP,monospace;color:#20243a;z-index:20;box-sizing:border-box}
+  #say-name{font-size:18px;letter-spacing:.5px}
+  #say .row{display:flex;gap:8px}
+  #say-in{flex:1;min-width:0;font:20px KP,monospace;color:#20243a;background:#eef1fb;border:3px solid #1c2240;padding:7px 9px;outline:0;border-radius:0;user-select:text;-webkit-user-select:text}
+  #say-in:focus{background:#fff;border-color:#d9483a}
+  #say button,#panel button{font:18px KP,monospace;color:#fff;background:#d9483a;border:3px solid #1c2240;padding:6px 12px;cursor:pointer;border-radius:0}
+  #say button#say-x,#panel button{background:#4a5a8c}
+  body.typing #pad{display:none}
+  #panel{position:fixed;inset:0;display:none;flex-direction:column;background:#12142a;z-index:30;padding:calc(8px + env(safe-area-inset-top)) 8px calc(8px + env(safe-area-inset-bottom))}
+  #panel .bar{display:flex;align-items:center;gap:10px;background:#fbfbff;border:4px solid #1c2240;border-bottom:0;box-shadow:inset 0 0 0 3px #7f9ad0;padding:6px 10px;font:20px KP,monospace;color:#20243a}
+  #panel-title{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #panel-f{flex:1;width:100%;border:4px solid #1c2240;background:#0a0a0a}
+  #ov{position:fixed;inset:0;background:rgba(10,12,30,.82);display:flex;align-items:center;justify-content:center;z-index:20}
+  #ov[hidden]{display:none}
+  #ovf{width:min(96vw,1100px);height:min(92vh,92dvh);display:flex;flex-direction:column;background:#1c2240;
+    border:4px solid #1c2240;box-shadow:0 0 0 4px #7f9ad0,0 0 0 8px #1c2240,0 10px 40px rgba(0,0,0,.6);image-rendering:pixelated}
+  #ovh{display:flex;align-items:center;gap:8px;padding:6px 8px;background:#7f9ad0;color:#fff;font:700 18px/1 KP,monospace;letter-spacing:1px}
+  #ov.arena #ovh{background:#c9433f}#ov.academy #ovh{background:#3f74c4}
+  #ovt{flex:1;text-shadow:2px 2px 0 #1c2240}
+  #ovx{width:44px;height:36px;border:3px solid #1c2240;background:#fbfbff;color:#20243a;font:700 20px/1 monospace;cursor:pointer;box-shadow:inset -3px -3px 0 #b4bcd6;touch-action:manipulation}
+  #ovi{flex:1;border:0;background:#fff;width:100%}
   pre#dbg{position:fixed;left:0;top:0;margin:0;color:#0f0;font:10px monospace;display:none}
 </style>
 </head>
@@ -36,7 +59,13 @@
   <div class="btn dp" id="up"></div><div class="btn dp" id="left"></div><div class="btn dp" id="right"></div><div class="btn dp" id="down"></div>
   <div class="btn" id="a">A</div>
 </div>
+<div id="say"><div id="say-name"></div><div class="row"><input id="say-in" maxlength="600" autocomplete="off" enterkeyhint="send"><button id="say-go">ENVOYER</button><button id="say-x">✕</button></div></div>
+<div id="panel"><div class="bar"><span id="panel-title"></span><button id="panel-x">✕ FERMER</button></div><iframe id="panel-f" referrerpolicy="no-referrer"></iframe></div>
+<div id="ov" hidden><div id="ovf"><div id="ovh"><span id="ovt"></span><button id="ovx" aria-label="Fermer">✕</button></div><iframe id="ovi" title="panneau"></iframe></div></div>
 <pre id="dbg" hidden></pre>
+<script src="sprites.js"></script>
+<script src="interior.js"></script>
+<script src="town.js"></script>
 <script src="world.js"></script>
 </body>
 </html>

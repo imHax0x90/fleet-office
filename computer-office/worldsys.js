@@ -60,7 +60,7 @@ function createWorld({ dir, getAgents }) {
       rowMax = Math.max(rowMax, rows * LOT_H + 2); maxW = Math.max(maxW, x0 + distW);
     });
     const w = Math.max(MIN_W, maxW), h = rowY + rowMax + 4;
-    return { districts, size: { w, h }, plaza: { academy: { x: Math.floor(w / 2) - 14, y: 3 }, arena: { x: Math.floor(w / 2) + 4, y: 3 }, spawn: { x: Math.floor(w / 2), y: 13 } } };
+    return { districts, size: { w, h }, plaza: { academy: { x: Math.floor(w / 2) - 14, y: 3 }, arena: { x: Math.floor(w / 2) + 4, y: 3 }, spawn: { x: Math.floor(w / 2), y: 16 } } };
   }
 
   function get() {
