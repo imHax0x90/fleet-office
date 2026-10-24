@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#1c2036">
+<title>Fleet Office · World</title>
+<style>
+  html,body{margin:0;height:100%;background:#12142a;overflow:hidden;overscroll-behavior:none;
+    -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:none}
+  #game{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;display:block;image-rendering:pixelated;image-rendering:crisp-edges;background:#12142a}
+  #pad{position:fixed;left:0;right:0;bottom:0;height:0;pointer-events:none;display:none;
+    padding-bottom:env(safe-area-inset-bottom)}
+  body.touch #pad{display:block}
+  .btn{position:absolute;pointer-events:auto;touch-action:none;border:3px solid #1c2240;
+    background:rgba(232,236,248,.28);color:#fff;font:700 20px/1 monospace;display:flex;align-items:center;justify-content:center;
+    box-shadow:inset 0 0 0 3px rgba(127,154,208,.55);-webkit-tap-highlight-color:transparent}
+  .btn.on{background:rgba(255,255,255,.55)}
+  .dp{width:56px;height:56px;border-radius:8px}
+  #up{left:68px;bottom:130px}#left{left:12px;bottom:74px}#right{left:124px;bottom:74px}#down{left:68px;bottom:18px}
+  #a{right:22px;bottom:62px;width:84px;height:84px;border-radius:50%;font-size:34px;background:rgba(200,70,60,.45)}
+  #a.on{background:rgba(255,120,100,.75)}
+  .dp::after{content:"";width:0;height:0;border:9px solid transparent}
+  #up::after{border-bottom:14px solid #fff;border-top:0}
+  #down::after{border-top:14px solid #fff;border-bottom:0}
+  #left::after{border-right:14px solid #fff;border-left:0}
+  #right::after{border-left:14px solid #fff;border-right:0}
+  body.land #up{bottom:100px}body.land #left{bottom:44px}body.land #right{bottom:44px}body.land #down{bottom:-12px}
+  body.land #a{bottom:36px}
+  pre#dbg{position:fixed;left:0;top:0;margin:0;color:#0f0;font:10px monospace;display:none}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="pad">
+  <div class="btn dp" id="up"></div><div class="btn dp" id="left"></div><div class="btn dp" id="right"></div><div class="btn dp" id="down"></div>
+  <div class="btn" id="a">A</div>
+</div>
+<pre id="dbg" hidden></pre>
+<script src="world.js"></script>
+</body>
+</html>

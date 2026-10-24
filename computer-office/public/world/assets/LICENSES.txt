@@ -1,0 +1,24 @@
+Fleet Office World - assets licenses
+====================================
+
+1) Kenney "Roguelike Indoors" pack (assets/indoor.png = Tilesheets/roguelikeIndoor_transparent.png)
+   Author : Kenney Vleugels (Kenney.nl)
+   URL    : https://kenney.nl/assets/roguelike-indoors
+   License: Creative Commons Zero (CC0 1.0) - https://creativecommons.org/publicdomain/zero/1.0/
+   Used for: tables, chairs, sofa, armchairs, plants, kitchen counters, piano.
+   (attribution not required; credited voluntarily)
+
+2) Kenney "Kenney Fonts" pack (assets/KenneyPixel.ttf = Fonts/Kenney Pixel.ttf)
+   Author : Kenney Vleugels (Kenney.nl)
+   URL    : https://kenney.nl/assets/kenney-fonts
+   License: Creative Commons Zero (CC0 1.0)
+   Used for: dialogue / HUD / name labels.
+
+3) All other graphics (floor, walls, windows, monitors, server racks, bookshelves,
+   rug, lamp, characters, speech bubbles, UI frames) are drawn procedurally in
+   world.js (original work, no third-party material).
+
+Candidates evaluated but not kept: Kenney "Roguelike Modern City" (CC0, exterior-oriented),
+Kenney "RPG Urban Pack" (CC0, exterior), Kenney "Roguelike Characters" (CC0, front-only
+paper-doll busts, no walk cycles), Kenney "Tiny Town" (CC0).
+No Nintendo / Game Freak / Pokemon material is used anywhere.
