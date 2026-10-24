@@ -536,10 +536,11 @@ function frame(now) {
   frame.cx += (tx - frame.cx) * Math.min(1, dt * 9); frame.cy += (ty - frame.cy) * Math.min(1, dt * 9);
   cam.x = Math.round(frame.cx); cam.y = Math.round(frame.cy);
   bx.imageSmoothingEnabled = false;
-  bx.fillStyle = '#12142a'; bx.fillRect(0, 0, bw, bh);
+  const BGC = scene === 'interior' ? '#2a1d14' : '#12142a'; // marges autour d'une pièce : brun chaud (plus de bleu nuit)
+  bx.fillStyle = BGC; bx.fillRect(0, 0, bw, bh);
   if (scene === 'town') { if (Town.ready) Town.draw(bx, bw, bh, now, player); } else Int.draw(bx, lx, lcv, bw, bh, now, player);
   ctx.imageSmoothingEnabled = false;
-  ctx.fillStyle = '#12142a'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = BGC; ctx.fillRect(0, 0, W, H);
   ctx.drawImage(buf, 0, 0, bw * Z, bh * Z);
   if (scene === 'interior') for (const n of Int.npcs) nameTag(n, (n.x - cam.x) * Z, (n.y - (n.seated ? 12 : 20) - 1 - cam.y) * Z - (n.look.crown ? 3 * Z : 0));
   drawHUD(); drawBanner(dt);

@@ -3,7 +3,8 @@
 (() => {
 'use strict';
 const FW = window.FW;
-const { TS, mk, R, clamp, rng, hash, shade, INK, CAP, CAP2, bubble, drawPerson, mkLook, bake } = FW;
+const { TS, mk, R, clamp, rng, hash, shade, INK, bubble, drawPerson, mkLook, bake } = FW;
+const CAP = '#6f5238', CAP2 = '#92704a'; // cadre de la pièce : bois chaud (avant : indigo)
 const MW = 26, MH = 18, cam = FW.cam, sheet = FW.sheet;
 let FL, blk, statics, interact, lights, desks, sofaSeats, npcs, npcById, nDesks = 8, house = null;
 const all = [];
@@ -18,8 +19,8 @@ function addTiles(sy, list) { // list: [col,row,x,y]
 }
 function shadowRect(px, py, w, h) {
   const c = FL.getContext('2d');
-  R(c, px + 1, py + h - 3, w + 2, 5, 'rgba(12,14,44,.34)');
-  R(c, px + w - 1, py + 3, 3, h - 3, 'rgba(12,14,44,.30)');
+  R(c, px + 1, py + h - 3, w + 2, 5, 'rgba(52,34,16,.34)');
+  R(c, px + w - 1, py + 3, 3, h - 3, 'rgba(52,34,16,.30)');
 }
 function buildFloor() {
   const c = FL.getContext('2d'); const r = rng(77);
@@ -27,10 +28,10 @@ function buildFloor() {
   // moquette (zone bureaux)
   for (let ty = 3; ty < 12; ty++) for (let tx = 1; tx < MW - 1; tx++) {
     const x = tx * TS, y = ty * TS, a = (tx + ty) & 1;
-    R(c, x, y, TS, TS, a ? '#566590' : '#5c6b97');
-    R(c, x, y, TS, 1, 'rgba(10,12,50,.16)'); R(c, x, y, 1, TS, 'rgba(10,12,50,.16)');
+    R(c, x, y, TS, TS, a ? '#e4d3ac' : '#dcc99f');
+    R(c, x, y, TS, 1, 'rgba(52,34,16,.16)'); R(c, x, y, 1, TS, 'rgba(52,34,16,.16)');
     R(c, x + 1, y + 1, TS - 1, 1, 'rgba(255,255,255,.05)');
-    for (let i = 0; i < 7; i++) R(c, x + 1 + (r() * 14 | 0), y + 1 + (r() * 14 | 0), 1, 1, r() < .5 ? 'rgba(255,255,255,.08)' : 'rgba(10,12,50,.14)');
+    for (let i = 0; i < 7; i++) R(c, x + 1 + (r() * 14 | 0), y + 1 + (r() * 14 | 0), 1, 1, r() < .5 ? 'rgba(255,255,255,.08)' : 'rgba(52,34,16,.14)');
   }
   // parquet (salon)
   const pl = ['#a06c44', '#a97550', '#98663f', '#b07c55'];
@@ -50,27 +51,27 @@ function buildFloor() {
   // liseré de transition
   R(c, TS, 12 * TS - 3, (MW - 2) * TS, 3, '#53381f'); R(c, TS, 12 * TS - 3, (MW - 2) * TS, 1, '#74512f');
   // murs
-  R(c, 0, 0, MW * TS, TS, CAP); R(c, 0, TS - 3, MW * TS, 3, CAP2); R(c, 0, TS - 1, MW * TS, 1, '#505a86');
+  R(c, 0, 0, MW * TS, TS, CAP); R(c, 0, TS - 3, MW * TS, 3, CAP2); R(c, 0, TS - 1, MW * TS, 1, '#8a6a48');
   for (let x = 0; x < MW * TS; x++) {
     // face du mur : haut clair + lambris
-    R(c, x, 16, 1, 22, '#dcd7ee');
-    R(c, x, 38, 1, 10, '#6b87a8');
+    R(c, x, 16, 1, 22, '#f2e8d0');
+    R(c, x, 38, 1, 10, '#9fb88f');
   }
-  R(c, 0, 16, MW * TS, 2, '#b9b3d6'); R(c, 0, 18, MW * TS, 1, '#e9e6f6');
-  for (let x = TS; x < MW * TS; x += 16) { R(c, x, 19, 1, 17, 'rgba(110,100,170,.20)'); }
-  R(c, 0, 35, MW * TS, 1, '#f3f0fb'); R(c, 0, 36, MW * TS, 2, '#a9a6cc');
-  R(c, 0, 38, MW * TS, 1, '#8fa8c4');
+  R(c, 0, 16, MW * TS, 2, '#dccba6'); R(c, 0, 18, MW * TS, 1, '#faf2de');
+  for (let x = TS; x < MW * TS; x += 16) { R(c, x, 19, 1, 17, 'rgba(150,118,66,.20)'); }
+  R(c, 0, 35, MW * TS, 1, '#fcf6e6'); R(c, 0, 36, MW * TS, 2, '#cdb88e');
+  R(c, 0, 38, MW * TS, 1, '#a89a74');
   for (let x = 4; x < MW * TS; x += 8) R(c, x, 40, 1, 5, 'rgba(30,50,90,.25)');
-  R(c, 0, 45, MW * TS, 3, '#39446a'); R(c, 0, 45, MW * TS, 1, '#56638f');
+  R(c, 0, 45, MW * TS, 3, '#7a5a3e'); R(c, 0, 45, MW * TS, 1, '#9a7650');
   // ombre du mur sur le sol
-  for (let i = 0; i < 7; i++) R(c, TS, 48 + i, (MW - 2) * TS, 1, `rgba(10,12,44,${0.30 - i * 0.045})`);
+  for (let i = 0; i < 7; i++) R(c, TS, 48 + i, (MW - 2) * TS, 1, `rgba(52,34,16,${0.30 - i * 0.045})`);
   // murs latéraux + bas
   for (const [x, w] of [[0, TS], [(MW - 1) * TS, TS]]) {
     R(c, x, 0, w, MH * TS, CAP); R(c, x + (x ? 0 : w - 3), 0, 3, MH * TS, CAP2);
   }
   R(c, 0, (MH - 1) * TS, MW * TS, TS, CAP); R(c, 0, (MH - 1) * TS, MW * TS, 3, CAP2);
-  for (let i = 0; i < 6; i++) { R(c, TS, 48 + 0, 0, 0, 'rgba(0,0,0,0)'); R(c, TS + i, 48, 1, 12 * TS - 3 - 48 + 12 * 0, `rgba(10,12,44,${0.22 - i * 0.035})`); R(c, (MW - 1) * TS - 1 - i, 48, 1, 12 * TS - 3 - 48, `rgba(10,12,44,${0.22 - i * 0.035})`); }
-  for (let i = 0; i < 6; i++) { R(c, TS + i, 12 * TS, 1, 5 * TS, `rgba(10,12,44,${0.22 - i * 0.035})`); R(c, (MW - 1) * TS - 1 - i, 12 * TS, 1, 5 * TS, `rgba(10,12,44,${0.22 - i * 0.035})`); R(c, TS, 17 * TS - 1 - i, (MW - 2) * TS, 1, `rgba(10,12,44,${0.22 - i * 0.035})`); }
+  for (let i = 0; i < 6; i++) { R(c, TS, 48 + 0, 0, 0, 'rgba(0,0,0,0)'); R(c, TS + i, 48, 1, 12 * TS - 3 - 48 + 12 * 0, `rgba(52,34,16,${0.22 - i * 0.035})`); R(c, (MW - 1) * TS - 1 - i, 48, 1, 12 * TS - 3 - 48, `rgba(52,34,16,${0.22 - i * 0.035})`); }
+  for (let i = 0; i < 6; i++) { R(c, TS + i, 12 * TS, 1, 5 * TS, `rgba(52,34,16,${0.22 - i * 0.035})`); R(c, (MW - 1) * TS - 1 - i, 12 * TS, 1, 5 * TS, `rgba(52,34,16,${0.22 - i * 0.035})`); R(c, TS, 17 * TS - 1 - i, (MW - 2) * TS, 1, `rgba(52,34,16,${0.22 - i * 0.035})`); }
   // porte (bas)
   const dx = 12 * TS; R(c, dx - 2, 16 * TS, 4 * TS + 4 - 32, 0, '#000');
   { const g = c.createLinearGradient(0, 17 * TS, 0, 18 * TS); g.addColorStop(0, '#d9f0ff'); g.addColorStop(1, '#7fb4de'); c.fillStyle = g; c.fillRect(dx, 17 * TS, 2 * TS, TS); }
@@ -82,7 +83,7 @@ function buildFloor() {
   lights.push({ x: dx + 16, y: 16 * TS, r: 46, col: 'win', k: .6 });
   // tapis du salon (8x4 tuiles)
   const rx = 3 * TS, ry = 13 * TS, rw = 8 * TS, rh = 4 * TS - 6;
-  R(c, rx + 3, ry + 3, rw, rh, 'rgba(12,14,44,.28)');
+  R(c, rx + 3, ry + 3, rw, rh, 'rgba(52,34,16,.28)');
   R(c, rx, ry, rw, rh, '#2a6f73'); R(c, rx + 2, ry + 2, rw - 4, rh - 4, '#efe2bd'); R(c, rx + 4, ry + 4, rw - 8, rh - 8, '#3b9a95');
   R(c, rx + 7, ry + 7, rw - 14, rh - 14, '#2a6f73');
   for (let x = rx + 9; x < rx + rw - 9; x += 8) { R(c, x, ry + rh / 2 - 2, 4, 4, '#d9694a'); R(c, x + 1, ry + rh / 2 - 3, 2, 6, '#d9694a'); R(c, x + 2, ry + rh / 2 - 1, 0, 0, '#000'); }
@@ -122,7 +123,7 @@ function whiteboard(c, x, y, w, h) {
   }
 }
 function clockAt(c, x, y) {
-  R(c, x - 6, y - 5, 12, 12, '#39446a'); R(c, x - 5, y - 6, 10, 14, '#39446a'); R(c, x - 5, y - 5, 10, 12, '#f6f3ea'); R(c, x - 6 + 1, y - 4, 12 - 2, 10, '#f6f3ea');
+  R(c, x - 6, y - 5, 12, 12, '#7a5a3e'); R(c, x - 5, y - 6, 10, 14, '#7a5a3e'); R(c, x - 5, y - 5, 10, 12, '#f6f3ea'); R(c, x - 6 + 1, y - 4, 12 - 2, 10, '#f6f3ea');
   R(c, x - 5, y - 6, 10, 1, '#f6f3ea'); R(c, x, y - 3, 1, 4, '#2a2d4a'); R(c, x, y + 1, 3, 1, '#2a2d4a'); R(c, x, y, 1, 1, '#d9694a');
 }
 function frame(c, x, y, w, h, col, mat) { R(c, x - 1, y - 1, w + 2, h + 2, '#5a3a22'); R(c, x, y, w, h, mat); R(c, x + 2, y + 2, w - 4, h - 4, col); R(c, x + 3, y + h - 5, w - 6, 2, 'rgba(255,255,255,.35)'); }
@@ -371,7 +372,7 @@ function lightSprite(col, r) {
   const m = { warm: ['rgba(255,226,160,1)', 'rgba(255,200,110,.55)'], cool: ['rgba(150,210,255,1)', 'rgba(110,170,255,.45)'], win: ['rgba(255,250,220,1)', 'rgba(255,240,190,.5)'] }[col];
   return lightSpr[k] = mkLightSpr(r, m[0], m[1]);
 }
-const AMBIENT = 'rgb(178,176,214)';
+const AMBIENT = 'rgb(236,228,214)';
 /* ───────── API ───────── */
 function build(h, nd) {
   house = h; nDesks = clamp(nd, 2, 8);
