@@ -301,7 +301,8 @@ function renderSessHead(a) {
   const branch = a.worktree && a.branch ? `<span class="sh-chip br">${ico("branch", 11)}${esc(a.branch)}</span>` : "";
   const prov = a.provider === "bedrock" ? `<span class="sh-chip bedrock">Bedrock</span>` : "";
   const changes = a.changes && a.changes.files ? `<span class="sh-chip"><span style="color:var(--ok)">+${a.changes.add || 0}</span> <span style="color:var(--del)">−${a.changes.del || 0}</span></span>` : "";
-  $("sess-head").innerHTML = `
+  if (renamingId === a.id) return;
+  const html = `
     <div class="sh-l">${stGlyph(a, true)}<span class="sh-name" id="h-name-txt">${esc(a.name)}</span><button class="rename-btn" id="h-rename" title="renommer">${ico("pencil", 12)}</button></div>
     <div class="sh-meta"><span class="sh-st">${esc(st(a).l)}${a.busy ? " · réfléchit" : ""}</span>${branch}${a.model ? `<span class="sh-chip">${esc(a.model)}${a.effort ? " · " + esc(a.effort) : ""}</span>` : ""}${prov}${changes}<span class="sh-chip host">${ico("server", 11)}${esc(a.host || "local")}</span></div>
     <div class="sh-act">
@@ -310,22 +311,33 @@ function renderSessHead(a) {
       <button class="icon-btn" id="h-ctx" title="détails">${ico("info", 15)}</button>
       <button class="icon-btn" id="h-team" title="équipe">${ico("users", 15)}</button>
     </div>`;
+  if (renderSessHead._h === html && $("h-rename")) return;
+  renderSessHead._h = html; $("sess-head").innerHTML = html;
   $("h-theme").onclick = () => { thScope = "conv"; openTheme(); };
-  $("h-refresh").onclick = () => { pollFeed(); pollHost(a); if (centerTab === "diff") loadDiff(true); };
-  $("h-ctx").onclick = () => { $("app").classList.toggle("ctx-open"); if ($("app").classList.contains("ctx-open")) renderCtx(a); };
+  const cur = () => agentById(a.id) || a;
+  $("h-refresh").onclick = () => { pollFeed(); pollHost(cur()); if (centerTab === "diff") loadDiff(true); };
+  $("h-ctx").onclick = () => { $("app").classList.toggle("ctx-open"); if ($("app").classList.contains("ctx-open")) renderCtx(cur()); };
   $("h-team").onclick = openTeam;
-  $("h-rename").onclick = () => startRename(a);
+  $("h-rename").onclick = () => startRename(cur());
 }
+let renamingId = null;
 function startRename(a) {
-  const hn = $("h-rename").closest(".sh-name"); if (!hn || hn.querySelector(".hn-input")) return;
-  const txt = $("h-name-txt"), input = document.createElement("input");
-  input.className = "hn-input"; input.value = a.name || ""; input.maxLength = 60;
+  const txt = $("h-name-txt"); if (!txt || renamingId) return;
+  renamingId = a.id; const input = document.createElement("input");
+  input.className = "hn-input"; input.value = a.name || ""; input.maxLength = 60; input.setAttribute("aria-label", "nom de la session");
   txt.replaceWith(input); $("h-rename").classList.add("hidden"); input.focus(); input.select();
   let done = false;
-  const restore = () => { const t = document.createElement("span"); t.id = "h-name-txt"; t.textContent = a.name || "—"; input.replaceWith(t); $("h-rename").classList.remove("hidden"); };
-  const commit = async () => { if (done) return; done = true; const v = input.value.trim(); if (!v || v === a.name) return restore(); const j = await post("/api/rename", { id: a.id, name: v }); if (!j.ok) { toast("Erreur : " + (j.error || "")); return restore(); } toast("✎ renommé : " + v); };
+  const finish = () => { renamingId = null; renderSessHead._h = null; const cur = agentById(a.id); if (cur) renderSessHead(cur); updateMobileTitle(cur || a); renderTabbar._sig = null; renderTabbar(); };
+  const commit = async () => {
+    if (done) return; done = true; const v = input.value.trim();
+    if (!v || v === a.name) return finish();
+    const j = await post("/api/rename", { id: a.id, name: v });
+    if (!j.ok) { toast("Erreur : " + (j.error || "")); return finish(); }
+    const cur = agentById(a.id); if (cur) cur.name = v; // affichage immédiat, le prochain snapshot confirme
+    toast("Renommé : " + v); finish();
+  };
   input.onblur = commit;
-  input.onkeydown = (e) => { if (e.key === "Enter") { e.preventDefault(); input.blur(); } else if (e.key === "Escape") { e.preventDefault(); done = true; restore(); } };
+  input.onkeydown = (e) => { if (e.key === "Enter") { e.preventDefault(); input.blur(); } else if (e.key === "Escape") { e.preventDefault(); done = true; finish(); } };
 }
 function renderSessTabs() {
   $("sess-tabs").querySelectorAll(".ctab").forEach((b) => b.classList.toggle("sel", b.dataset.ctab === centerTab));

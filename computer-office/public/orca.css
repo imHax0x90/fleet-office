@@ -244,3 +244,5 @@ svg.i { flex: 0 0 auto; display: block; }
 @media (max-width: 860px) { .arow { grid-template-columns: auto minmax(0, 1fr) auto; row-gap: 6px; } .ar-last { grid-column: 2; } .ar-next { grid-column: 2; } .ar-act { grid-column: 3; grid-row: 1 / span 3; flex-direction: column; } .auto-head { flex-direction: column; } }
 
 .chk-fld small { display: block; margin-top: 2px; } .chk-fld b { font-weight: 500; }
+
+.hn-input { height: 26px; min-width: 160px; max-width: 320px; padding: 0 8px; border-radius: 6px; background: var(--bg); color: var(--ink); border: 1px solid var(--fg-30); box-shadow: 0 0 0 3px var(--fg-8); font: inherit; font-size: 13px; font-weight: 600; outline: 0; }
