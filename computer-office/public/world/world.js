@@ -6,7 +6,7 @@ const FW = window.FW, Town = FW.Town, Int = FW.Interior;
 const { TS, mk, R, clamp, hash, cam, INK, drawStr, strW, GEAR, bubble, drawPerson, PLAYER_LOOK } = FW;
 const qs = new URLSearchParams(location.search);
 const DEMO = qs.has('demo'), RUN = qs.has('run');
-const SPEED_WALK = 38, SPEED_RUN = 58;   // px/s du joueur (réglage unique)
+const SPEED_WALK = 38, SPEED_RUN = 76;   // px/s du joueur (réglage unique)
 const $ = id => document.getElementById(id);
 const cv = $('game'), ctx = cv.getContext('2d');
 const buf = mk(8, 8), bx = buf.getContext('2d');
@@ -31,25 +31,33 @@ const curNpcs = () => scene === 'interior' ? Int.npcs : [];
 const curInteract = () => scene === 'interior' ? Int.interact : [];
 const isBlockedT = (tx, ty) => scene === 'interior' ? Int.isBlocked(tx, ty) : Town.blocked(tx, ty);
 
-let COLS = 38, dlg = null, HS = 16, Z = 3, bw = 100, bh = 100, W = 100, H = 100, FS = 16, dpr = 1;
+let COLS = 38, dlg = null, HS = 16, Z = 2, ZU = 3, bw = 100, bh = 100, W = 100, H = 100, FS = 16, dpr = 1;
 /* ───────── entrée ───────── */
 const keys = new Set(), order = [];
 const KMAP = { ArrowUp: 'u', KeyW: 'u', KeyZ: 'u', ArrowDown: 'd', KeyS: 'd', ArrowLeft: 'l', KeyA: 'l', KeyQ: 'l', ArrowRight: 'r', KeyD: 'r' };
 const ACT = new Set(['Enter', 'Space', 'KeyE', 'KeyF', 'KeyJ']);
-let actQueued = false;
-function press(d) { if (dlg && menuNav(d)) return; if (!keys.has(d)) { keys.add(d); order.push(d); } }
+let actQueued = false, shiftDown = false, touchRun = false;
+const running = () => RUN || shiftDown || touchRun;
+function press(d) { if (mapOpen) { mapNav(d); return; } if (dlg && menuNav(d)) return; if (!keys.has(d)) { keys.add(d); order.push(d); } }
 function release(d) { keys.delete(d); const i = order.indexOf(d); if (i >= 0) order.splice(i, 1); }
 addEventListener('keydown', e => {
   if (typing || panelOpen) return;
+  shiftDown = !!e.shiftKey;
   if (DEMO && e.code === 'KeyN' && !e.repeat) { demoNew++; lastNet = 0; }
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   if (overlayOpen) { if (e.code === 'Escape' || e.code === 'KeyB') { closeOverlay(); e.preventDefault(); } return; }
+  if (mapOpen) {
+    if (e.code === 'Escape' || e.code === 'KeyB' || e.code === 'KeyM') { closeMap(); e.preventDefault(); return; }
+    const md = KMAP[e.code]; if (md) { if (!e.repeat) mapNav(md); e.preventDefault(); return; }
+    if (ACT.has(e.code)) { if (!e.repeat) mapGo(); e.preventDefault(); } return;
+  }
+  if (e.code === 'KeyM' && !dlg && !fade && !e.repeat) { openMap(); e.preventDefault(); return; }
   if (e.code === 'Escape' || e.code === 'KeyB') { if (dlg) { dlg = null; e.preventDefault(); } else if (scene === 'interior' && !fade) { exitHouse(); e.preventDefault(); } return; }
   const d = KMAP[e.code]; if (d && !(e.code === 'KeyA' && false)) { press(d); e.preventDefault(); return; }
   if (ACT.has(e.code)) { if (!e.repeat) actQueued = true; e.preventDefault(); }
 });
-addEventListener('keyup', e => { const d = KMAP[e.code]; if (d) release(d); });
-addEventListener('blur', () => { keys.clear(); order.length = 0; });
+addEventListener('keyup', e => { shiftDown = !!e.shiftKey; const d = KMAP[e.code]; if (d) release(d); });
+addEventListener('blur', () => { keys.clear(); order.length = 0; shiftDown = false; touchRun = false; });
 // touch
 const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0 || qs.has('touch');
 if (isTouch) document.body.classList.add('touch');
@@ -58,7 +66,10 @@ for (const [id, d] of [['up', 'u'], ['down', 'd'], ['left', 'l'], ['right', 'r']
   el.addEventListener('pointerdown', on); el.addEventListener('pointerup', off); el.addEventListener('pointercancel', off); el.addEventListener('lostpointercapture', off);
 }
 { const el = $('a'); el.addEventListener('pointerdown', e => { e.preventDefault(); el.classList.add('on'); actQueued = true; }); const off = () => el.classList.remove('on'); el.addEventListener('pointerup', off); el.addEventListener('pointercancel', off); }
+{ const b = $('b'); if (b) { const on = e => { e.preventDefault(); b.classList.add('on'); touchRun = true; try { b.setPointerCapture(e.pointerId); } catch (_) { } }, off = e => { e.preventDefault(); b.classList.remove('on'); touchRun = false; }; b.addEventListener('pointerdown', on); b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); b.addEventListener('lostpointercapture', off); } }
+{ const m = $('mapbtn'); if (m) m.addEventListener('pointerdown', e => { e.preventDefault(); if (mapOpen) closeMap(); else if (!dlg && !fade && !overlayOpen && !typing && !panelOpen) openMap(); }); }
 cv.addEventListener('pointerdown', e => {
+  if (mapOpen) { mapPointer(e); e.preventDefault(); return; }
   if (!dlg) return;
   if (dlg.rects) { const r = cv.getBoundingClientRect(), px = (e.clientX - r.left) * W / r.width, py = (e.clientY - r.top) * H / r.height; for (const z of dlg.rects) if (px >= z.x && px <= z.x + z.w && py >= z.y && py <= z.y + z.h) dlg.sel = z.i; }
   actQueued = true; e.preventDefault();
@@ -72,12 +83,12 @@ function hitsAt(x, y) {
 }
 function updatePlayer(dt) {
   player.moving = false;
-  if (dlg || fade || overlayOpen) return;
+  if (dlg || fade || overlayOpen || mapOpen) return;
   const d = order.length ? order[order.length - 1] : null;
   if (!d) return;
   const dx = d === 'l' ? -1 : d === 'r' ? 1 : 0, dy = d === 'u' ? -1 : d === 'd' ? 1 : 0;
   player.dir = dy > 0 ? 0 : dy < 0 ? 1 : dx < 0 ? 2 : 3;
-  let left = (RUN ? SPEED_RUN : SPEED_WALK) * dt;
+  let left = (running() ? SPEED_RUN : SPEED_WALK) * dt;
   while (left > 0) {
     const st = Math.min(left, 1); left -= st;
     const nx = player.x + dx * st, ny = player.y + dy * st;
@@ -85,7 +96,7 @@ function updatePlayer(dt) {
     else if (dx) { for (const s of [-1, 1]) if (!hitsAt(nx, ny + s * 1)) { player.y += s * .6; player.moving = true; break; } }
     else if (dy) { for (const s of [-1, 1]) if (!hitsAt(nx + s * 1, ny)) { player.x += s * .6; player.moving = true; break; } }
   }
-  if (player.moving) player.t += dt;
+  if (player.moving) player.t += dt * (running() ? 1.55 : 1);
 }
 
 const tagCache = new Map();
@@ -113,7 +124,7 @@ function wrap(text, max) {
 function paginate(lines, per = 3) { const p = []; for (let i = 0; i < lines.length; i += per) p.push(lines.slice(i, i + per)); return p; }
 function maxChars() { return clamp(Math.floor((dlgW() - 12 * dU()) / Math.max(1, charW())), 16, 38); }
 let _cw = 0; function charW() { ctx.font = FS + 'px KP'; return _cw = ctx.measureText('n').width; }
-const dU = () => Math.max(2, Math.round(Z * .75));
+const dU = () => Math.max(2, Math.round(ZU * .75));
 function dlgW() { return Math.min(W - 6 * dU(), Math.ceil(COLS * charW()) + 16 * dU()) - (isTouch && W > H ? 160 * dpr : 0); }
 function openDialog(name, pages) { dlg = { name, pages, page: 0, chars: 0, done: false, t: 0 }; }
 function talkTo(n) {
@@ -199,6 +210,7 @@ async function converse(n, text) {
 }
 function plural(n, s) { return n + ' ' + s + (n > 1 ? 's' : ''); }
 function doAction() {
+  if (mapOpen) { mapGo(); return; }
   if (dlg) {
     if (typing || panelOpen) return;
     const page = dlg.pages[dlg.page], total = page.join('').length;
@@ -315,14 +327,15 @@ function resize() {
   const cw = innerWidth, ch = innerHeight;
   W = Math.round(cw * dpr); H = Math.round(ch * dpr);
   cv.width = W; cv.height = H;
-  let zc = cw < 640 ? 3 : Math.round(Math.min(cw / 360, ch / 216));
-  zc = clamp(zc, 2, 5);
-  Z = Math.max(1, Math.round(zc * dpr));
+  let zu = cw < 640 ? 3 : Math.round(Math.min(cw / 360, ch / 216)); zu = clamp(zu, 2, 5);   // échelle de l'INTERFACE (dialogues, HUD)
+  let zc = cw < 640 ? 2 : Math.round(Math.min(cw / 640, ch / 360)); zc = clamp(zc, 2, 4);   // échelle du MONDE : ~40×22 cases à l'écran (avant ~27×15)
+  if (qs.get('zoom')) zc = clamp(+qs.get('zoom') || zc, 1, 6);
+  ZU = Math.max(1, Math.round(zu * dpr)); Z = Math.max(1, Math.round(zc * dpr));
   bw = Math.ceil(W / Z); bh = Math.ceil(H / Z);
   buf.width = bw; buf.height = bh; lcv.width = bw; lcv.height = bh;
-  FS = 16; HS = 8 * Math.max(2, Math.round(Z * 1.0));
+  FS = 16; HS = 8 * Math.max(2, Math.round(ZU * 1.0));
   COLS = cw < 640 ? 24 : 38;
-  { const u = Math.max(2, Math.round(Z * .75)); for (const f of [96, 80, 64, 48, 32, 16]) { FS = f; ctx.font = f + 'px KP'; if (f <= 16 * Z && COLS * ctx.measureText('n').width + 16 * u <= W * .96) break; } }
+  { const u = Math.max(2, Math.round(ZU * .75)); for (const f of [96, 80, 64, 48, 32, 16]) { FS = f; ctx.font = f + 'px KP'; if (f <= 16 * ZU && COLS * ctx.measureText('n').width + 16 * u <= W * .96) break; } }
   document.body.classList.toggle('land', cw > ch);
 }
 addEventListener('resize', resize);
@@ -335,7 +348,7 @@ function panel(x, y, w, h, u) {
 }
 function drawHUD() {
   const [w, b, f, i] = counts();
-  const u = Math.max(2, Math.round(Z * .6)), fs = HS, pad = 3 * u, y = 2 * u + (isTouch ? 0 : 0), x = 2 * u;
+  const u = Math.max(2, Math.round(ZU * .6)), fs = HS, pad = 3 * u, y = 2 * u + (isTouch ? 0 : 0), x = 2 * u;
   ctx.font = `${fs}px KP`; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
   const parts = [['work', String(w)], ['blocked', String(b)], ['failed', String(f)], ['idle', String(i)]];
   const iw = 9 * u; let tw = 0; for (const p of parts) tw += iw + ctx.measureText(p[1]).width + 4 * u;
@@ -390,7 +403,7 @@ function drawDialog(dt) {
   }
 }
 function drawBanner(dt) {
-  const u = Math.max(2, Math.round(Z * .75)), fs = HS;
+  const u = Math.max(2, Math.round(ZU * .75)), fs = HS;
   ctx.font = `${fs}px KP`;
   const lines = [];
   if (banner) { banner.t += dt; if (banner.t > 3.2) banner = null; else lines.push([banner.name, banner.sub, Math.min(1, banner.t * 4) * (banner.t > 2.7 ? Math.max(0, (3.2 - banner.t) * 2) : 1)]); }
@@ -408,6 +421,91 @@ function drawBanner(dt) {
     const m = msgs[msgs.length - 1], a = Math.min(1, m.t * 4) * (m.t > 3.9 ? Math.max(0, (4.5 - m.t) / .6) : 1), tw = strW(ctx, m.text) + 12 * u, th = fs * 1.3 + 5 * u, x = Math.round((W - tw) / 2), y = H - th - 4 * u - (isTouch && H > W ? 220 * dpr : 0) - (dlg ? 120 * dpr : 0);
     ctx.globalAlpha = a; panel(x, y, tw, th, u); drawStr(ctx, m.text, x + 6 * u, y + 3 * u + Math.round(fs * .85), '#20243a'); ctx.globalAlpha = 1;
   }
+}
+
+/* ───────── carte de la ville (touche M) ───────── */
+let mapOpen = false, mapSel = 0, mapT = 0, mapRects = [];
+const ROOF = ['#2f8f8a', '#7a4fb0', '#c0463d', '#d98a2b', '#3f6fc0', '#5a9a3a'];
+function mapTargets() {
+  if (!Town.ready) return [];
+  const d = Town.data, out = [{ plaza: true, name: 'LA PLACE', sub: 'Académie et Arène', tx: d.plaza.spawn.x, ty: d.plaza.spawn.y - 1, st: 0 }];
+  for (const h of d.houses) { const p = Town.spawnPos(h); out.push({ h, name: h.name, sub: h.district, tx: p.x / TS, ty: p.y / TS, st: h.style }); }
+  return out;
+}
+function openMap() {
+  if (!Town.ready) return; const t = mapTargets(); if (!t.length) return;
+  mapOpen = true; mapT = 0; order.length = 0; keys.clear();
+  let best = 0, bd = 1e9; const px = scene === 'town' ? player.x / TS : (curHouse ? Town.spawnPos(curHouse).x / TS : t[0].tx), py = scene === 'town' ? player.y / TS : (curHouse ? Town.spawnPos(curHouse).y / TS : t[0].ty);
+  t.forEach((q, i) => { const dd = Math.hypot(q.tx - px, q.ty - py); if (dd < bd) { bd = dd; best = i; } }); mapSel = best;   // curseur sur la maison la plus proche
+}
+function closeMap() { mapOpen = false; order.length = 0; keys.clear(); }
+function mapNav(d) {
+  const t = mapTargets(); if (!t.length) return; const c = t[mapSel], vx = d === 'l' ? -1 : d === 'r' ? 1 : 0, vy = d === 'u' ? -1 : d === 'd' ? 1 : 0;
+  let best = -1, bs = 1e9;
+  t.forEach((q, i) => { if (i === mapSel) return; const dx = q.tx - c.tx, dy = q.ty - c.ty, along = dx * vx + dy * vy, perp = Math.abs(dx * vy) + Math.abs(dy * vx); if (along <= 0.5) return; const s = along + perp * 1.6; if (s < bs) { bs = s; best = i; } });
+  if (best >= 0) mapSel = best; else mapSel = (mapSel + (d === 'l' || d === 'u' ? t.length - 1 : 1)) % t.length;   // rien dans cette direction : on fait le tour
+}
+function mapGo() {
+  const t = mapTargets(), q = t[mapSel]; if (!q) return; closeMap(); dlg = null;
+  startFade(() => {
+    const p = q.plaza ? Town.plazaSpawn() : Town.spawnPos(q.h);
+    scene = 'town'; curHouse = null; player.x = p.x; player.y = p.y; player.dir = 0; order.length = 0; keys.clear(); frame.cx = undefined;
+    if (q.h) setBanner(q.h.name, q.h.district); else banner = null;
+  });
+}
+function mapPointer(e) {
+  const r = cv.getBoundingClientRect(), px = (e.clientX - r.left) * W / r.width, py = (e.clientY - r.top) * H / r.height;
+  let hit = -1, hd = 1e9; for (const z of mapRects) { const dd = Math.hypot(px - z.x, py - z.y); if (dd < z.r && dd < hd) { hd = dd; hit = z.i; } }
+  if (hit >= 0) { if (hit === mapSel) mapGo(); else mapSel = hit; return; }
+  closeMap();
+}
+function drawMap(dt, now) {
+  mapT += dt; const d = Town.data, u = dU(), fs = HS; mapRects = [];
+  ctx.fillStyle = 'rgba(8,10,28,.86)'; ctx.fillRect(0, 0, W, H);
+  const pad = 3 * u, tH = fs + 6 * u, iH = fs * 2 + 8 * u, px = Math.round(W * .04), py = Math.round(H * .05), pw = W - 2 * px, ph = H - 2 * py;
+  panel(px, py, pw, ph, u);
+  ctx.font = `${fs}px KP`; ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+  drawStr(ctx, 'CARTE DE LA VILLE', px + 6 * u, py + 5 * u + fs, '#20243a');
+  const ax = px + 4 * u, ay = py + tH, aw = pw - 8 * u, ah = ph - tH - iH - 3 * u;
+  const sc = Math.max(1, Math.min(aw / d.size.w, ah / d.size.h)), s = sc >= 2 ? Math.floor(sc) : sc, mw = d.size.w * s, mh = d.size.h * s, ox = Math.round(ax + (aw - mw) / 2), oy = Math.round(ay + (ah - mh) / 2);
+  const X = tx => ox + tx * s, Y = ty => oy + ty * s;
+  ctx.fillStyle = '#2f6f45'; ctx.fillRect(ox, oy, mw, mh);
+  ctx.fillStyle = '#6fb257'; ctx.fillRect(X(2), Y(2), (d.size.w - 4) * s, (d.size.h - 4) * s);
+  const pl = d.plaza, bw = 12, bh = 7;
+  ctx.fillStyle = '#d9cfb8'; ctx.fillRect(X(pl.academy.x - 1), Y(2), (pl.arena.x + bw - pl.academy.x + 2) * s, (pl.spawn.y + 2) * s);
+  ctx.fillStyle = '#3a5fb0'; ctx.fillRect(X(pl.academy.x), Y(pl.academy.y), bw * s, bh * s); ctx.fillStyle = '#c0463d'; ctx.fillRect(X(pl.arena.x), Y(pl.arena.y), bw * s, bh * s);
+  const lf = Math.max(8, Math.min(20, Math.round(s * 1.7))); ctx.font = `${lf}px KP`;
+  drawStr(ctx, 'ACADEMIE', X(pl.academy.x) + s, Y(pl.academy.y) + bh * s * .6, '#fff'); drawStr(ctx, 'ARENE', X(pl.arena.x) + s * 2, Y(pl.arena.y) + bh * s * .6, '#fff');
+  ctx.fillStyle = '#4aa0d8'; ctx.beginPath(); ctx.arc(X((pl.academy.x + bw + pl.arena.x) / 2), Y(pl.academy.y + bh + 2.5), Math.max(3, s * 1.4), 0, 7); ctx.fill();   // fontaine
+  for (const q of d.districts) {
+    ctx.fillStyle = '#86cc6b'; ctx.fillRect(X(q.x), Y(q.y), q.w * s, q.h * s); ctx.strokeStyle = '#4c8d3e'; ctx.lineWidth = 1; ctx.strokeRect(X(q.x) + .5, Y(q.y) + .5, q.w * s - 1, q.h * s - 1);
+    ctx.font = `${lf}px KP`; drawStr(ctx, String(q.name).toUpperCase().replace(/[^A-Z0-9 &\/]/g, ''), X(q.x) + s * .6, Y(q.y) + lf + 1, '#1f4d2a');
+  }
+  const t = mapTargets(), blink = (((mapT * 3) | 0) & 1) === 0;
+  t.forEach((q, i) => {
+    if (q.plaza) { mapRects.push({ x: X(q.tx), y: Y(q.ty), r: Math.max(8, s * 2.5), i }); return; }
+    const hw = Math.max(5, s * 3.2), hh = Math.max(4, s * 2.4), cx = X(q.tx), cy = Y(q.ty - 1.6), h = q.h;
+    ctx.fillStyle = '#f3efe4'; ctx.fillRect(Math.round(cx - hw / 2), Math.round(cy - hh / 2 + hh * .35), Math.round(hw), Math.round(hh * .65));
+    ctx.fillStyle = ROOF[q.st % 6]; ctx.fillRect(Math.round(cx - hw / 2 - 1), Math.round(cy - hh / 2), Math.round(hw + 2), Math.round(hh * .45));
+    const stc = h.failed > 0 ? '#e0463a' : h.blocked > 0 ? '#f08a24' : h.working > 0 ? '#ffd23a' : null;
+    if (stc) { ctx.strokeStyle = stc; ctx.lineWidth = Math.max(1, Math.round(u / 2)); ctx.strokeRect(Math.round(cx - hw / 2 - 2) + .5, Math.round(cy - hh / 2 - 2) + .5, Math.round(hw + 4), Math.round(hh + 4)); }
+    if (i === mapSel && blink) { ctx.strokeStyle = '#ffffff'; ctx.lineWidth = Math.max(2, u); ctx.strokeRect(Math.round(cx - hw / 2 - 4), Math.round(cy - hh / 2 - 4), Math.round(hw + 8), Math.round(hh + 8)); }
+    mapRects.push({ x: cx, y: cy, r: Math.max(10, hw), i });
+  });
+  const sel = t[mapSel];
+  if (sel && sel.plaza && blink) { ctx.strokeStyle = '#fff'; ctx.lineWidth = Math.max(2, u); ctx.strokeRect(X(pl.academy.x - 1), Y(2), (pl.arena.x + bw - pl.academy.x + 2) * s, (pl.spawn.y + 2) * s); }
+  // le joueur
+  { const pp = scene === 'town' ? { x: player.x / TS, y: player.y / TS } : (curHouse ? { x: Town.spawnPos(curHouse).x / TS, y: Town.spawnPos(curHouse).y / TS - 1 } : null);
+    if (pp && (((mapT * 2) | 0) & 1) === 0) { const r = Math.max(3, Math.round(s * .9)); ctx.fillStyle = '#e8483a'; ctx.beginPath(); ctx.arc(X(pp.x), Y(pp.y), r, 0, 7); ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke(); } }
+  // bandeau d'info
+  const by = py + ph - iH - 2 * u; ctx.fillStyle = '#dfe5f6'; ctx.fillRect(px + 3 * u, by, pw - 6 * u, iH);
+  ctx.font = `${fs}px KP`;
+  if (sel) {
+    drawStr(ctx, String(sel.name), px + 7 * u, by + 2 * u + fs, '#20243a');
+    const n = sel.h ? sel.h.agentIds.length : 0, info = sel.plaza ? sel.sub : `${sel.sub} - ${n} agent${n > 1 ? 's' : ''}${sel.h && sel.h.working ? ' - ' + sel.h.working + ' au travail' : ''}${sel.h && sel.h.blocked ? ' - ' + sel.h.blocked + ' en attente' : ''}`;
+    drawStr(ctx, info, px + 7 * u, by + 3 * u + fs * 2, '#4a5a8c');
+  }
+  ctx.textAlign = 'right'; const hint = isTouch ? 'TOUCHER : CHOISIR / Y ALLER' : 'A : Y ALLER   M : FERMER'; ctx.fillStyle = '#4a5a8c'; ctx.font = `${Math.max(10, Math.round(fs * .8))}px KP`; ctx.fillText(hint, px + pw - 7 * u, by + 2 * u + fs); ctx.textAlign = 'left';
 }
 function frame(now) {
   const dt = Math.min(.05, (now - frame.last) / 1000 || 0.016); frame.last = now;
@@ -446,6 +544,7 @@ function frame(now) {
   if (scene === 'interior') for (const n of Int.npcs) nameTag(n, (n.x - cam.x) * Z, (n.y - (n.seated ? 12 : 20) - 1 - cam.y) * Z - (n.look.crown ? 3 * Z : 0));
   drawHUD(); drawBanner(dt);
   if (dlg) drawDialog(dt);
+  if (mapOpen) drawMap(dt, now);
   if (fade) { const a = fade.phase === 0 ? Math.min(1, fade.t / .22) : 1 - Math.min(1, fade.t / .22); ctx.fillStyle = `rgba(8,10,28,${a})`; ctx.fillRect(0, 0, W, H); }
   if (((frame.n = (frame.n || 0) + 1) % 8) === 0) debug();
   requestAnimationFrame(frame);
@@ -461,7 +560,7 @@ function debug() {
     menu: dlg && dlg.rects ? dlg.menu.map(o => o.label).join('/') + '@' + dlg.sel : null, typing: typing ? typing.name : null, panel: panelOpen, wait: !!(dlg && dlg.wait),
     dialog: dlg ? (dlg.name + '|' + dlg.pages[dlg.page].join(' / ') + '|p' + (dlg.page + 1) + '/' + dlg.pages.length + (dlg.pending ? '|pending' : '')) : null,
     houses: td ? td.houses.length : 0, hl: tl, academy: bn('academy'), arena: bn('arena'), size: td ? td.size : null, spawn: td ? td.plaza.spawn : null,
-    npcs: nn.length, work: nn.filter(n => n.mode === 'work').length, seated: nn.filter(n => n.seated).length, net: stats.net, err: stats.err || null, fps: Math.round(stats.fps), Z, bw, bh, cam: [cam.x, cam.y], touch: isTouch,
+    npcs: nn.length, work: nn.filter(n => n.mode === 'work').length, seated: nn.filter(n => n.seated).length, net: stats.net, err: stats.err || null, map: mapOpen, sel: mapOpen ? (mapTargets()[mapSel] || {}).name : null, run: running(), Z, ZU, fps: Math.round(stats.fps), Z, bw, bh, cam: [cam.x, cam.y], touch: isTouch,
     names: nn.map(n => n.name + ':' + n.mode + ':' + Math.round(n.x) + ',' + Math.round(n.y)),
   });
 }
