@@ -996,9 +996,13 @@ function spawnAgent({ name, role, cwd, prompt, model, perm, teamId: joinTeamId, 
   if (wtMeta) setTimeout(() => { try { refreshWorktreeChanges(); } catch {} }, 4000);
   return sessionId;
 }
-function spawnTeam({ name, goal, cwd, model, perm, roles, chief, provider, effort }) {
-  if (!cwd || !fs.existsSync(cwd)) throw new Error("workspace introuvable : " + cwd);
-  if (!fs.statSync(cwd).isDirectory()) throw new Error("workspace n'est pas un dossier : " + cwd);
+function spawnTeam({ name, goal, cwd, model, perm, roles, chief, provider, effort, host }) {
+  const remote = !!(host && host !== "local");
+  if (!cwd || !String(cwd).trim()) throw new Error("workspace requis");
+  if (!remote) {
+    if (!fs.existsSync(cwd)) throw new Error("workspace introuvable : " + cwd);
+    if (!fs.statSync(cwd).isDirectory()) throw new Error("workspace n'est pas un dossier : " + cwd);
+  }
   if (!goal || !String(goal).trim()) throw new Error("objectif d'équipe requis");
   const list = (Array.isArray(roles) && roles.length) ? roles : ["Architecte", "Backend", "Frontend", "DevOps", "QA"];
   const prov = provider === "bedrock" ? "bedrock" : "anthropic";
@@ -1042,7 +1046,7 @@ function spawnTeam({ name, goal, cwd, model, perm, roles, chief, provider, effor
       : `\n\nQuand ta tâche est finie : NE clos PAS la mission. Écris « [FINI][${role}] <résumé> » dans TEAM_NOTES.md à l'attention du chef (${chiefLabel}) et reste en attente de ses instructions / de la décision de l'humain.`;
     const mModel = isChief ? chiefModel : memberModel;
     managed.set(sessionId, {
-      id: sessionId, name: isChief ? `${role} 👑` : role, role, cwd, model: mModel,
+      id: sessionId, name: isChief ? `${role} 👑` : role, role, cwd, model: mModel, host: remote ? host : null,
       perm: SAFE_PERMS.includes(perm) ? perm : DEFAULT_PERM, status: "working",
       startedAt: Date.now(), lastPrompt: "[équipe] " + goal, costUsd: 0, teamId, teamGoal: goal, teamName,
       chief: isChief, provider: prov, effort: effort || null,
@@ -1050,7 +1054,7 @@ function spawnTeam({ name, goal, cwd, model, perm, roles, chief, provider, effor
     runClaude({ sessionId, cwd, prompt: base + tail, model: mModel, perm, resume: false });
     ids.push(sessionId);
   });
-  logAudit("team", { id: teamId, name: teamName, goal, cwd, members: list.length, provider: prov });
+  logAudit("team", { id: teamId, name: teamName, goal, cwd, members: list.length, provider: prov, host: remote ? host : "local" });
   return { teamId, ids, teamName };
 }
 // "Adopte" n'importe quelle session live (interactive ou bg) pour la rendre pilotable.
@@ -1966,6 +1970,28 @@ const server = http.createServer(async (req, res) => {
     const b = await readBody(req);
     try { return sendJSON(res, 200, { ok: true, roles: addRole(b.role) }); }
     catch (e) { return sendJSON(res, 400, { ok: false, error: String(e.message || e) }); }
+  }
+  // ---- vue d'équipe : TEAM_NOTES.md (local ou nœud distant, lecture asynchrone) + message à toute l'équipe ----
+  if (p === "/api/teamnotes" && req.method === "GET") {
+    const tid = url.searchParams.get("teamId") || "";
+    const m = [...managed.values()].find((x) => x.teamId === tid && x.cwd && x.cwd !== "~" && x.cwd !== "-");
+    if (!m) return sendJSON(res, 404, { ok: false, error: "équipe introuvable" });
+    const file = String(m.cwd).replace(/\/+$/, "") + "/TEAM_NOTES.md", host = m.host && m.host !== "local" ? m.host : null;
+    const done = (err, text) => sendJSON(res, 200, { ok: !err, text: err ? "" : text, path: file, host: host || "local", missing: !!err });
+    if (!host) { fs.readFile(file, "utf8", (e, t) => done(e, (t || "").slice(-60000))); return; }
+    exec("timeout -k 3 8 ssh " + SSH_OPTS.join(" ") + " " + shq(host) + " " + shq("tail -c 60000 " + shq(file)), { timeout: 12000, killSignal: "SIGKILL", maxBuffer: 4 * 1024 * 1024 }, (e, out) => done(e, out || ""));
+    return;
+  }
+  if (req.method === "POST" && p === "/api/team-send") {
+    const b = await readBody(req);
+    try {
+      const text = String(b.prompt || "").trim(); if (!text) throw new Error("message vide");
+      const targets = [...managed.values()].filter((m) => m.teamId === b.teamId && (!b.onlyChief || m.chief));
+      if (!targets.length) throw new Error("équipe introuvable");
+      for (const m of targets) sendAgent(m.id, "📣 Message de l'humain à toute l'équipe : " + text);
+      logAudit("team-send", { teamId: b.teamId, members: targets.length });
+      broadcast(true); return sendJSON(res, 200, { ok: true, sent: targets.length });
+    } catch (e) { return sendJSON(res, 400, { ok: false, error: String(e.message || e) }); }
   }
   if (p === "/api/automations" && req.method === "GET") return sendJSON(res, 200, { ok: true, automations: automations.list(), tz: require("./automations").TZ });
   if (req.method === "POST" && p.startsWith("/api/automations/")) {

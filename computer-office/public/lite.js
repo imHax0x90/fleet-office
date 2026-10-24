@@ -48,6 +48,11 @@ const IP = {
   clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
   play: '<polygon points="6 3 20 12 6 21 6 3"/>',
   trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+  crown: '<path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/><path d="M5.5 21h13"/>',
+  grid: '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
+  panel: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/>',
+  power: '<path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.77.04"/>',
+  expand: '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>',
   logo: '<path d="M2 18c2.5-4 5-6 8-6s4 3 7 3 3.5-2 5-5"/><path d="M5 6c1-1.5 2.5-2 4-1.5"/><circle cx="17" cy="6.5" r="1.2" fill="currentColor"/>',
 };
 const ico = (n, s = 16) => `<svg class="i" viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IP[n] || ""}</svg>`;
@@ -120,6 +125,8 @@ function onSnapshot() {
   $("nav-machines").textContent = new Set(ags.map((a) => a.host).filter(Boolean)).size + 1;
   renderSidebar(); renderStatusline(); renderTabbar();
   if (view === "board" && !detailId) { applyCenterVisibility(); renderBoard(); }
+  $("nav-teams").textContent = (snap.teams || []).length;
+  if (view === "teams" && !detailId) renderTeams();
   if (view === "machines") renderMachines();
   if (detailId) {
     const a = agentById(detailId);
@@ -179,7 +186,7 @@ function agentCard(a) {
   const statusLine = intent ? `<div class="ac-status-line">${esc(String(intent).slice(0, 90))}</div>` : "";
   const sa = a.subAgents || [];
   const subs = sa.length ? `<div class="ac-subs"><div class="ac-subs-h">${sa.length} agent${sa.length > 1 ? "s" : ""}</div>${sa.map((s) => `<div class="subrow" data-sub="${esc(s.id)}">${stGlyph(s)}<span class="sn">${esc(s.name || s.role || "sous-agent")}</span></div>`).join("")}</div>` : "";
-  const badge = a.teamName ? `<span class="ac-badge" title="${esc(a.teamName)}">${ico("users", 11)}</span>` : (a.fanoutId ? `<span class="ac-badge" title="fan-out">${ico("branch", 11)}</span>` : "");
+  const badge = a.teamName ? `<span class="ac-badge" data-team="${esc(a.teamId || "")}" title="Équipe « ${esc(a.teamName)} » — ouvrir la vue d'équipe">${ico("users", 11)}</span>` : (a.fanoutId ? `<span class="ac-badge" title="fan-out">${ico("branch", 11)}</span>` : "");
   return `<button class="acard ${detailId === a.id ? "sel" : ""} ${a.busy ? "working" : ""}${tcAttr(a.id)}" data-card="${esc(a.id)}" title="${esc((a.model || "") + (a.host ? " · " + a.host : ""))}">
     <div class="ac-top">${stGlyph(a)}<span class="ac-name">${esc(a.name)}</span>${badge}${review ? `<span class="ac-pill">à revoir</span>` : ""}${a.changes ? chg(a.changes) : ""}<span class="ac-star ${fav ? "on" : ""}" data-star="${esc(a.id)}" title="${fav ? "Retirer des favoris" : "Épingler"}">${ico("star", 12)}</span></div>
     <div class="ac-sub">${second}<span class="ac-right"><span class="ac-host">${esc(a.host || "local")}</span><span class="ac-time">${esc(relT(a.updatedAt) || "")}</span></span></div>
@@ -212,7 +219,8 @@ function renderSidebar() {
 }
 const b2 = (a) => isActive(a) ? 2 : isReview(a) ? 1 : 0;
 function wireSidebar(el) {
-  el.querySelectorAll("[data-card]").forEach((c) => (c.onclick = (e) => { if (e.target.closest("[data-sub]") || e.target.closest("[data-star]")) return; select(c.dataset.card); }));
+  el.querySelectorAll("[data-card]").forEach((c) => (c.onclick = (e) => { if (e.target.closest("[data-sub]") || e.target.closest("[data-star]") || e.target.closest("[data-team]")) return; select(c.dataset.card); }));
+  el.querySelectorAll("[data-team]").forEach((x) => (x.onclick = (e) => { e.stopPropagation(); if (x.dataset.team) openTeamView(x.dataset.team); }));
   el.querySelectorAll("[data-star]").forEach((x) => (x.onclick = (e) => { e.stopPropagation(); toggleFav(x.dataset.star); }));
   el.querySelectorAll("[data-ws]").forEach((h) => (h.onclick = () => { const w = h.dataset.ws, was = h.parentElement.classList.contains("collapsed"); wsCollapsed[w] = !was; LSW("fleet.wsCollapsed", wsCollapsed); renderSidebar(); }));
   el.querySelectorAll("[data-sub]").forEach((s) => (s.onclick = (e) => { e.stopPropagation(); select(s.dataset.sub); }));
@@ -317,7 +325,8 @@ function renderSessHead(a) {
   const cur = () => agentById(a.id) || a;
   $("h-refresh").onclick = () => { pollFeed(); pollHost(cur()); if (centerTab === "diff") loadDiff(true); };
   $("h-ctx").onclick = () => { $("app").classList.toggle("ctx-open"); if ($("app").classList.contains("ctx-open")) renderCtx(cur()); };
-  $("h-team").onclick = openTeam;
+  $("h-team").onclick = () => { const c = cur(); if (c.teamId) openTeamView(c.teamId); else openTeam(); };
+  $("h-team").title = (agentById(a.id) || a).teamId ? "vue d'équipe" : "créer une équipe";
   $("h-rename").onclick = () => startRename(cur());
 }
 let renamingId = null;
@@ -362,6 +371,7 @@ function applyCenterVisibility() {
   $("audit").classList.toggle("hidden", sess || view !== "audit");
   $("design").classList.toggle("hidden", sess || view !== "design");
   $("auto").classList.toggle("hidden", sess || view !== "auto");
+  $("teams").classList.toggle("hidden", sess || view !== "teams");
   if (sess) {
     $("conv").classList.toggle("hidden", centerTab !== "conv");
     $("composer").classList.toggle("hidden", centerTab !== "conv");
@@ -720,12 +730,13 @@ function wireFtree(el, rerenderFn) {
 function setView(v) {
   view = v; detailId = null; applySessionTheme(null); teardownTerminal(); clearInterval(feedTimer); clearInterval(hostTimer);
   $("nav").querySelectorAll(".nav-item").forEach((b) => b.classList.toggle("sel", b.dataset.view === v));
-  clearInterval(machTimer); clearInterval(autoTimer); applyCenterVisibility(); renderSidebar(); renderTabbar();
+  clearInterval(machTimer); clearInterval(autoTimer); clearInterval(tvTimer); applyCenterVisibility(); renderSidebar(); renderTabbar();
   if (v === "board") renderBoard();
   if (v === "machines") { renderMachines(); machTimer = setInterval(renderMachines, 15000); }
   if (v === "skills") renderSkills();
   if (v === "audit") renderAudit();
   if (v === "design") renderDesign();
+  if (v === "teams") { renderTeams(); pollTeams(true); tvTimer = setInterval(pollTeams, 3000); }
   if (v === "auto") { renderAuto(); loadAuto(); autoTimer = setInterval(loadAuto, 15000); }
   closeDrawers();
 }
@@ -891,12 +902,18 @@ async function loadRoles(checked) { try { const j = await getJSON("/api/roles");
 const checkedRoles = () => [...$("tm-roles").querySelectorAll("input:checked")].map((c) => c.value);
 function populateChief() { const sel = $("tm-chief"); if (!sel) return; const prev = sel.value, roles = checkedRoles(), managed = (snap.agents || []).filter((a) => a.managed); let html = `<optgroup label="Nouveau rôle">` + (roles.length ? roles.map((r) => `<option value="${esc(r)}">${esc(r)}</option>`).join("") : `<option value="">(coche un rôle)</option>`) + `</optgroup>`; if (managed.length) html += `<optgroup label="Agent existant">` + managed.map((a) => `<option value="agent:${a.id}">${esc(a.name)} · ${esc(a.role)}</option>`).join("") + `</optgroup>`; sel.innerHTML = html; if (prev) sel.value = prev; }
 async function addRole() { const inp = $("tm-newrole"), v = inp.value.trim(); if (!v) return; const checked = new Set(checkedRoles()); checked.add(v); const j = await post("/api/roles", { role: v }); if (!j.ok) return toast("Erreur"); rolesCache = j.roles || rolesCache; inp.value = ""; renderRoles(checked); populateChief(); toast("✅ métier : " + v); }
-function openTeam() { openModal("team"); $("tm-err").textContent = ""; fillModels(); teamProv = "anthropic"; provSeg("tm-prov", teamProv, (v) => (teamProv = v)); loadRoles(); }
+async function fillTeamHosts() {
+  if (!railHostsCache.length) await pollRailHosts();
+  const hosts = railHostsCache.length ? railHostsCache : [{ id: "local", label: "local", online: true }];
+  $("tm-host").innerHTML = hosts.map((h) => `<option value="${esc(h.id)}" ${h.online === false ? "disabled" : ""}>${esc(h.label || h.id)}${h.online === false ? " (hors-ligne)" : ""}</option>`).join("");
+  const c = detailId && agentById(detailId); $("tm-host").value = (c && c.host) || (hosts.find((h) => h.id !== "local" && h.online !== false) || hosts[0]).id;
+}
+function openTeam() { openModal("team"); fillTeamHosts(); $("tm-err").textContent = ""; fillModels(); teamProv = "anthropic"; provSeg("tm-prov", teamProv, (v) => (teamProv = v)); loadRoles(); }
 async function doTeam() {
-  const roles = checkedRoles(); const body = { name: $("tm-name").value.trim(), goal: $("tm-goal").value.trim(), cwd: $("tm-cwd").value.trim(), model: $("tm-model").value, perm: $("tm-perm").value, roles, chief: $("tm-chief").value, provider: teamProv };
+  const roles = checkedRoles(); const body = { name: $("tm-name").value.trim(), goal: $("tm-goal").value.trim(), cwd: $("tm-cwd").value.trim(), host: $("tm-host").value, model: $("tm-model").value, perm: $("tm-perm").value, roles, chief: $("tm-chief").value, provider: teamProv };
   if (!body.cwd || !body.goal) { $("tm-err").textContent = "Objectif et workspace requis."; return; } if (!roles.length) { $("tm-err").textContent = "Choisis au moins un rôle."; return; }
   $("tm-go").disabled = true; const j = await post("/api/team", body); $("tm-go").disabled = false; if (!j.ok) { $("tm-err").textContent = j.error || "échec"; return; }
-  closeModal("team"); toast("🚀 équipe lancée"); $("tm-name").value = $("tm-goal").value = $("tm-cwd").value = "";
+  closeModal("team"); toast("Équipe lancée"); if (j.teamId) openTeamView(j.teamId); $("tm-name").value = $("tm-goal").value = $("tm-cwd").value = "";
 }
 
 
@@ -980,6 +997,117 @@ $("au-go").onclick = async () => {
   if (!j.ok) { $("au-err").textContent = j.error || "échec"; return; }
   closeModal("autom"); toast(autoEdit ? "Automation mise à jour" : "Automation créée"); loadAuto();
 };
+
+
+// ---- ÉQUIPES : supervision multi-agents (volets par agent, chef, TEAM_NOTES.md, message à tous) ------------
+let tvFeedHtml = {}, tvNotesHtml = "", tvTeamId = null, tvLayout = LSJ("fleet.tvLayout", "focus"), tvNotes = LSJ("fleet.tvNotes", true), tvTimer = null, tvSig = "", tvFeedSig = {}, tvNotesSig = "", tvTick = 0, tvStopArm = false;
+const membersOf = (tid) => (snap.agents || []).filter((a) => a.teamId === tid).sort((x, y) => (y.chief ? 1 : 0) - (x.chief ? 1 : 0) || String(x.name).localeCompare(String(y.name)));
+let tvWantAt = 0;
+function openTeamView(tid) { if (tid) { tvTeamId = tid; tvWantAt = Date.now(); } tvSig = ""; setView("teams"); }
+function renderTeams() {
+  const el = $("teams"); if (!el) return;
+  const teams = snap.teams || [];
+  if (!el.dataset.w) { el.dataset.w = "1"; el.addEventListener("click", (e) => { const m = e.target.closest(".tpm.you"); if (m) m.classList.toggle("open"); }); }
+  if (!teams.length) {
+    if (tvSig !== "empty") { tvSig = "empty"; el.innerHTML = `<div class="auto-empty" style="margin:60px auto;max-width:34rem"><span class="big" data-ico="users" data-s="30"></span><b>Aucune équipe en cours</b><span>Une équipe regroupe plusieurs agents (un chef + des métiers) qui travaillent ensemble sur un même dossier. Tu les supervises ici, tous en même temps.</span><button class="primary" id="tv-new0" type="button" style="margin-top:8px">Créer une équipe</button></div>`; hydrateIcons(el); $("tv-new0").onclick = () => openTeam(); }
+    return;
+  }
+  if (tvTeamId && !teams.some((t) => t.id === tvTeamId) && Date.now() - tvWantAt < 8000) { el.innerHTML = `<div class="tp-wait" style="padding:60px">Lancement de l'équipe…</div>`; tvSig = ""; return; }
+  if (!tvTeamId || !teams.some((t) => t.id === tvTeamId)) tvTeamId = teams[0].id;
+  const t = teams.find((x) => x.id === tvTeamId), mem = membersOf(t.id);
+  const sig = [t.id, tvLayout, tvNotes, teams.map((x) => x.id + x.name).join(","), mem.map((m) => m.id).join(",")].join("~");
+  if (sig !== tvSig) { buildTeams(el, teams, t, mem); tvSig = sig; }
+  updateTeamsLive(t, mem);
+}
+function buildTeams(el, teams, t, mem) {
+  const drafts = {}; el.querySelectorAll("[data-tpin]").forEach((i) => { if (i.value) drafts[i.dataset.tpin] = i.value; });
+  const bcDraft = ($("tv-bc") || {}).value || "";
+  const seg = (v, l, ic) => `<button class="pseg ${tvLayout === v ? "sel" : ""}" data-tvlay="${v}" title="${l}" type="button">${ico(ic, 14)}</button>`;
+  const chips = teams.length > 1 ? `<div class="psegs tv-chips">${teams.map((x) => `<button class="pseg ${x.id === t.id ? "sel" : ""}" data-tvteam="${esc(x.id)}" type="button">${esc(x.name)}</button>`).join("")}</div>` : "";
+  const pane = (a) => `<section class="tp ${a.chief ? "chief" : ""}" data-tp="${esc(a.id)}">
+    <header class="tp-h"><span class="tp-g" data-g></span><b class="tp-n">${esc(String(a.name).replace(/\s*👑\s*/g, ""))}</b>${a.chief ? `<span class="tp-crown" title="chef d'équipe">${ico("crown", 12)}</span>` : ""}<span class="tp-chip" data-role>${esc(a.role || "")}</span><span class="tp-chip mono" data-host></span><span class="tp-st" data-st></span><span class="sp"></span><button class="icon-btn" data-tpopen="${esc(a.id)}" title="Ouvrir la session" type="button">${ico("expand", 14)}</button></header>
+    <div class="tp-feed" data-feed><div class="tp-wait">chargement…</div></div>
+    <footer class="tp-f"><textarea rows="1" data-tpin="${esc(a.id)}" placeholder="Écrire à ${esc(String(a.name).replace(/\s*👑\s*/g, ""))}…"></textarea><button class="send-btn sm" data-tpsend="${esc(a.id)}" type="button" title="Envoyer">${ico("up", 14)}</button></footer>
+  </section>`;
+  el.innerHTML = `<div class="tv">
+    <div class="tv-bar">
+      ${chips}
+      <div class="tv-title"><b>${esc(t.name)}</b>${t.goal && t.goal !== t.name ? `<span class="tv-goal" title="${esc(t.goal)}">${esc(t.goal)}</span>` : ""}</div>
+      <div class="tv-sum" id="tv-sum"></div>
+      <div class="tv-act">
+        <div class="psegs">${seg("focus", "Chef en grand", "panel")}${seg("grid", "Grille égale", "grid")}</div>
+        <button class="ghost-btn sm ${tvNotes ? "on" : ""}" id="tv-notes-btn" type="button">${ico("file", 13)}Notes</button>
+        <button class="ghost-btn sm" id="tv-new" type="button">${ico("plus", 13)}Nouvelle équipe</button>
+        <button class="ghost-btn sm danger" id="tv-stop" type="button">${ico("power", 13)}Arrêter</button>
+      </div>
+    </div>
+    <div class="tv-bc"><span class="tv-bc-l">${ico("users", 14)}</span><input id="tv-bc" placeholder="Message à toute l'équipe…" autocomplete="off" /><label class="tv-only"><input type="checkbox" id="tv-bc-chief" />chef seul</label><button class="send-btn sm" id="tv-bc-go" type="button" title="Envoyer à l'équipe">${ico("up", 14)}</button></div>
+    <div class="tv-body">
+      <div class="tv-panes tv-${tvLayout}" style="--rows:${Math.max(1, mem.length - 1)}">${mem.map(pane).join("")}</div>
+      <aside class="tv-notes ${tvNotes ? "" : "hidden"}"><div class="tv-notes-h">${ico("file", 13)}<b>TEAM_NOTES.md</b><span class="tv-notes-p" id="tv-notes-p"></span></div><div class="tv-notes-b mbody md" id="tv-notes-b"><div class="tp-wait">chargement…</div></div></aside>
+    </div></div>`;
+  hydrateIcons(el);
+  mem.forEach((a) => { const f = el.querySelector(`[data-tp="${a.id}"] [data-feed]`); if (f && tvFeedHtml[a.id]) { f.innerHTML = tvFeedHtml[a.id]; f.scrollTop = f.scrollHeight; } });
+  if (tvNotesHtml && $("tv-notes-b")) $("tv-notes-b").innerHTML = tvNotesHtml;
+  el.querySelectorAll("[data-tvlay]").forEach((b) => (b.onclick = () => { tvLayout = b.dataset.tvlay; LSW("fleet.tvLayout", tvLayout); renderTeams(); }));
+  el.querySelectorAll("[data-tvteam]").forEach((b) => (b.onclick = () => { tvTeamId = b.dataset.tvteam; tvFeedHtml = {}; tvFeedSig = {}; tvNotesHtml = ""; tvNotesSig = ""; renderTeams(); pollTeams(true); }));
+  $("tv-notes-btn").onclick = () => { tvNotes = !tvNotes; LSW("fleet.tvNotes", tvNotes); renderTeams(); };
+  $("tv-new").onclick = () => openTeam();
+  $("tv-stop").onclick = async () => {
+    const b = $("tv-stop"); if (!tvStopArm) { tvStopArm = true; b.classList.add("arm"); b.lastChild.textContent = "Confirmer ?"; setTimeout(() => { tvStopArm = false; const x = $("tv-stop"); if (x) { x.classList.remove("arm"); x.lastChild.textContent = "Arrêter"; } }, 3500); return; }
+    tvStopArm = false; const j = await post("/api/team-kill", { teamId: t.id }); toast(j.ok ? `Équipe arrêtée (${j.killed})` : (j.error || "échec"));
+  };
+  const bc = async () => { const v = $("tv-bc").value.trim(); if (!v) return; $("tv-bc-go").disabled = true; const j = await post("/api/team-send", { teamId: t.id, prompt: v, onlyChief: $("tv-bc-chief").checked }); $("tv-bc-go").disabled = false; if (!j.ok) return toast(j.error || "échec"); $("tv-bc").value = ""; toast(`Envoyé à ${j.sent} agent${j.sent > 1 ? "s" : ""}`); setTimeout(() => pollTeams(true), 800); };
+  $("tv-bc-go").onclick = bc; $("tv-bc").onkeydown = (e) => { if (e.key === "Enter") { e.preventDefault(); bc(); } }; $("tv-bc").value = bcDraft;
+  el.querySelectorAll("[data-tpopen]").forEach((b) => (b.onclick = () => select(b.dataset.tpopen)));
+  const send = async (id) => { const i = el.querySelector(`[data-tpin="${id}"]`), v = i.value.trim(); if (!v) return; i.value = ""; i.style.height = ""; const j = await post("/api/send", { id, prompt: v }); if (!j.ok) { i.value = v; toast(j.error || "échec"); } else setTimeout(() => pollTeams(true), 700); };
+  el.querySelectorAll("[data-tpsend]").forEach((b) => (b.onclick = () => send(b.dataset.tpsend)));
+  el.querySelectorAll("[data-tpin]").forEach((i) => {
+    if (drafts[i.dataset.tpin]) i.value = drafts[i.dataset.tpin];
+    i.onkeydown = (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(i.dataset.tpin); } };
+    i.oninput = () => { i.style.height = "auto"; i.style.height = Math.min(i.scrollHeight, 120) + "px"; };
+  });
+}
+function updateTeamsLive(t, mem) {
+  const work = mem.filter(isActive).length, ask = mem.filter((m) => m.status === "blocked").length, rest = mem.length - work - ask;
+  const sum = $("tv-sum"); if (sum) sum.innerHTML = `${work ? `<span class="tv-pill w"><span class="spin"></span>${work} au travail</span>` : ""}${ask ? `<span class="tv-pill q">${ico("help", 12)}${ask} en attente</span>` : ""}${rest ? `<span class="tv-pill">${rest} au repos</span>` : ""}${t.awaitingDecision ? `<span class="tv-pill d" title="tous les membres ont fini">${ico("checkc", 12)}en attente de ta décision</span>` : ""}`;
+  mem.forEach((a) => {
+    const p = document.querySelector(`[data-tp="${a.id}"]`); if (!p) return;
+    const g = p.querySelector("[data-g]"), h = stGlyph(a, true); if (g.dataset.k !== h) { g.dataset.k = h; g.innerHTML = h; }
+    p.querySelector("[data-host]").textContent = a.host || "local"; p.querySelector("[data-st]").textContent = st(a).l + (a.model ? " · " + a.model : "");
+    p.classList.toggle("working", !!a.busy);
+  });
+}
+const tpClip = (s, n) => { s = String(s || ""); return s.length > n ? s.slice(0, n) + "…" : s; };
+function tpFeedHTML(feed) {
+  const items = feed.filter((e) => e.kind === "say" || e.kind === "prompt" || e.kind === "tool").slice(-14);
+  if (!items.length) return `<div class="tp-wait">aucune activité</div>`;
+  return items.map((e) => e.kind === "tool" ? `<div class="tpt">${esc(String(e.text || "").split("\n")[0].slice(0, 160))}</div>`
+    : e.kind === "prompt" ? `<div class="tpm you">${esc(tpClip(e.text, 280))}</div>`
+    : `<div class="tpm mbody md">${mdToHtml(tpClip(e.text, 1800))}</div>`).join("");
+}
+async function pollTeams(force) {
+  if (view !== "teams" || detailId || !tvTeamId) return;
+  tvTick++; const mem = membersOf(tvTeamId);
+  await Promise.all(mem.map(async (a) => {
+    const p = document.querySelector(`[data-tp="${a.id}"] [data-feed]`); if (!p) return;
+    try {
+      const j = await getJSON("/api/transcript?id=" + encodeURIComponent(a.id) + "&n=24");
+      const f = j.feed || [], last = f[f.length - 1], sig = f.length + ":" + (last ? (last.text || "").length + last.kind : "");
+      if (tvFeedSig[a.id] === sig) return; tvFeedSig[a.id] = sig;
+      const near = p.scrollHeight - p.scrollTop - p.clientHeight < 80;
+      p.innerHTML = tvFeedHtml[a.id] = tpFeedHTML(f); if (near || force) p.scrollTop = p.scrollHeight;
+    } catch {}
+  }));
+  if (tvNotes && (force || tvTick % 2 === 1)) {
+    try {
+      const j = await getJSON("/api/teamnotes?teamId=" + encodeURIComponent(tvTeamId)), b = $("tv-notes-b"); if (!b) return;
+      const sig = j.ok ? "ok:" + j.text.length + ":" + j.text.slice(-60) : "missing"; if (sig === tvNotesSig) return; tvNotesSig = sig;
+      $("tv-notes-p").textContent = j.host ? j.host : "";
+      b.innerHTML = tvNotesHtml = j.ok && j.text.trim() ? mdToHtml(j.text) : `<div class="tp-wait">Pas encore de TEAM_NOTES.md — le chef le crée dès que l'équipe démarre.</div>`;
+    } catch {}
+  }
+}
 
 // ---- modales / toast / pièces jointes -----------------------------------------
 function openModal(id) { $("backdrop").classList.remove("hidden"); $(id).classList.remove("hidden"); }
@@ -1103,7 +1231,7 @@ function closeTab(id) {
   if (detailId === id) { const next = openTabs[i] || openTabs[i - 1]; if (next && agentById(next)) select(next); else setView(view); }
   else renderTabbar();
 }
-const VIEW_LABEL = { board: ["board", "Board"], auto: ["zap", "Automations"], machines: ["server", "Machines"], skills: ["book", "Skills"], audit: ["file", "Audit"], design: ["palette", "Design"] };
+const VIEW_LABEL = { board: ["board", "Board"], teams: ["users", "Équipes"], auto: ["zap", "Automations"], machines: ["server", "Machines"], skills: ["book", "Skills"], audit: ["file", "Audit"], design: ["palette", "Design"] };
 function renderTabbar() {
   const el = $("tabbar"); if (!el || tabDrag) return;
   const ags = snap.agents || [];
@@ -1216,7 +1344,7 @@ $("tm-newrole").onkeydown = (e) => { if (e.key === "Enter") { e.preventDefault()
 document.querySelectorAll("[data-close]").forEach((b) => (b.onclick = () => closeModal(b.dataset.close)));
 $("backdrop").onclick = () => { closeModal("spawn"); closeModal("team"); closeModal("fx"); closeModal("skillview"); };
 $("sp-browse").onclick = () => openBrowser("sp-cwd", spawnHost);
-$("tm-browse").onclick = () => openBrowser("tm-cwd", "local");
+$("tm-browse").onclick = () => openBrowser("tm-cwd", $("tm-host").value || "local");
 wireBrowser();
 // dans l'APK (iframe) : le ⚙ serveur vit ici, plus en bouton flottant qui masquait le haut à droite
 if (window.parent !== window) {
