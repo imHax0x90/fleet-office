@@ -168,6 +168,7 @@ function decorLot(lx, ly) {
 function meadowLot(lx, ly) { // lot vide : fleurs et quelques pierres
   const key = 'm' + lx + ',' + ly; if (decorated.has(key)) return; decorated.add(key);
   const r = rng(hash(key));
+  if (r() < .6) tallGrassPatch(lx + 2, ly + 2, 6, 4, r);
   for (let i = 0; i < 26; i++) flower(gctx, lx * TS + 40 + (r() * (lot.w * TS - 80) | 0), ly * TS + 20 + (r() * ((lot.h - 2) * TS - 20) | 0), FLC[(r() * FLC.length) | 0]);
 }
 function paintHouseGround(h) {
@@ -212,6 +213,7 @@ function addHouse(h, animate) {
   o.door = { x0: (g.hx + 2) * TS, x1: (g.hx + 4) * TS, y: (g.hy + HH) * TS };
   const spr0 = g.hx * TS, spy0 = g.hy * TS - 8;
   o.obj = addObj({ sy: (g.hy + HH) * TS - 1, x0: spr0 - 6, y0: spy0 - 26, x1: spr0 + 102, y1: spy0 + 92, draw: b => drawHouse(b, o) });
+  clearTallGrass(g.lx, g.ly, lot.w, lot.h + 1);
   repaintRect(g.lx, g.ly, lot.w, lot.h + 1);
   paintHouseGround(h);
   if (animate) o.gardenAt = o.born + 2300; else paintGarden(o);
@@ -352,6 +354,96 @@ function fullBuild(w) {
     if (old && old.born) o.born = old.born;
   }
   objs.sort((a, b) => a.sy - b.sy); dirtySort = false;
+  ensureVillagers(w);
+}
+/* ───── hautes herbes animées (le personnage s'y enfonce) ───── */
+const tuftS = [0, 1, 2].map(v => bake(16, 16, c => {
+  const r = rng(900 + v * 17), D = '#2c7a3c', M = '#47a84c', L = '#8bdc6b', O = '#1d5230';
+  R(c, 0, 13, 16, 3, D);
+  for (let i = 0; i < 6; i++) {
+    const x = 1 + i * 2.6 | 0, h = 6 + (r() * 6 | 0);
+    for (let y = 0; y < h; y++) { const w = y > h - 3 ? 1 : 2; R(c, x, 15 - y, w, 1, y > h * .55 ? L : M); }
+    R(c, x, 15 - h, 1, 1, O); R(c, x - 1 < 0 ? 0 : x - 1, 15 - Math.max(2, h - 3), 1, Math.max(2, h - 3), O);
+  }
+  R(c, 0, 15, 16, 1, O);
+}));
+function tallGrassPatch(tx0, ty0, w, h, r) {
+  for (let ty = ty0; ty < ty0 + h; ty++) for (let tx = tx0; tx < tx0 + w; tx++) {
+    if (kd(tx, ty) !== K.GRASS || blk[ty * MW + tx]) continue;
+    const edge = tx === tx0 || tx === tx0 + w - 1 || ty === ty0 || ty === ty0 + h - 1; if (edge && r() < .35) continue;
+    R(gctx, tx * TS, ty * TS, TS, TS, '#4f9d48');
+    const spr = tuftS[(r() * 3) | 0], ph = r() * 6.28;
+    addObj({ tuft: true, sy: (ty + 1) * TS, x0: tx * TS, y0: ty * TS, x1: tx * TS + 16, y1: ty * TS + 16, draw: b => {
+      const x = tx * TS - cam.x, y = ty * TS - cam.y, sw = Math.round(Math.sin(nowT / 430 + ph) * 1);
+      b.drawImage(spr, 0, 0, 16, 9, x + sw, y, 16, 9); b.drawImage(spr, 0, 9, 16, 7, x, y + 9, 16, 7);
+    } });
+  }
+}
+function clearTallGrass(lx, ly, w, h) { objs = objs.filter(o => !(o.tuft && o.x0 >= lx * TS && o.x0 < (lx + w) * TS && o.y0 >= ly * TS && o.y0 < (ly + h) * TS)); }
+
+/* ───── villageois (décor vivant : se promènent, parlent) ───── */
+const villagers = [];
+const VLOOKS = [
+  { skin: '#f2cba6', hair: '#5a3a22', style: 1, shirt: '#e07a8a', pants: '#4a4a62' }, { skin: '#dba374', hair: '#2b2233', style: 0, shirt: '#4a8fd0', pants: '#2f3a5a' },
+  { skin: '#f2cba6', hair: '#c9902f', style: 2, shirt: '#79b36b', pants: '#4a4a62' }, { skin: '#b07a52', hair: '#2b2233', style: 1, shirt: '#e0b030', pants: '#2f3a5a' },
+  { skin: '#f2cba6', hair: '#b5482a', style: 0, shirt: '#8a5fc0', pants: '#4a4a62' }, { skin: '#7d5037', hair: '#2b2233', style: 2, shirt: '#3b9a95', pants: '#2f3a5a' },
+];
+const VLINES = [
+  D => [`Bienvenue dans le quartier ${D} !`, 'Ici, chaque maison est un projet.'],
+  () => ['Quand une cheminée fume, un agent travaille.', 'Regarde bien les maisons !'],
+  () => ['Tu veux voir toute la ville ?', 'Appuie sur M pour ouvrir la carte.'],
+  () => ['Maintiens Maj pour courir.', 'Mais ne piétine pas les fleurs !'],
+  () => ['Les hautes herbes ? Aucun danger ici.', 'Ça chatouille, c\'est tout.'],
+  () => ['Une fenêtre allumée, c\'est un agent au travail.', 'Un « ! », c\'est qu\'il t\'attend.'],
+];
+let v0 = 0;
+function mkVillager(def) {
+  const v = { kind: 'npc', villager: true, name: def.name, x: 0, y: 0, dir: def.dir || 0, t: 0, moving: false, seated: false, mode: 'idle', look: def.look, lines: def.lines, district: def.district, wait: 1 + Math.random() * 4, tgt: null, R: def.R || 4, speed: def.speed || 13, tx: 0, ty: 0, sy: 0 };
+  v.look.key = ''; v.draw = b => FW.drawPerson(b, v);
+  return v;
+}
+function freeSpot(tx, ty) {
+  for (let rad = 0; rad < 8; rad++) for (let dy = -rad; dy <= rad; dy++) for (let dx = -rad; dx <= rad; dx++) {
+    if (Math.max(Math.abs(dx), Math.abs(dy)) !== rad) continue; const x = tx + dx, y = ty + dy;
+    if (x < 3 || y < 3 || x >= MW - 3 || y >= MH - 3 || blocked(x, y) || kd(x, y) === K.WATER) continue;
+    if (villagers.some(o => o.tx === x && o.ty === y)) continue; return { tx: x, ty: y };
+  }
+  return { tx, ty };
+}
+function ensureVillagers(w) {
+  if (villagers.length) { for (const v of villagers) if (blocked(v.tx, v.ty)) { const s = freeSpot(v.tx, v.ty); v.tx = s.tx; v.ty = s.ty; v.x = s.tx * TS + 8; v.y = s.ty * TS + 12; v.tgt = null; } return; }
+  const defs = [], ac = bld.academy, ar = bld.arena;
+  defs.push({ name: 'Prof. Skill', look: { skin: '#dba374', hair: '#c9cbd8', style: 0, shirt: '#f6f6fa', pants: '#3a3f5c' }, at: [ac.x + 2, ac.y + BH + 3], R: 2, speed: 9, dir: 3,
+    lines: () => ['Je suis le Professeur Skill.', 'L\'Académie t\'apprend les métiers des agents.', 'Chaque skill qu\'un agent utilise le fait monter de niveau.'] });
+  defs.push({ name: 'Juge de l\'Arène', look: { skin: '#f2cba6', hair: '#2b2233', style: 0, shirt: '#c0463d', pants: '#2f3a5a' }, at: [ar.x + BW - 3, ar.y + BH + 3], R: 2, speed: 9, dir: 2,
+    lines: () => ['L\'Arène évalue le travail de tes agents.', 'Le professeur y dit ce qui a marché… et ce qui a raté.'] });
+  defs.push({ name: 'Enfant', look: { skin: '#f2cba6', hair: '#5a3a22', style: 2, shirt: '#d9483a', pants: '#4a4a62', cap: '#d9483a' }, at: [plaza.x0 + 4, plaza.y1 - 2], R: 5, speed: 15, lines: () => ['J\'adore courir sur la place !', 'Maj + flèches, essaie !'] });
+  (w.districts || []).slice(0, 6).forEach((d, i) => defs.push({ name: ['Villageois', 'Villageoise', 'Promeneur', 'Voisine', 'Jardinier', 'Passant'][i % 6], look: Object.assign({}, VLOOKS[i % VLOOKS.length]), at: [d.x + 3 + (i % 3), d.y + d.h - 1], R: 5, speed: 12 + (i % 3), district: d.name }));
+  defs.forEach(d => {
+    const v = mkVillager({ name: d.name, look: d.look, lines: d.lines || (() => VLINES[(v0++) % VLINES.length](d.district || 'ici')), district: d.district, R: d.R, speed: d.speed, dir: d.dir });
+    const s = freeSpot(d.at[0], d.at[1]); v.tx = v.hx = s.tx; v.ty = v.hy = s.ty; v.x = s.tx * TS + 8; v.y = s.ty * TS + 12; villagers.push(v);
+  });
+}
+function updateVillagers(dt, player) {
+  for (const v of villagers) {
+    if (v.tgt) {
+      const dx = v.tgt.x - v.x, dy = v.tgt.y - v.y, d = Math.hypot(dx, dy), st = v.speed * dt;
+      if (d <= st) { v.x = v.tgt.x; v.y = v.tgt.y; v.tx = v.tgt.tx; v.ty = v.tgt.ty; v.tgt = null; v.moving = false; v.wait = 1.2 + Math.random() * 4.5; } else { v.x += dx / d * st; v.y += dy / d * st; v.moving = true; v.t += dt; }
+      continue;
+    }
+    v.moving = false; if (v.talking > 0) { v.talking -= dt; continue; }
+    v.wait -= dt; if (v.wait > 0) continue;
+    const dirs = [[0, 1, 0], [0, -1, 1], [-1, 0, 2], [1, 0, 3]].sort(() => Math.random() - .5);
+    for (const [ddx, ddy, dd] of dirs) {
+      const nx = v.tx + ddx, ny = v.ty + ddy;
+      if (Math.abs(nx - v.hx) > v.R || Math.abs(ny - v.hy) > v.R || blocked(nx, ny) || kd(nx, ny) === K.WATER) continue;
+      const wx = nx * TS + 8, wy = ny * TS + 12;
+      if (player && Math.abs(player.x - wx) < 12 && Math.abs(player.y - wy) < 10) continue;
+      if (villagers.some(o => o !== v && (o.tgt ? o.tgt.tx === nx && o.tgt.ty === ny : o.tx === nx && o.ty === ny))) continue;
+      v.dir = dd; v.tgt = { x: wx, y: wy, tx: nx, ty: ny }; break;
+    }
+    if (!v.tgt) v.wait = .8 + Math.random() * 2;
+  }
 }
 function setWorld(w, serverTime) {
   if (!w || !w.size || !w.plaza) return [];
@@ -379,23 +471,24 @@ function setWorld(w, serverTime) {
   first = false;
   return created;
 }
-function update(dt, now) {
-  nowT = now;
+function update(dt, now, player) {
+  nowT = now; updateVillagers(dt, player);
   for (const o of houses.values()) if (o.gardenAt && now >= o.gardenAt) { o.gardenAt = 0; paintGarden(o); if (dirtySort) { objs.sort((a, b) => a.sy - b.sy); dirtySort = false; } }
 }
 function lower(y) { let lo = 0, hi = objs.length; while (lo < hi) { const m = (lo + hi) >> 1; if (objs[m].sy < y) lo = m + 1; else hi = m; } return lo; }
 function draw(bx, bw, bh, now, player) {
   nowT = now;
   bx.drawImage(ground, -cam.x, -cam.y);
-  let i = lower(cam.y - 10), pd = false;
+  let i = lower(cam.y - 10);
   const yMax = cam.y + bh + 170;
+  const dyn = villagers.concat([player]).sort((a, b) => a.y - b.y); let di = 0;   // personnages mobiles triés avec le décor
   for (; i < objs.length; i++) {
     const o = objs[i]; if (o.sy > yMax) break;
-    if (!pd && player.y < o.sy) { player.draw(bx); pd = true; }
+    while (di < dyn.length && dyn[di].y < o.sy) dyn[di++].draw(bx);
     if (o.x1 < cam.x || o.x0 > cam.x + bw || o.y1 < cam.y || o.y0 > cam.y + bh) continue;
     o.draw(bx);
   }
-  if (!pd) player.draw(bx);
+  while (di < dyn.length) dyn[di++].draw(bx);
   drawOverlays(bx, bw, bh, now);
   // scintillements sur l'eau
   if (pond) { bx.fillStyle = 'rgba(255,255,255,.75)'; for (let k = 0; k < 7; k++) { const t = now / 700 + k * 1.9, x = pond.cx * TS + 8 + Math.cos(k * 2.3) * 30 * (.4 + .6 * Math.abs(Math.sin(k))), y = pond.cy * TS + 8 + Math.sin(k * 1.7) * 18 * .8; if (((t | 0) + k) % 3 === 0) bx.fillRect(Math.round(x - cam.x), Math.round(y - cam.y), 3, 1); } }
@@ -415,7 +508,7 @@ function nearHouse(p) {
 }
 function spawnPos(h) { const g = houseGeom(h); return { x: (g.hx + 3) * TS, y: (g.hy + HH) * TS + 12 }; }
 FW.Town = {
-  setWorld, update, draw, blocked, doorAt, nearHouse, spawnPos, houses,
+  setWorld, update, draw, blocked, doorAt, nearHouse, spawnPos, houses, villagers,
   get w() { return MW * TS; }, get h() { return MH * TS; }, get tw() { return MW; }, get th() { return MH; },
   get data() { return W; }, get ready() { return !!W; }, plazaSpawn: () => W ? { x: W.plaza.spawn.x * TS + 8, y: W.plaza.spawn.y * TS + 12 } : { x: 100, y: 100 },
   doorOf(id) { const o = houses.get(id); return o ? { x: (o.g.hx + 3) * TS, y: (o.g.hy + HH) * TS } : null; },

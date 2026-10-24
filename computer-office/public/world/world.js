@@ -79,6 +79,7 @@ function hitsAt(x, y) {
   const x0 = Math.floor((x - 4) / TS), x1 = Math.floor((x + 3.99) / TS), y0 = Math.floor((y - 5) / TS), y1 = Math.floor((y - .01) / TS);
   for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) if (isBlockedT(tx, ty)) return true;
   if (scene === 'interior') for (const n of Int.npcs) if (Math.abs(n.x - x) < 8 && Math.abs(n.y - y) < 6) return true;
+  if (scene === 'town') for (const n of Town.villagers) if (Math.abs(n.x - x) < 8 && Math.abs(n.y - y) < 6) return true;
   return false;
 }
 function updatePlayer(dt) {
@@ -224,6 +225,9 @@ function doAction() {
   if (fade || overlayOpen || typing || panelOpen) return;
   const mc = maxChars();
   if (scene === 'town') {
+    { const d0 = player.dir, qx = player.x + (d0 === 2 ? -10 : d0 === 3 ? 10 : 0), qy = player.y + (d0 === 0 ? 9 : d0 === 1 ? -13 : -4); let bv = null, bd0 = 1e9;
+      for (const n of Town.villagers) { const ox = Math.abs(qx - n.x), oy = Math.abs(qy - (n.y - 5)); if (ox <= 11 && oy <= 12 && ox + oy < bd0) { bd0 = ox + oy; bv = n; } }
+      if (bv) { bv.dir = d0 === 0 ? 1 : d0 === 1 ? 0 : d0 === 2 ? 3 : 2; bv.talking = 4; openDialog(bv.name, paginate(bv.lines().flatMap(s => wrap(s, mc)), 3)); return; } }
     const nh = Town.nearHouse(player); if (!nh) return;
     let lines;
     if (nh.house) { const h = nh.house; lines = [`Projet : ${h.name}`, `Quartier : ${h.district}`, `${plural(h.agentIds.length, 'agent')} : ${h.working} au travail, ${h.blocked} en attente, ${h.failed} en échec.`, 'Entre par la porte pour les voir.']; }
@@ -520,7 +524,7 @@ function frame(now) {
   updatePlayer(dt);
   let rw, rh;
   if (scene === 'town') {
-    Town.update(dt, now); rw = Town.w; rh = Town.h; label = null;
+    Town.update(dt, now, player); rw = Town.w; rh = Town.h; label = null;
     if (!fade && Town.ready) {
       const dr = Town.doorAt(player);
       if (dr && !overlayOpen) { if (dr.type === 'house') { enterHouse(dr.house); } else { startFade(() => { player.y += 20; }); openOverlay(dr.type); } }
@@ -561,7 +565,7 @@ function debug() {
     menu: dlg && dlg.rects ? dlg.menu.map(o => o.label).join('/') + '@' + dlg.sel : null, typing: typing ? typing.name : null, panel: panelOpen, wait: !!(dlg && dlg.wait),
     dialog: dlg ? (dlg.name + '|' + dlg.pages[dlg.page].join(' / ') + '|p' + (dlg.page + 1) + '/' + dlg.pages.length + (dlg.pending ? '|pending' : '')) : null,
     houses: td ? td.houses.length : 0, hl: tl, academy: bn('academy'), arena: bn('arena'), size: td ? td.size : null, spawn: td ? td.plaza.spawn : null,
-    npcs: nn.length, work: nn.filter(n => n.mode === 'work').length, seated: nn.filter(n => n.seated).length, net: stats.net, err: stats.err || null, map: mapOpen, sel: mapOpen ? (mapTargets()[mapSel] || {}).name : null, run: running(), Z, ZU, fps: Math.round(stats.fps), Z, bw, bh, cam: [cam.x, cam.y], touch: isTouch,
+    npcs: nn.length, work: nn.filter(n => n.mode === 'work').length, seated: nn.filter(n => n.seated).length, net: stats.net, err: stats.err || null, vill: Town.villagers.map(v => v.name + ':' + Math.round(v.x) + ',' + Math.round(v.y)), map: mapOpen, sel: mapOpen ? (mapTargets()[mapSel] || {}).name : null, run: running(), Z, ZU, fps: Math.round(stats.fps), Z, bw, bh, cam: [cam.x, cam.y], touch: isTouch,
     names: nn.map(n => n.name + ':' + n.mode + ':' + Math.round(n.x) + ',' + Math.round(n.y)),
   });
 }
