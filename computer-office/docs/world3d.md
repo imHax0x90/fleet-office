@@ -15,7 +15,8 @@ ZQSD / flèches, Maj = courir, clic = sélectionner ou marcher, molette / pincem
 | Quoi | Source | Licence |
 |---|---|---|
 | Maisons (6), bâtiments fonctionnels (5), puits, foin, caisses, clôture, jardinière, buissons, rochers, hautes herbes, arbres (2), roche des falaises, tuiles d'herbe / pierre / terre | découpes rectangulaires de `Tilesets/padded_mycorTown.png` (icyethics/PokemonAssets), rognées sur la transparence | `icyethics-noncommercial` (README : usage non commercial, dérivés libres, crédit IcyEthics ; texte non juridique, non vérifié) |
-| Tuiles de pavés / eau / sable, arbre, banc, lampadaire, 8 métiers et 5 héros (3 états × 4 directions) | `persos_pixel_art_pack.zip` (généré par un script de l'utilisateur, copié dans `assets/sources/`) | `oeuvre-utilisateur` (déclarée par l'auteur) |
+| Tuiles de pavés / eau / sable, arbre, banc, lampadaire | `persos_pixel_art_pack.zip` (généré par un script de l'utilisateur, copié dans `assets/sources/`) | `oeuvre-utilisateur` (déclarée par l'auteur) |
+| 9 personnages créés (René — père de Barry retravaillé —, ingénieur, scientifique, analyste, opérateur, sécurité, livreur, étudiant, médecin) | dessinés par `tools/world3d/gen-characters.mjs`, dans le style des feuilles overworld IcyEthics (cellules 32×48, grosse tête, contour) | projet |
 | 8 habitants overworld (feuilles 4×4 de 32×48) | `Overworld Sprites/` (IcyEthics) | idem IcyEthics |
 
 Les originaux sont copiés **intacts** dans `assets/sources/` ; les dérivés (`tex/sp_*.png`, `ground.png`, `cliff.png`) portent leur rectangle source dans `registry.json`. **Exclus** : tout `ukbigdave/PokemonSprites` (créatures, © The Pokémon Company), `Trchar*`, portrait Hilda, `speech hgss*`, sprites de créatures, `OW_*` (fond opaque).
@@ -31,3 +32,6 @@ Textures `NEAREST` (pixels nets), sol en un maillage, décor instancié par bloc
 
 ## Limites
 Pas d'intérieurs ; facades toutes orientées au sud (caméra fixe) ; les planches de tuiles IcyEthics sont des autotiles 2D dont on n'utilise que des découpes ; mobile/tactile et fortes charges d'agents non testés ; falaises = paliers et rampes (pas de saut de corniche).
+
+## Personnages
+Seuls des personnages « overworld » de style Pokémon sont gardés : les 8 habitants IcyEthics et les 9 personnages créés (`chr_*`). Les personnages génériques du pack utilisateur (64×64) ont été retirés. René (`chr_rene`) est le personnage par défaut ; les agents prennent la tenue de leur métier. Ajouter un personnage : une entrée dans `CHARS` de `gen-characters.mjs` (palette, coiffure, couvre-chef, barbe/moustache, lunettes, sac, manteau, gilet), puis `tools/world3d/build-all.sh` ; il apparaît dans la grille de choix (touche C).

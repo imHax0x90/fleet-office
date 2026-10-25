@@ -187,20 +187,20 @@ class Actor {
 }
 
 // ---------------------------------------------------------------------------------------------- apparence du joueur (touche C) : feuilles du pack utilisateur ou tenue générée
-const DEFAULT_HERO = "hero_peter"; let heroId = DEFAULT_HERO;
+const DEFAULT_HERO = "chr_rene"; let heroId = DEFAULT_HERO;
 try { const w = Q.get("hero") || localStorage.getItem("w3d.hero"); if (w) heroId = w; } catch { /* stockage indisponible */ }
 async function setHero(id) {
   if (!cat.sheetInfo(id)) id = DEFAULT_HERO; heroId = id; try { localStorage.setItem("w3d.hero", id); } catch { /* ignoré */ }
   const info = await sheet(id), old = player; player = new Actor(info, { id: "player", name: "Vous", kind: "player", x: old ? old.x : MAP.spawn.x, z: old ? old.z : MAP.spawn.y }); player.dir = old ? old.dir : 0; if (old) old.dispose(); applyTime(true);
 }
 // sélecteur de personnage : tous les personnages jouables du catalogue, avec aperçu de la frame « face, au repos »
-const GROUPS = [["hero_", "Héros (pack utilisateur)"], ["npc_", "Métiers (pack utilisateur)"], ["ow_", "Habitants (IcyEthics, non commercial)"]];
-const NICE = { etudiant: "Étudiant", ingenieur: "Ingénieur", medecin: "Médecin", securite: "Sécurité", operateur: "Opérateur", pierre_rochard: "Pierre Rochard", mrfrost: "M. Frost", macdonald: "MacDonald" };
-const labelOf = (id) => { const k = id.replace(/^(hero_|npc_|ow_)/, ""); if (NICE[k]) return NICE[k]; const t = id.replace(/^(hero_|npc_|ow_)/, "").replace(/_/g, " "); return t.charAt(0).toUpperCase() + t.slice(1); };
+const GROUPS = [["chr_", "Créés pour le village"], ["ow_", "Habitants (IcyEthics)"]];
+const NICE = { mrfrost: "M. Frost", macdonald: "MacDonald" };
+const labelOf = (id) => { const e = cat.get(id); if (e && e.label) return e.label; const k = id.replace(/^(chr_|ow_)/, ""); if (NICE[k]) return NICE[k]; const t = id.replace(/^(hero_|npc_|ow_)/, "").replace(/_/g, " "); return t.charAt(0).toUpperCase() + t.slice(1); };
 function openHeroPicker() {
   keys.clear(); const box = $("herogrid"); box.innerHTML = "";
   for (const [prefix, title] of GROUPS) {
-    const list = cat.find({ category: "character", sheet: true }).filter((e) => e.id.startsWith(prefix) && e.id.indexOf("tree") < 0); if (!list.length) continue;
+    const list = cat.find({ category: "character", sheet: true }).filter((e) => e.id.startsWith(prefix) && true); if (!list.length) continue;
     const h = document.createElement("h4"); h.textContent = title; box.appendChild(h); const row = document.createElement("div"); row.className = "hrow"; box.appendChild(row);
     for (const e of list) {
       const b = document.createElement("button"); b.className = "hbtn" + (e.id === heroId ? " on" : ""); b.title = e.id; b.dataset.id = e.id; const c = document.createElement("canvas"); c.width = e.sheet.cell[0]; c.height = e.sheet.cell[1]; b.appendChild(c); const sp = document.createElement("span"); sp.textContent = labelOf(e.id); b.appendChild(sp); row.appendChild(b);
@@ -302,8 +302,8 @@ async function applyWorld() {
   for (const [k, o] of [...houseObjs]) if (!seen.has(k)) { removeBuilding(o.b); houseObjs.delete(k); }
   S.houses = houseObjs.size;
 }
-const OUTFIT = [[/architect/, "npc_ingenieur"], [/back/, "npc_operateur"], [/front/, "npc_etudiant"], [/devops/, "npc_livreur"], [/\bqa\b|test/, "npc_analyste"], [/visual|valid/, "npc_scientifique"], [/pentest|secur|sécur/, "npc_securite"], [/m[ée]decin|doc/, "npc_medecin"]];
-function outfitFor(a) { const r = String(a.role || "").toLowerCase(); for (const [re, id] of OUTFIT) if (re.test(r)) return id; const pool = cat.find({ category: "character", sheet: true }).filter((e) => e.id.startsWith("npc_")); return pool.length ? pool[hashStr(a.id) % pool.length].id : "npc_ingenieur"; }
+const OUTFIT = [[/architect/, "chr_ingenieur"], [/back/, "chr_operateur"], [/front/, "chr_etudiant"], [/devops/, "chr_livreur"], [/\bqa\b|test/, "chr_analyste"], [/visual|valid/, "chr_scientifique"], [/pentest|secur|sécur/, "chr_securite"], [/m[ée]decin|doc/, "chr_medecin"]];
+function outfitFor(a) { const r = String(a.role || "").toLowerCase(); for (const [re, id] of OUTFIT) if (re.test(r)) return id; const pool = cat.find({ category: "character", sheet: true }).filter((e) => e.id.startsWith("chr_") || e.id.startsWith("ow_")); return pool.length ? pool[hashStr(a.id) % pool.length].id : "chr_rene"; }
 const hq = () => buildings.find((b) => b.id === "hq");
 function homeFor(a) {
   const h = houseOfAgent.get(a.id), o = h && houseObjs.get(h.key);

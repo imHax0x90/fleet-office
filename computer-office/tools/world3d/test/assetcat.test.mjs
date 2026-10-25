@@ -12,10 +12,10 @@ test("identifiants uniques et recherche par catégorie / tags / dimensions", () 
 test("découpe de spritesheet : rectangles de frames sans fichier par frame", () => {
   const c = mk(); assert.deepEqual(c.frameRect("ow_allison", { dir: "bas", frame: 0 }), { x: 0, y: 0, w: 32, h: 48 });
   assert.deepEqual(c.frameRect("ow_allison", { dir: "droite", frame: 3 }), { x: 96, y: 96, w: 32, h: 48 }); assert.deepEqual(c.frameRect("ow_allison", { dir: "haut", frame: 9 }), { x: 96, y: 144, w: 32, h: 48 }); // colonne bornée
-  assert.deepEqual(c.frameRect("npc_ingenieur", { dir: "gauche", state: "course" }), { x: 128, y: 64, w: 64, h: 64 }); assert.equal(c.frameCount("ow_allison"), 16); assert.throws(() => c.frameRect("hq"), /pas de spritesheet/);
+  assert.deepEqual(c.frameRect("chr_ingenieur", { dir: "gauche", state: "marche1" }), { x: 32, y: 48, w: 32, h: 48 }); assert.equal(c.frameCount("ow_allison"), 16); assert.throws(() => c.frameRect("hq"), /pas de spritesheet/);
   for (const e of c.find({ sheet: true })) { const s = e.sheet; assert.equal(s.cols * s.cell[0], s.px[0], e.id); assert.equal(s.rows * s.cell[1], s.px[1], e.id); }
 });
-test("sheetInfo : séquences et pied", () => { const i = mk().sheetInfo("npc_medecin"); assert.deepEqual(i.frames.run, [2, 1, 2, 1]); assert.ok(i.foot > 0); assert.equal(mk().sheetInfo("hq"), null); });
+test("sheetInfo : séquences et pied", () => { const i = mk().sheetInfo("chr_medecin"); assert.deepEqual(i.frames.run, [1, 2, 3, 0]); assert.ok(i.foot > 0); assert.equal(mk().sheetInfo("hq"), null); });
 test("chargement paresseux, cache et placeholders", async () => {
   let calls = 0; const c = mk(async (url) => { calls++; if (url.toLowerCase().includes("allison")) return { w: 128, h: 192 }; throw new Error("404"); });
   const [a, b] = await Promise.all([c.image("ow_allison"), c.image("ow_allison")]); assert.equal(calls, 1); assert.equal(a, b); assert.equal(a.placeholder, false);

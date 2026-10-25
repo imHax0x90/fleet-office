@@ -1684,1202 +1684,6 @@
    }
   },
   {
-   "id": "npc_analyste",
-   "category": "character",
-   "file": "tex/npc_analyste.png",
-   "format": "png-spritesheet",
-   "source": {
-    "kind": "imported",
-    "from": "persos_pixel_art_pack.zip (généré par le script de l'utilisateur, voir assets/sources/)",
-    "importer": "tools/world3d/import-sprites.mjs",
-    "author": "utilisateur",
-    "original": "pnj/analyste"
-   },
-   "licence": "oeuvre-utilisateur",
-   "licenceUrl": null,
-   "licenceVerified": true,
-   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
-   "dimensions": {
-    "w": 2.4,
-    "h": 2.4,
-    "d": 0
-   },
-   "sheet": {
-    "px": [
-     192,
-     256
-    ],
-    "cell": [
-     64,
-     64
-    ],
-    "cols": 3,
-    "rows": 4,
-    "rowsOrder": [
-     "bas",
-     "gauche",
-     "droite",
-     "haut"
-    ],
-    "colsOrder": [
-     "statique",
-     "marche",
-     "course"
-    ],
-    "footPx": 10
-   },
-   "anchor": "bottom-center",
-   "scale": 1,
-   "billboard": "yaw",
-   "materials": [
-    "alphaTest 0.5, nearest"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 0.3
-   },
-   "animations": [
-    {
-     "name": "idle",
-     "frames": [
-      0
-     ],
-     "fps": 1
-    },
-    {
-     "name": "walk",
-     "frames": [
-      0,
-      1,
-      0,
-      1
-     ],
-     "fps": 5
-    },
-    {
-     "name": "run",
-     "frames": [
-      2,
-      1,
-      2,
-      1
-     ],
-     "fps": 8
-    }
-   ],
-   "fallback": {
-    "shape": "capsule",
-    "color": "#2f9aa0"
-   }
-  },
-  {
-   "id": "npc_etudiant",
-   "category": "character",
-   "file": "tex/npc_etudiant.png",
-   "format": "png-spritesheet",
-   "source": {
-    "kind": "imported",
-    "from": "persos_pixel_art_pack.zip (généré par le script de l'utilisateur, voir assets/sources/)",
-    "importer": "tools/world3d/import-sprites.mjs",
-    "author": "utilisateur",
-    "original": "pnj/etudiant"
-   },
-   "licence": "oeuvre-utilisateur",
-   "licenceUrl": null,
-   "licenceVerified": true,
-   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
-   "dimensions": {
-    "w": 2.4,
-    "h": 2.4,
-    "d": 0
-   },
-   "sheet": {
-    "px": [
-     192,
-     256
-    ],
-    "cell": [
-     64,
-     64
-    ],
-    "cols": 3,
-    "rows": 4,
-    "rowsOrder": [
-     "bas",
-     "gauche",
-     "droite",
-     "haut"
-    ],
-    "colsOrder": [
-     "statique",
-     "marche",
-     "course"
-    ],
-    "footPx": 10
-   },
-   "anchor": "bottom-center",
-   "scale": 1,
-   "billboard": "yaw",
-   "materials": [
-    "alphaTest 0.5, nearest"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 0.3
-   },
-   "animations": [
-    {
-     "name": "idle",
-     "frames": [
-      0
-     ],
-     "fps": 1
-    },
-    {
-     "name": "walk",
-     "frames": [
-      0,
-      1,
-      0,
-      1
-     ],
-     "fps": 5
-    },
-    {
-     "name": "run",
-     "frames": [
-      2,
-      1,
-      2,
-      1
-     ],
-     "fps": 8
-    }
-   ],
-   "fallback": {
-    "shape": "capsule",
-    "color": "#2f9aa0"
-   }
-  },
-  {
-   "id": "npc_ingenieur",
-   "category": "character",
-   "file": "tex/npc_ingenieur.png",
-   "format": "png-spritesheet",
-   "source": {
-    "kind": "imported",
-    "from": "persos_pixel_art_pack.zip (généré par le script de l'utilisateur, voir assets/sources/)",
-    "importer": "tools/world3d/import-sprites.mjs",
-    "author": "utilisateur",
-    "original": "pnj/ingenieur"
-   },
-   "licence": "oeuvre-utilisateur",
-   "licenceUrl": null,
-   "licenceVerified": true,
-   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
-   "dimensions": {
-    "w": 2.4,
-    "h": 2.4,
-    "d": 0
-   },
-   "sheet": {
-    "px": [
-     192,
-     256
-    ],
-    "cell": [
-     64,
-     64
-    ],
-    "cols": 3,
-    "rows": 4,
-    "rowsOrder": [
-     "bas",
-     "gauche",
-     "droite",
-     "haut"
-    ],
-    "colsOrder": [
-     "statique",
-     "marche",
-     "course"
-    ],
-    "footPx": 10
-   },
-   "anchor": "bottom-center",
-   "scale": 1,
-   "billboard": "yaw",
-   "materials": [
-    "alphaTest 0.5, nearest"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 0.3
-   },
-   "animations": [
-    {
-     "name": "idle",
-     "frames": [
-      0
-     ],
-     "fps": 1
-    },
-    {
-     "name": "walk",
-     "frames": [
-      0,
-      1,
-      0,
-      1
-     ],
-     "fps": 5
-    },
-    {
-     "name": "run",
-     "frames": [
-      2,
-      1,
-      2,
-      1
-     ],
-     "fps": 8
-    }
-   ],
-   "fallback": {
-    "shape": "capsule",
-    "color": "#2f9aa0"
-   }
-  },
-  {
-   "id": "npc_livreur",
-   "category": "character",
-   "file": "tex/npc_livreur.png",
-   "format": "png-spritesheet",
-   "source": {
-    "kind": "imported",
-    "from": "persos_pixel_art_pack.zip (généré par le script de l'utilisateur, voir assets/sources/)",
-    "importer": "tools/world3d/import-sprites.mjs",
-    "author": "utilisateur",
-    "original": "pnj/livreur"
-   },
-   "licence": "oeuvre-utilisateur",
-   "licenceUrl": null,
-   "licenceVerified": true,
-   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
-   "dimensions": {
-    "w": 2.4,
-    "h": 2.4,
-    "d": 0
-   },
-   "sheet": {
-    "px": [
-     192,
-     256
-    ],
-    "cell": [
-     64,
-     64
-    ],
-    "cols": 3,
-    "rows": 4,
-    "rowsOrder": [
-     "bas",
-     "gauche",
-     "droite",
-     "haut"
-    ],
-    "colsOrder": [
-     "statique",
-     "marche",
-     "course"
-    ],
-    "footPx": 10
-   },
-   "anchor": "bottom-center",
-   "scale": 1,
-   "billboard": "yaw",
-   "materials": [
-    "alphaTest 0.5, nearest"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 0.3
-   },
-   "animations": [
-    {
-     "name": "idle",
-     "frames": [
-      0
-     ],
-     "fps": 1
-    },
-    {
-     "name": "walk",
-     "frames": [
-      0,
-      1,
-      0,
-      1
-     ],
-     "fps": 5
-    },
-    {
-     "name": "run",
-     "frames": [
-      2,
-      1,
-      2,
-      1
-     ],
-     "fps": 8
-    }
-   ],
-   "fallback": {
-    "shape": "capsule",
-    "color": "#2f9aa0"
-   }
-  },
-  {
-   "id": "npc_medecin",
-   "category": "character",
-   "file": "tex/npc_medecin.png",
-   "format": "png-spritesheet",
-   "source": {
-    "kind": "imported",
-    "from": "persos_pixel_art_pack.zip (généré par le script de l'utilisateur, voir assets/sources/)",
-    "importer": "tools/world3d/import-sprites.mjs",
-    "author": "utilisateur",
-    "original": "pnj/medecin"
-   },
-   "licence": "oeuvre-utilisateur",
-   "licenceUrl": null,
-   "licenceVerified": true,
-   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
-   "dimensions": {
-    "w": 2.4,
-    "h": 2.4,
-    "d": 0
-   },
-   "sheet": {
-    "px": [
-     192,
-     256
-    ],
-    "cell": [
-     64,
-     64
-    ],
-    "cols": 3,
-    "rows": 4,
-    "rowsOrder": [
-     "bas",
-     "gauche",
-     "droite",
-     "haut"
-    ],
-    "colsOrder": [
-     "statique",
-     "marche",
-     "course"
-    ],
-    "footPx": 10
-   },
-   "anchor": "bottom-center",
-   "scale": 1,
-   "billboard": "yaw",
-   "materials": [
-    "alphaTest 0.5, nearest"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 0.3
-   },
-   "animations": [
-    {
-     "name": "idle",
-     "frames": [
-      0
-     ],
-     "fps": 1
-    },
-    {
-     "name": "walk",
-     "frames": [
-      0,
-      1,
-      0,
-      1
-     ],
-     "fps": 5
-    },
-    {
-     "name": "run",
-     "frames": [
-      2,
-      1,
-      2,
-      1
-     ],
-     "fps": 8
-    }
-   ],
-   "fallback": {
-    "shape": "capsule",
-    "color": "#2f9aa0"
-   }
-  },
-  {
-   "id": "npc_operateur",
-   "category": "character",
-   "file": "tex/npc_operateur.png",
-   "format": "png-spritesheet",
-   "source": {
-    "kind": "imported",
-    "from": "persos_pixel_art_pack.zip (généré par le script de l'utilisateur, voir assets/sources/)",
-    "importer": "tools/world3d/import-sprites.mjs",
-    "author": "utilisateur",
-    "original": "pnj/operateur"
-   },
-   "licence": "oeuvre-utilisateur",
-   "licenceUrl": null,
-   "licenceVerified": true,
-   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
-   "dimensions": {
-    "w": 2.4,
-    "h": 2.4,
-    "d": 0
-   },
-   "sheet": {
-    "px": [
-     192,
-     256
-    ],
-    "cell": [
-     64,
-     64
-    ],
-    "cols": 3,
-    "rows": 4,
-    "rowsOrder": [
-     "bas",
-     "gauche",
-     "droite",
-     "haut"
-    ],
-    "colsOrder": [
-     "statique",
-     "marche",
-     "course"
-    ],
-    "footPx": 10
-   },
-   "anchor": "bottom-center",
-   "scale": 1,
-   "billboard": "yaw",
-   "materials": [
-    "alphaTest 0.5, nearest"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 0.3
-   },
-   "animations": [
-    {
-     "name": "idle",
-     "frames": [
-      0
-     ],
-     "fps": 1
-    },
-    {
-     "name": "walk",
-     "frames": [
-      0,
-      1,
-      0,
-      1
-     ],
-     "fps": 5
-    },
-    {
-     "name": "run",
-     "frames": [
-      2,
-      1,
-      2,
-      1
-     ],
-     "fps": 8
-    }
-   ],
-   "fallback": {
-    "shape": "capsule",
-    "color": "#2f9aa0"
-   }
-  },
-  {
-   "id": "npc_scientifique",
-   "category": "character",
-   "file": "tex/npc_scientifique.png",
-   "format": "png-spritesheet",
-   "source": {
-    "kind": "imported",
-    "from": "persos_pixel_art_pack.zip (généré par le script de l'utilisateur, voir assets/sources/)",
-    "importer": "tools/world3d/import-sprites.mjs",
-    "author": "utilisateur",
-    "original": "pnj/scientifique"
-   },
-   "licence": "oeuvre-utilisateur",
-   "licenceUrl": null,
-   "licenceVerified": true,
-   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
-   "dimensions": {
-    "w": 2.4,
-    "h": 2.4,
-    "d": 0
-   },
-   "sheet": {
-    "px": [
-     192,
-     256
-    ],
-    "cell": [
-     64,
-     64
-    ],
-    "cols": 3,
-    "rows": 4,
-    "rowsOrder": [
-     "bas",
-     "gauche",
-     "droite",
-     "haut"
-    ],
-    "colsOrder": [
-     "statique",
-     "marche",
-     "course"
-    ],
-    "footPx": 10
-   },
-   "anchor": "bottom-center",
-   "scale": 1,
-   "billboard": "yaw",
-   "materials": [
-    "alphaTest 0.5, nearest"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 0.3
-   },
-   "animations": [
-    {
-     "name": "idle",
-     "frames": [
-      0
-     ],
-     "fps": 1
-    },
-    {
-     "name": "walk",
-     "frames": [
-      0,
-      1,
-      0,
-      1
-     ],
-     "fps": 5
-    },
-    {
-     "name": "run",
-     "frames": [
-      2,
-      1,
-      2,
-      1
-     ],
-     "fps": 8
-    }
-   ],
-   "fallback": {
-    "shape": "capsule",
-    "color": "#2f9aa0"
-   }
-  },
-  {
-   "id": "npc_securite",
-   "category": "character",
-   "file": "tex/npc_securite.png",
-   "format": "png-spritesheet",
-   "source": {
-    "kind": "imported",
-    "from": "persos_pixel_art_pack.zip (généré par le script de l'utilisateur, voir assets/sources/)",
-    "importer": "tools/world3d/import-sprites.mjs",
-    "author": "utilisateur",
-    "original": "pnj/securite"
-   },
-   "licence": "oeuvre-utilisateur",
-   "licenceUrl": null,
-   "licenceVerified": true,
-   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
-   "dimensions": {
-    "w": 2.4,
-    "h": 2.4,
-    "d": 0
-   },
-   "sheet": {
-    "px": [
-     192,
-     256
-    ],
-    "cell": [
-     64,
-     64
-    ],
-    "cols": 3,
-    "rows": 4,
-    "rowsOrder": [
-     "bas",
-     "gauche",
-     "droite",
-     "haut"
-    ],
-    "colsOrder": [
-     "statique",
-     "marche",
-     "course"
-    ],
-    "footPx": 10
-   },
-   "anchor": "bottom-center",
-   "scale": 1,
-   "billboard": "yaw",
-   "materials": [
-    "alphaTest 0.5, nearest"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 0.3
-   },
-   "animations": [
-    {
-     "name": "idle",
-     "frames": [
-      0
-     ],
-     "fps": 1
-    },
-    {
-     "name": "walk",
-     "frames": [
-      0,
-      1,
-      0,
-      1
-     ],
-     "fps": 5
-    },
-    {
-     "name": "run",
-     "frames": [
-      2,
-      1,
-      2,
-      1
-     ],
-     "fps": 8
-    }
-   ],
-   "fallback": {
-    "shape": "capsule",
-    "color": "#2f9aa0"
-   }
-  },
-  {
-   "id": "hero_cynthia",
-   "category": "character",
-   "file": "tex/hero_cynthia.png",
-   "format": "png-spritesheet",
-   "source": {
-    "kind": "imported",
-    "from": "persos_pixel_art_pack.zip (généré par le script de l'utilisateur, voir assets/sources/)",
-    "importer": "tools/world3d/import-sprites.mjs",
-    "author": "utilisateur",
-    "original": "principaux/cynthia"
-   },
-   "licence": "oeuvre-utilisateur",
-   "licenceUrl": null,
-   "licenceVerified": true,
-   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
-   "dimensions": {
-    "w": 2.4,
-    "h": 2.4,
-    "d": 0
-   },
-   "sheet": {
-    "px": [
-     192,
-     256
-    ],
-    "cell": [
-     64,
-     64
-    ],
-    "cols": 3,
-    "rows": 4,
-    "rowsOrder": [
-     "bas",
-     "gauche",
-     "droite",
-     "haut"
-    ],
-    "colsOrder": [
-     "statique",
-     "marche",
-     "course"
-    ],
-    "footPx": 10
-   },
-   "anchor": "bottom-center",
-   "scale": 1,
-   "billboard": "yaw",
-   "materials": [
-    "alphaTest 0.5, nearest"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 0.3
-   },
-   "animations": [
-    {
-     "name": "idle",
-     "frames": [
-      0
-     ],
-     "fps": 1
-    },
-    {
-     "name": "walk",
-     "frames": [
-      0,
-      1,
-      0,
-      1
-     ],
-     "fps": 5
-    },
-    {
-     "name": "run",
-     "frames": [
-      2,
-      1,
-      2,
-      1
-     ],
-     "fps": 8
-    }
-   ],
-   "fallback": {
-    "shape": "capsule",
-    "color": "#2f9aa0"
-   }
-  },
-  {
-   "id": "hero_gold",
-   "category": "character",
-   "file": "tex/hero_gold.png",
-   "format": "png-spritesheet",
-   "source": {
-    "kind": "imported",
-    "from": "persos_pixel_art_pack.zip (généré par le script de l'utilisateur, voir assets/sources/)",
-    "importer": "tools/world3d/import-sprites.mjs",
-    "author": "utilisateur",
-    "original": "principaux/gold"
-   },
-   "licence": "oeuvre-utilisateur",
-   "licenceUrl": null,
-   "licenceVerified": true,
-   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
-   "dimensions": {
-    "w": 2.4,
-    "h": 2.4,
-    "d": 0
-   },
-   "sheet": {
-    "px": [
-     192,
-     256
-    ],
-    "cell": [
-     64,
-     64
-    ],
-    "cols": 3,
-    "rows": 4,
-    "rowsOrder": [
-     "bas",
-     "gauche",
-     "droite",
-     "haut"
-    ],
-    "colsOrder": [
-     "statique",
-     "marche",
-     "course"
-    ],
-    "footPx": 10
-   },
-   "anchor": "bottom-center",
-   "scale": 1,
-   "billboard": "yaw",
-   "materials": [
-    "alphaTest 0.5, nearest"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 0.3
-   },
-   "animations": [
-    {
-     "name": "idle",
-     "frames": [
-      0
-     ],
-     "fps": 1
-    },
-    {
-     "name": "walk",
-     "frames": [
-      0,
-      1,
-      0,
-      1
-     ],
-     "fps": 5
-    },
-    {
-     "name": "run",
-     "frames": [
-      2,
-      1,
-      2,
-      1
-     ],
-     "fps": 8
-    }
-   ],
-   "fallback": {
-    "shape": "capsule",
-    "color": "#2f9aa0"
-   }
-  },
-  {
-   "id": "hero_peter",
-   "category": "character",
-   "file": "tex/hero_peter.png",
-   "format": "png-spritesheet",
-   "source": {
-    "kind": "imported",
-    "from": "persos_pixel_art_pack.zip (généré par le script de l'utilisateur, voir assets/sources/)",
-    "importer": "tools/world3d/import-sprites.mjs",
-    "author": "utilisateur",
-    "original": "principaux/peter"
-   },
-   "licence": "oeuvre-utilisateur",
-   "licenceUrl": null,
-   "licenceVerified": true,
-   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
-   "dimensions": {
-    "w": 2.4,
-    "h": 2.4,
-    "d": 0
-   },
-   "sheet": {
-    "px": [
-     192,
-     256
-    ],
-    "cell": [
-     64,
-     64
-    ],
-    "cols": 3,
-    "rows": 4,
-    "rowsOrder": [
-     "bas",
-     "gauche",
-     "droite",
-     "haut"
-    ],
-    "colsOrder": [
-     "statique",
-     "marche",
-     "course"
-    ],
-    "footPx": 10
-   },
-   "anchor": "bottom-center",
-   "scale": 1,
-   "billboard": "yaw",
-   "materials": [
-    "alphaTest 0.5, nearest"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 0.3
-   },
-   "animations": [
-    {
-     "name": "idle",
-     "frames": [
-      0
-     ],
-     "fps": 1
-    },
-    {
-     "name": "walk",
-     "frames": [
-      0,
-      1,
-      0,
-      1
-     ],
-     "fps": 5
-    },
-    {
-     "name": "run",
-     "frames": [
-      2,
-      1,
-      2,
-      1
-     ],
-     "fps": 8
-    }
-   ],
-   "fallback": {
-    "shape": "capsule",
-    "color": "#2f9aa0"
-   }
-  },
-  {
-   "id": "hero_pierre_rochard",
-   "category": "character",
-   "file": "tex/hero_pierre_rochard.png",
-   "format": "png-spritesheet",
-   "source": {
-    "kind": "imported",
-    "from": "persos_pixel_art_pack.zip (généré par le script de l'utilisateur, voir assets/sources/)",
-    "importer": "tools/world3d/import-sprites.mjs",
-    "author": "utilisateur",
-    "original": "principaux/pierre_rochard"
-   },
-   "licence": "oeuvre-utilisateur",
-   "licenceUrl": null,
-   "licenceVerified": true,
-   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
-   "dimensions": {
-    "w": 2.4,
-    "h": 2.4,
-    "d": 0
-   },
-   "sheet": {
-    "px": [
-     192,
-     256
-    ],
-    "cell": [
-     64,
-     64
-    ],
-    "cols": 3,
-    "rows": 4,
-    "rowsOrder": [
-     "bas",
-     "gauche",
-     "droite",
-     "haut"
-    ],
-    "colsOrder": [
-     "statique",
-     "marche",
-     "course"
-    ],
-    "footPx": 10
-   },
-   "anchor": "bottom-center",
-   "scale": 1,
-   "billboard": "yaw",
-   "materials": [
-    "alphaTest 0.5, nearest"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 0.3
-   },
-   "animations": [
-    {
-     "name": "idle",
-     "frames": [
-      0
-     ],
-     "fps": 1
-    },
-    {
-     "name": "walk",
-     "frames": [
-      0,
-      1,
-      0,
-      1
-     ],
-     "fps": 5
-    },
-    {
-     "name": "run",
-     "frames": [
-      2,
-      1,
-      2,
-      1
-     ],
-     "fps": 8
-    }
-   ],
-   "fallback": {
-    "shape": "capsule",
-    "color": "#2f9aa0"
-   }
-  },
-  {
-   "id": "hero_red",
-   "category": "character",
-   "file": "tex/hero_red.png",
-   "format": "png-spritesheet",
-   "source": {
-    "kind": "imported",
-    "from": "persos_pixel_art_pack.zip (généré par le script de l'utilisateur, voir assets/sources/)",
-    "importer": "tools/world3d/import-sprites.mjs",
-    "author": "utilisateur",
-    "original": "principaux/red"
-   },
-   "licence": "oeuvre-utilisateur",
-   "licenceUrl": null,
-   "licenceVerified": true,
-   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
-   "dimensions": {
-    "w": 2.4,
-    "h": 2.4,
-    "d": 0
-   },
-   "sheet": {
-    "px": [
-     192,
-     256
-    ],
-    "cell": [
-     64,
-     64
-    ],
-    "cols": 3,
-    "rows": 4,
-    "rowsOrder": [
-     "bas",
-     "gauche",
-     "droite",
-     "haut"
-    ],
-    "colsOrder": [
-     "statique",
-     "marche",
-     "course"
-    ],
-    "footPx": 10
-   },
-   "anchor": "bottom-center",
-   "scale": 1,
-   "billboard": "yaw",
-   "materials": [
-    "alphaTest 0.5, nearest"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 0.3
-   },
-   "animations": [
-    {
-     "name": "idle",
-     "frames": [
-      0
-     ],
-     "fps": 1
-    },
-    {
-     "name": "walk",
-     "frames": [
-      0,
-      1,
-      0,
-      1
-     ],
-     "fps": 5
-    },
-    {
-     "name": "run",
-     "frames": [
-      2,
-      1,
-      2,
-      1
-     ],
-     "fps": 8
-    }
-   ],
-   "fallback": {
-    "shape": "capsule",
-    "color": "#2f9aa0"
-   }
-  },
-  {
    "id": "ow_allison",
    "inventoryId": "icy:overworld_sprites_char_allison",
    "category": "character",
@@ -3670,6 +2474,879 @@
       1,
       2,
       3
+     ],
+     "fps": 10
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#8a6a4a"
+   }
+  },
+  {
+   "id": "chr_rene",
+   "label": "René",
+   "category": "character",
+   "tags": [
+    "personnage",
+    "overworld",
+    "3/4",
+    "créé"
+   ],
+   "file": "tex/chr_rene.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "created",
+    "from": "dessiné pour ce projet par tools/world3d/gen-characters.mjs, dans l'esprit des feuilles IcyEthics",
+    "note": "père de Barry, version retravaillée : cheveux blonds en brosse, moustache, gilet bleu sur marinière, jean"
+   },
+   "licence": "oeuvre-utilisateur",
+   "licenceUrl": null,
+   "licenceVerified": true,
+   "dimensions": {
+    "w": 1.25,
+    "h": 1.875,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     128,
+     192
+    ],
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche1",
+     "statique2",
+     "marche2"
+    ],
+    "footPx": 3
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      1,
+      2,
+      3,
+      0
+     ],
+     "fps": 6
+    },
+    {
+     "name": "run",
+     "frames": [
+      1,
+      2,
+      3,
+      0
+     ],
+     "fps": 10
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#8a6a4a"
+   }
+  },
+  {
+   "id": "chr_ingenieur",
+   "label": "Ingénieur",
+   "category": "character",
+   "tags": [
+    "personnage",
+    "overworld",
+    "3/4",
+    "créé"
+   ],
+   "file": "tex/chr_ingenieur.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "created",
+    "from": "dessiné pour ce projet par tools/world3d/gen-characters.mjs, dans l'esprit des feuilles IcyEthics",
+    "note": null
+   },
+   "licence": "oeuvre-utilisateur",
+   "licenceUrl": null,
+   "licenceVerified": true,
+   "dimensions": {
+    "w": 1.25,
+    "h": 1.875,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     128,
+     192
+    ],
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche1",
+     "statique2",
+     "marche2"
+    ],
+    "footPx": 3
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      1,
+      2,
+      3,
+      0
+     ],
+     "fps": 6
+    },
+    {
+     "name": "run",
+     "frames": [
+      1,
+      2,
+      3,
+      0
+     ],
+     "fps": 10
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#8a6a4a"
+   }
+  },
+  {
+   "id": "chr_scientifique",
+   "label": "Scientifique",
+   "category": "character",
+   "tags": [
+    "personnage",
+    "overworld",
+    "3/4",
+    "créé"
+   ],
+   "file": "tex/chr_scientifique.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "created",
+    "from": "dessiné pour ce projet par tools/world3d/gen-characters.mjs, dans l'esprit des feuilles IcyEthics",
+    "note": null
+   },
+   "licence": "oeuvre-utilisateur",
+   "licenceUrl": null,
+   "licenceVerified": true,
+   "dimensions": {
+    "w": 1.25,
+    "h": 1.875,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     128,
+     192
+    ],
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche1",
+     "statique2",
+     "marche2"
+    ],
+    "footPx": 3
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      1,
+      2,
+      3,
+      0
+     ],
+     "fps": 6
+    },
+    {
+     "name": "run",
+     "frames": [
+      1,
+      2,
+      3,
+      0
+     ],
+     "fps": 10
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#8a6a4a"
+   }
+  },
+  {
+   "id": "chr_analyste",
+   "label": "Analyste",
+   "category": "character",
+   "tags": [
+    "personnage",
+    "overworld",
+    "3/4",
+    "créé"
+   ],
+   "file": "tex/chr_analyste.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "created",
+    "from": "dessiné pour ce projet par tools/world3d/gen-characters.mjs, dans l'esprit des feuilles IcyEthics",
+    "note": null
+   },
+   "licence": "oeuvre-utilisateur",
+   "licenceUrl": null,
+   "licenceVerified": true,
+   "dimensions": {
+    "w": 1.25,
+    "h": 1.875,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     128,
+     192
+    ],
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche1",
+     "statique2",
+     "marche2"
+    ],
+    "footPx": 3
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      1,
+      2,
+      3,
+      0
+     ],
+     "fps": 6
+    },
+    {
+     "name": "run",
+     "frames": [
+      1,
+      2,
+      3,
+      0
+     ],
+     "fps": 10
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#8a6a4a"
+   }
+  },
+  {
+   "id": "chr_operateur",
+   "label": "Opérateur",
+   "category": "character",
+   "tags": [
+    "personnage",
+    "overworld",
+    "3/4",
+    "créé"
+   ],
+   "file": "tex/chr_operateur.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "created",
+    "from": "dessiné pour ce projet par tools/world3d/gen-characters.mjs, dans l'esprit des feuilles IcyEthics",
+    "note": null
+   },
+   "licence": "oeuvre-utilisateur",
+   "licenceUrl": null,
+   "licenceVerified": true,
+   "dimensions": {
+    "w": 1.25,
+    "h": 1.875,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     128,
+     192
+    ],
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche1",
+     "statique2",
+     "marche2"
+    ],
+    "footPx": 3
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      1,
+      2,
+      3,
+      0
+     ],
+     "fps": 6
+    },
+    {
+     "name": "run",
+     "frames": [
+      1,
+      2,
+      3,
+      0
+     ],
+     "fps": 10
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#8a6a4a"
+   }
+  },
+  {
+   "id": "chr_securite",
+   "label": "Sécurité",
+   "category": "character",
+   "tags": [
+    "personnage",
+    "overworld",
+    "3/4",
+    "créé"
+   ],
+   "file": "tex/chr_securite.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "created",
+    "from": "dessiné pour ce projet par tools/world3d/gen-characters.mjs, dans l'esprit des feuilles IcyEthics",
+    "note": null
+   },
+   "licence": "oeuvre-utilisateur",
+   "licenceUrl": null,
+   "licenceVerified": true,
+   "dimensions": {
+    "w": 1.25,
+    "h": 1.875,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     128,
+     192
+    ],
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche1",
+     "statique2",
+     "marche2"
+    ],
+    "footPx": 3
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      1,
+      2,
+      3,
+      0
+     ],
+     "fps": 6
+    },
+    {
+     "name": "run",
+     "frames": [
+      1,
+      2,
+      3,
+      0
+     ],
+     "fps": 10
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#8a6a4a"
+   }
+  },
+  {
+   "id": "chr_livreur",
+   "label": "Livreur",
+   "category": "character",
+   "tags": [
+    "personnage",
+    "overworld",
+    "3/4",
+    "créé"
+   ],
+   "file": "tex/chr_livreur.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "created",
+    "from": "dessiné pour ce projet par tools/world3d/gen-characters.mjs, dans l'esprit des feuilles IcyEthics",
+    "note": null
+   },
+   "licence": "oeuvre-utilisateur",
+   "licenceUrl": null,
+   "licenceVerified": true,
+   "dimensions": {
+    "w": 1.25,
+    "h": 1.875,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     128,
+     192
+    ],
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche1",
+     "statique2",
+     "marche2"
+    ],
+    "footPx": 3
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      1,
+      2,
+      3,
+      0
+     ],
+     "fps": 6
+    },
+    {
+     "name": "run",
+     "frames": [
+      1,
+      2,
+      3,
+      0
+     ],
+     "fps": 10
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#8a6a4a"
+   }
+  },
+  {
+   "id": "chr_etudiant",
+   "label": "Étudiant",
+   "category": "character",
+   "tags": [
+    "personnage",
+    "overworld",
+    "3/4",
+    "créé"
+   ],
+   "file": "tex/chr_etudiant.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "created",
+    "from": "dessiné pour ce projet par tools/world3d/gen-characters.mjs, dans l'esprit des feuilles IcyEthics",
+    "note": null
+   },
+   "licence": "oeuvre-utilisateur",
+   "licenceUrl": null,
+   "licenceVerified": true,
+   "dimensions": {
+    "w": 1.25,
+    "h": 1.875,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     128,
+     192
+    ],
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche1",
+     "statique2",
+     "marche2"
+    ],
+    "footPx": 3
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      1,
+      2,
+      3,
+      0
+     ],
+     "fps": 6
+    },
+    {
+     "name": "run",
+     "frames": [
+      1,
+      2,
+      3,
+      0
+     ],
+     "fps": 10
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#8a6a4a"
+   }
+  },
+  {
+   "id": "chr_medecin",
+   "label": "Médecin",
+   "category": "character",
+   "tags": [
+    "personnage",
+    "overworld",
+    "3/4",
+    "créé"
+   ],
+   "file": "tex/chr_medecin.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "created",
+    "from": "dessiné pour ce projet par tools/world3d/gen-characters.mjs, dans l'esprit des feuilles IcyEthics",
+    "note": null
+   },
+   "licence": "oeuvre-utilisateur",
+   "licenceUrl": null,
+   "licenceVerified": true,
+   "dimensions": {
+    "w": 1.25,
+    "h": 1.875,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     128,
+     192
+    ],
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche1",
+     "statique2",
+     "marche2"
+    ],
+    "footPx": 3
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      1,
+      2,
+      3,
+      0
+     ],
+     "fps": 6
+    },
+    {
+     "name": "run",
+     "frames": [
+      1,
+      2,
+      3,
+      0
      ],
      "fps": 10
     }
