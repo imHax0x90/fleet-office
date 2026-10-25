@@ -105,6 +105,10 @@ const PAL = [ // coat, pants, hair, skin, acc (écharpe/col), head: 0 cheveux / 
   { coat: "#e0a02f", pants: "#3b3b3b", hair: "#6b3a1f", skin: "#8c5a3c", acc: "#fbfbff", head: 1, hat: "#2f9aa0" },
   { coat: "#e8e8f0", pants: "#4a5878", hair: "#7a5a3a", skin: "#f1c6a0", acc: "#d9483a", head: 3, hat: "#e8e8f0" },
   { coat: "#e86a9a", pants: "#8a3a5a", hair: "#3a2418", skin: "#e0ac84", acc: "#ffffff", head: 0, skirt: true, bag: true },
+  { coat: "#8a6a4a", pants: "#4a4a4a", hair: "#e6e6e6", skin: "#e0ac84", acc: "#d9483a", head: 0 },               // 8 ancien
+  { coat: "#2f6f9a", pants: "#3a4a3a", hair: "#6b3a1f", skin: "#f1c6a0", acc: "#ffe27a", head: 2, hat: "#e8c870", bag: true }, // 9 pêcheur
+  { coat: "#5a8a3a", pants: "#6b5a3a", hair: "#4a2f1d", skin: "#c58a62", acc: "#fbfbff", head: 1, hat: "#e8c870" },   // 10 jardinier
+  { coat: "#2f4aa0", pants: "#2e3340", hair: "#1f1a18", skin: "#f1c6a0", acc: "#ffd24a", head: 1, hat: "#2f4aa0", bag: true }, // 11 facteur
 ];
 const LINE = [29, 26, 36, 255];
 const drawChar = (img, ox, oy, p, dir, f) => {
@@ -143,3 +147,10 @@ PAL.forEach((p, i) => { const img = new Img(64, 96); for (let d = 0; d < 4; d++)
 { const img = new Img(16, 16), q = rng(95); for (let b = 0; b < 7; b++) { const x0 = 1 + b * 2 + (q() * 2 | 0), h = 7 + (q() * 8 | 0), lean = (q() * 3 | 0) - 1; for (let y = 0; y < h; y++) { const x = x0 + Math.round(lean * y / h * 2); img.px(x, 15 - y, y > h - 3 ? "#9be06a" : y > h / 2 ? "#4aa63f" : "#2f7d3c"); img.px(x + 1, 15 - y, y > h - 3 ? "#79c457" : "#2f7d3c"); } } save("tallgrass", img); }
 { const img = new Img(16, 32); img.rect(0, 0, 16, 32, "#f4ecd0"); for (let y = 0; y < 32; y += 4) img.rect(0, y, 16, 1, "#d9cfa8"); img.rect(0, 0, 16, 2, "#6b4a2b"); img.rect(0, 30, 16, 2, "#6b4a2b"); img.rect(0, 0, 2, 32, "#6b4a2b"); img.rect(14, 0, 2, 32, "#6b4a2b"); img.rect(7, 0, 2, 32, "#8c6a43"); for (let y = 6; y < 30; y += 8) img.rect(0, y, 16, 2, "#8c6a43"); save("sail", img); }
 { const img = new Img(16, 16); img.rect(0, 0, 16, 16, "#2a3347"); img.rect(1, 1, 14, 14, "#f6f1dc"); for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2; img.px(8 + Math.round(Math.sin(a) * 5.5), 8 - Math.round(Math.cos(a) * 5.5), "#2a3347"); } img.rect(8, 3, 1, 5, "#2a3347"); img.rect(8, 8, 4, 1, "#2a3347"); img.rect(7, 7, 3, 3, "#d9483a"); save("clock", img); }
+
+{ // roche de falaise : strates horizontales, fissures, mousse en haut
+  const img = new Img(16, 16), q = rng(121), base = hex("#9a8a76"); img.rect(0, 0, 16, 16, base); speckle(img, q, base, .16, 90);
+  for (const [y, c] of [[3, "#7e6f5d"], [7, "#b4a48c"], [11, "#7e6f5d"], [14, "#8c7c68"]]) { for (let x = 0; x < 16; x++) img.px(x, y + ((x * 7 + y) % 3 === 0 ? 1 : 0), c); }
+  for (let k = 0; k < 5; k++) { const x = q() * 16 | 0, y = q() * 12 | 0; for (let j = 0; j < 4; j++) img.px(x + (j % 2), y + j, "#6a5c4c"); }
+  img.rect(0, 0, 16, 2, "#5f9a45"); for (let x = 0; x < 16; x += 2) img.px(x, 2, "#4a8038"); save("cliff", img);
+}

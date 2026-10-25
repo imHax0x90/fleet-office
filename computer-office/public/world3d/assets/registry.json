@@ -1870,6 +1870,150 @@
    }
   },
   {
+   "id": "char_10",
+   "category": "character",
+   "file": "tex/char_10.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "generated",
+    "tool": "tools/world3d/build-models.mjs",
+    "note": "dessiné par code, aucune donnée tierce"
+   },
+   "licence": "CC0-1.0",
+   "dimensions": {
+    "w": 1,
+    "h": 1.5,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     64,
+     96
+    ],
+    "cell": [
+     16,
+     24
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ]
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0,
+      2
+     ],
+     "fps": 1.5
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 7
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#2f9aa0"
+   }
+  },
+  {
+   "id": "char_11",
+   "category": "character",
+   "file": "tex/char_11.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "generated",
+    "tool": "tools/world3d/build-models.mjs",
+    "note": "dessiné par code, aucune donnée tierce"
+   },
+   "licence": "CC0-1.0",
+   "dimensions": {
+    "w": 1,
+    "h": 1.5,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     64,
+     96
+    ],
+    "cell": [
+     16,
+     24
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ]
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0,
+      2
+     ],
+     "fps": 1.5
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 7
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#2f9aa0"
+   }
+  },
+  {
    "id": "char_2",
    "category": "character",
    "file": "tex/char_2.png",
@@ -2233,6 +2377,150 @@
    "id": "char_7",
    "category": "character",
    "file": "tex/char_7.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "generated",
+    "tool": "tools/world3d/build-models.mjs",
+    "note": "dessiné par code, aucune donnée tierce"
+   },
+   "licence": "CC0-1.0",
+   "dimensions": {
+    "w": 1,
+    "h": 1.5,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     64,
+     96
+    ],
+    "cell": [
+     16,
+     24
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ]
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0,
+      2
+     ],
+     "fps": 1.5
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 7
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#2f9aa0"
+   }
+  },
+  {
+   "id": "char_8",
+   "category": "character",
+   "file": "tex/char_8.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "generated",
+    "tool": "tools/world3d/build-models.mjs",
+    "note": "dessiné par code, aucune donnée tierce"
+   },
+   "licence": "CC0-1.0",
+   "dimensions": {
+    "w": 1,
+    "h": 1.5,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     64,
+     96
+    ],
+    "cell": [
+     16,
+     24
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ]
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0,
+      2
+     ],
+     "fps": 1.5
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 7
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#2f9aa0"
+   }
+  },
+  {
+   "id": "char_9",
+   "category": "character",
+   "file": "tex/char_9.png",
    "format": "png-spritesheet",
    "source": {
     "kind": "generated",

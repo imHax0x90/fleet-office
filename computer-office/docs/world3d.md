@@ -104,3 +104,9 @@ asset cassé (fallback orange + HUD rouge) · asset importé (OBJ → GLB) charg
 * **Eau animée** (2 images d'atlas alternées), **berges de sable**, **lac avec ponton**, **ruisseau et pont**, **hautes herbes** (touffes en billboards croisés), **champs de fleurs**, **moulin à voiles tournantes**, **tour de l'horloge**, **portes de ville** aux quatre sorties, arbres d'alignement le long des rues.
 * Ces décors sont de catégorie `scenery` dans le registre : purs éléments d'ambiance, sans lien avec des données.
 * Cases de carte : `b` = pont/ponton (eau dessous, praticable), `t` = hautes herbes ; `animated[]` = props animés (rotation continue).
+
+## Relief et habitants (v4)
+
+* **Falaises** : la carte déclare `plateaus[]` (rectangles de niveau 1 = 2,2 unités) et `ramps[]` (rampes dans un sens n/s/e/w). Le moteur calcule la hauteur du sol (`heightAt`), élève sol, décors, bâtiments, lampadaires et personnages, et génère les **murs de roche** là où deux tuiles voisines diffèrent de hauteur. Un personnage ne franchit une différence > 0,45 que par une rampe. Deux collines : la colline du moulin (nord-ouest) et la terrasse de l'horloge (nord-est).
+* **Habitants décoratifs** : `npcs[]` de la carte (14 : meunier, pêcheur, jardinier, facteur en tournée, joggeur, enfants, ancien sur son banc, gardiens de porte…), en promenade, en patrouille ou statiques, avec quelques répliques. **Ils ne représentent aucun agent** : étiquette « · décor » au survol et bandeau d'avertissement dans leur panneau ; ils ne sont pas comptés avec les agents (HUD : « 14 habitants (décor) »).
+* Textures ajoutées : roche de falaise, 4 tenues d'habitants (ancien, pêcheur, jardinier, facteur).
