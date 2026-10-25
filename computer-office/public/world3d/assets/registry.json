@@ -2484,28 +2484,1345 @@
    }
   },
   {
-   "id": "chr_rene",
+   "id": "ow_trchar074",
+   "label": "Chapeau de paille",
+   "category": "character",
+   "tags": [
+    "personnage",
+    "overworld",
+    "3/4",
+    "icy"
+   ],
+   "file": "tex/ow_trchar074.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets",
+    "importer": "tools/world3d/import-icy-extra.mjs",
+    "author": "IcyEthics",
+    "original": "Overworld Sprites/Trchar074.png",
+    "note": null
+   },
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "usage personnel",
+   "dimensions": {
+    "w": 1.25,
+    "h": 1.88,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     128,
+     192
+    ],
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche1",
+     "statique2",
+     "marche2"
+    ],
+    "footPx": 2
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 6
+    },
+    {
+     "name": "run",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 10
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#8a6a4a"
+   }
+  },
+  {
+   "id": "ow_trchar075",
+   "label": "Capuche bleue",
+   "category": "character",
+   "tags": [
+    "personnage",
+    "overworld",
+    "3/4",
+    "icy"
+   ],
+   "file": "tex/ow_trchar075.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets",
+    "importer": "tools/world3d/import-icy-extra.mjs",
+    "author": "IcyEthics",
+    "original": "Overworld Sprites/Trchar075.png",
+    "note": null
+   },
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "usage personnel",
+   "dimensions": {
+    "w": 1.25,
+    "h": 1.88,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     128,
+     192
+    ],
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche1",
+     "statique2",
+     "marche2"
+    ],
+    "footPx": 2
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 6
+    },
+    {
+     "name": "run",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 10
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#8a6a4a"
+   }
+  },
+  {
+   "id": "ow_trchar076",
+   "label": "Grand chapeau",
+   "category": "character",
+   "tags": [
+    "personnage",
+    "overworld",
+    "3/4",
+    "icy"
+   ],
+   "file": "tex/ow_trchar076.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets",
+    "importer": "tools/world3d/import-icy-extra.mjs",
+    "author": "IcyEthics",
+    "original": "Overworld Sprites/Trchar076.png",
+    "note": null
+   },
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "usage personnel",
+   "dimensions": {
+    "w": 1.25,
+    "h": 1.88,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     128,
+     192
+    ],
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche1",
+     "statique2",
+     "marche2"
+    ],
+    "footPx": 2
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 6
+    },
+    {
+     "name": "run",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 10
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#8a6a4a"
+   }
+  },
+  {
+   "id": "ow_trchar077",
+   "label": "Gentleman",
+   "category": "character",
+   "tags": [
+    "personnage",
+    "overworld",
+    "3/4",
+    "icy"
+   ],
+   "file": "tex/ow_trchar077.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets",
+    "importer": "tools/world3d/import-icy-extra.mjs",
+    "author": "IcyEthics",
+    "original": "Overworld Sprites/trchar077.png",
+    "note": null
+   },
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "usage personnel",
+   "dimensions": {
+    "w": 1.25,
+    "h": 1.88,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     128,
+     192
+    ],
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche1",
+     "statique2",
+     "marche2"
+    ],
+    "footPx": 2
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 6
+    },
+    {
+     "name": "run",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 10
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#8a6a4a"
+   }
+  },
+  {
+   "id": "ow_trchar078",
+   "label": "Vieil homme chauve",
+   "category": "character",
+   "tags": [
+    "personnage",
+    "overworld",
+    "3/4",
+    "icy"
+   ],
+   "file": "tex/ow_trchar078.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets",
+    "importer": "tools/world3d/import-icy-extra.mjs",
+    "author": "IcyEthics",
+    "original": "Overworld Sprites/trchar078.png",
+    "note": null
+   },
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "usage personnel",
+   "dimensions": {
+    "w": 1.25,
+    "h": 1.88,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     128,
+     192
+    ],
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche1",
+     "statique2",
+     "marche2"
+    ],
+    "footPx": 6
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 6
+    },
+    {
+     "name": "run",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 10
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#8a6a4a"
+   }
+  },
+  {
+   "id": "ow_navy_temp",
+   "label": "Garçon aux cheveux verts",
+   "category": "character",
+   "tags": [
+    "personnage",
+    "overworld",
+    "3/4",
+    "icy"
+   ],
+   "file": "tex/ow_navy_temp.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets",
+    "importer": "tools/world3d/import-icy-extra.mjs",
+    "author": "IcyEthics",
+    "original": "Overworld Sprites/Navy_Temp.png",
+    "note": null
+   },
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "usage personnel",
+   "dimensions": {
+    "w": 1.25,
+    "h": 1.88,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     128,
+     192
+    ],
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche1",
+     "statique2",
+     "marche2"
+    ],
+    "footPx": 2
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 6
+    },
+    {
+     "name": "run",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 10
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#8a6a4a"
+   }
+  },
+  {
+   "id": "ow_scarlet_temp",
+   "label": "Garçon roux",
+   "category": "character",
+   "tags": [
+    "personnage",
+    "overworld",
+    "3/4",
+    "icy"
+   ],
+   "file": "tex/ow_scarlet_temp.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets",
+    "importer": "tools/world3d/import-icy-extra.mjs",
+    "author": "IcyEthics",
+    "original": "Overworld Sprites/Scarlet_Temp.png",
+    "note": null
+   },
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "usage personnel",
+   "dimensions": {
+    "w": 1.25,
+    "h": 1.88,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     128,
+     192
+    ],
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche1",
+     "statique2",
+     "marche2"
+    ],
+    "footPx": 2
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 6
+    },
+    {
+     "name": "run",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 10
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#8a6a4a"
+   }
+  },
+  {
+   "id": "ow_ow_cyan",
+   "label": "Magicien cyan",
+   "category": "character",
+   "tags": [
+    "personnage",
+    "overworld",
+    "3/4",
+    "icy"
+   ],
+   "file": "tex/ow_ow_cyan.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets",
+    "importer": "tools/world3d/import-icy-extra.mjs",
+    "author": "IcyEthics",
+    "original": "Overworld Sprites/OW_Cyan.png",
+    "note": null
+   },
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "usage personnel",
+   "dimensions": {
+    "w": 1.25,
+    "h": 1.88,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     128,
+     192
+    ],
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche1",
+     "statique2",
+     "marche2"
+    ],
+    "footPx": 2
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 6
+    },
+    {
+     "name": "run",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 10
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#8a6a4a"
+   }
+  },
+  {
+   "id": "ow_ow_green",
+   "label": "Magicien vert",
+   "category": "character",
+   "tags": [
+    "personnage",
+    "overworld",
+    "3/4",
+    "icy"
+   ],
+   "file": "tex/ow_ow_green.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets",
+    "importer": "tools/world3d/import-icy-extra.mjs",
+    "author": "IcyEthics",
+    "original": "Overworld Sprites/OW_Green.png",
+    "note": null
+   },
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "usage personnel",
+   "dimensions": {
+    "w": 1.25,
+    "h": 1.88,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     128,
+     192
+    ],
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche1",
+     "statique2",
+     "marche2"
+    ],
+    "footPx": 2
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 6
+    },
+    {
+     "name": "run",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 10
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#8a6a4a"
+   }
+  },
+  {
+   "id": "ow_ow_pink",
+   "label": "Magicien rose",
+   "category": "character",
+   "tags": [
+    "personnage",
+    "overworld",
+    "3/4",
+    "icy"
+   ],
+   "file": "tex/ow_ow_pink.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets",
+    "importer": "tools/world3d/import-icy-extra.mjs",
+    "author": "IcyEthics",
+    "original": "Overworld Sprites/OW_Pink.png",
+    "note": null
+   },
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "usage personnel",
+   "dimensions": {
+    "w": 1.25,
+    "h": 1.88,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     128,
+     192
+    ],
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche1",
+     "statique2",
+     "marche2"
+    ],
+    "footPx": 2
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 6
+    },
+    {
+     "name": "run",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 10
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#8a6a4a"
+   }
+  },
+  {
+   "id": "ow_ow_purple",
+   "label": "Magicien violet",
+   "category": "character",
+   "tags": [
+    "personnage",
+    "overworld",
+    "3/4",
+    "icy"
+   ],
+   "file": "tex/ow_ow_purple.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets",
+    "importer": "tools/world3d/import-icy-extra.mjs",
+    "author": "IcyEthics",
+    "original": "Overworld Sprites/OW_Purple.png",
+    "note": null
+   },
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "usage personnel",
+   "dimensions": {
+    "w": 1.25,
+    "h": 1.88,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     128,
+     192
+    ],
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche1",
+     "statique2",
+     "marche2"
+    ],
+    "footPx": 2
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 6
+    },
+    {
+     "name": "run",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 10
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#8a6a4a"
+   }
+  },
+  {
+   "id": "ow_ow_yellow",
+   "label": "Magicien jaune",
+   "category": "character",
+   "tags": [
+    "personnage",
+    "overworld",
+    "3/4",
+    "icy"
+   ],
+   "file": "tex/ow_ow_yellow.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets",
+    "importer": "tools/world3d/import-icy-extra.mjs",
+    "author": "IcyEthics",
+    "original": "Overworld Sprites/OW_Yellow.png",
+    "note": null
+   },
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "usage personnel",
+   "dimensions": {
+    "w": 1.25,
+    "h": 1.88,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     128,
+     192
+    ],
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche1",
+     "statique2",
+     "marche2"
+    ],
+    "footPx": 2
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 6
+    },
+    {
+     "name": "run",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 10
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#8a6a4a"
+   }
+  },
+  {
+   "id": "ow_magdalyne",
+   "label": "Magdalyne",
+   "category": "character",
+   "tags": [
+    "personnage",
+    "overworld",
+    "3/4",
+    "icy"
+   ],
+   "file": "tex/ow_magdalyne.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets",
+    "importer": "tools/world3d/import-icy-extra.mjs",
+    "author": "IcyEthics",
+    "original": "Overworld Sprites/char_magdalyne.png",
+    "note": null
+   },
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "usage personnel",
+   "dimensions": {
+    "w": 1.56,
+    "h": 2.03,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     160,
+     208
+    ],
+    "cell": [
+     40,
+     52
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche1",
+     "statique2",
+     "marche2"
+    ],
+    "footPx": 2
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 6
+    },
+    {
+     "name": "run",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 10
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#8a6a4a"
+   }
+  },
+  {
+   "id": "ow_rene",
    "label": "René",
    "category": "character",
    "tags": [
     "personnage",
     "overworld",
     "3/4",
-    "créé"
+    "icy"
    ],
-   "file": "tex/chr_rene.png",
+   "file": "tex/ow_rene.png",
    "format": "png-spritesheet",
    "source": {
-    "kind": "created",
-    "from": "dessiné pour ce projet par tools/world3d/gen-characters.mjs, dans l'esprit des feuilles IcyEthics",
-    "note": "père de Barry, version retravaillée : cheveux blonds en brosse, moustache, gilet bleu sur marinière, jean"
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets",
+    "importer": "tools/world3d/import-icy-extra.mjs",
+    "author": "IcyEthics",
+    "original": "Overworld Sprites/Navy_Temp.png",
+    "note": "père de Barry, version retravaillée : base Navy_Temp, cheveux blonds, gilet bleu, moustache"
    },
-   "licence": "oeuvre-utilisateur",
-   "licenceUrl": null,
-   "licenceVerified": true,
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "usage personnel",
    "dimensions": {
     "w": 1.25,
-    "h": 1.875,
+    "h": 1.88,
     "d": 0
    },
    "sheet": {
@@ -2531,7 +3848,7 @@
      "statique2",
      "marche2"
     ],
-    "footPx": 3
+    "footPx": 2
    },
    "anchor": "bottom-center",
    "scale": 1,
@@ -2557,20 +3874,20 @@
     {
      "name": "walk",
      "frames": [
+      0,
       1,
       2,
-      3,
-      0
+      3
      ],
      "fps": 6
     },
     {
      "name": "run",
      "frames": [
+      0,
       1,
       2,
-      3,
-      0
+      3
      ],
      "fps": 10
     }
@@ -2581,319 +3898,32 @@
    }
   },
   {
-   "id": "chr_ingenieur",
-   "label": "Ingénieur",
-   "category": "character",
-   "tags": [
-    "personnage",
-    "overworld",
-    "3/4",
-    "créé"
-   ],
-   "file": "tex/chr_ingenieur.png",
-   "format": "png-spritesheet",
-   "source": {
-    "kind": "created",
-    "from": "dessiné pour ce projet par tools/world3d/gen-characters.mjs, dans l'esprit des feuilles IcyEthics",
-    "note": null
-   },
-   "licence": "oeuvre-utilisateur",
-   "licenceUrl": null,
-   "licenceVerified": true,
-   "dimensions": {
-    "w": 1.25,
-    "h": 1.875,
-    "d": 0
-   },
-   "sheet": {
-    "px": [
-     128,
-     192
-    ],
-    "cell": [
-     32,
-     48
-    ],
-    "cols": 4,
-    "rows": 4,
-    "rowsOrder": [
-     "bas",
-     "gauche",
-     "droite",
-     "haut"
-    ],
-    "colsOrder": [
-     "statique",
-     "marche1",
-     "statique2",
-     "marche2"
-    ],
-    "footPx": 3
-   },
-   "anchor": "bottom-center",
-   "scale": 1,
-   "billboard": "yaw",
-   "materials": [
-    "alphaTest 0.5, nearest"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 0.3
-   },
-   "animations": [
-    {
-     "name": "idle",
-     "frames": [
-      0
-     ],
-     "fps": 1
-    },
-    {
-     "name": "walk",
-     "frames": [
-      1,
-      2,
-      3,
-      0
-     ],
-     "fps": 6
-    },
-    {
-     "name": "run",
-     "frames": [
-      1,
-      2,
-      3,
-      0
-     ],
-     "fps": 10
-    }
-   ],
-   "fallback": {
-    "shape": "capsule",
-    "color": "#8a6a4a"
-   }
-  },
-  {
-   "id": "chr_scientifique",
-   "label": "Scientifique",
-   "category": "character",
-   "tags": [
-    "personnage",
-    "overworld",
-    "3/4",
-    "créé"
-   ],
-   "file": "tex/chr_scientifique.png",
-   "format": "png-spritesheet",
-   "source": {
-    "kind": "created",
-    "from": "dessiné pour ce projet par tools/world3d/gen-characters.mjs, dans l'esprit des feuilles IcyEthics",
-    "note": null
-   },
-   "licence": "oeuvre-utilisateur",
-   "licenceUrl": null,
-   "licenceVerified": true,
-   "dimensions": {
-    "w": 1.25,
-    "h": 1.875,
-    "d": 0
-   },
-   "sheet": {
-    "px": [
-     128,
-     192
-    ],
-    "cell": [
-     32,
-     48
-    ],
-    "cols": 4,
-    "rows": 4,
-    "rowsOrder": [
-     "bas",
-     "gauche",
-     "droite",
-     "haut"
-    ],
-    "colsOrder": [
-     "statique",
-     "marche1",
-     "statique2",
-     "marche2"
-    ],
-    "footPx": 3
-   },
-   "anchor": "bottom-center",
-   "scale": 1,
-   "billboard": "yaw",
-   "materials": [
-    "alphaTest 0.5, nearest"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 0.3
-   },
-   "animations": [
-    {
-     "name": "idle",
-     "frames": [
-      0
-     ],
-     "fps": 1
-    },
-    {
-     "name": "walk",
-     "frames": [
-      1,
-      2,
-      3,
-      0
-     ],
-     "fps": 6
-    },
-    {
-     "name": "run",
-     "frames": [
-      1,
-      2,
-      3,
-      0
-     ],
-     "fps": 10
-    }
-   ],
-   "fallback": {
-    "shape": "capsule",
-    "color": "#8a6a4a"
-   }
-  },
-  {
-   "id": "chr_analyste",
-   "label": "Analyste",
-   "category": "character",
-   "tags": [
-    "personnage",
-    "overworld",
-    "3/4",
-    "créé"
-   ],
-   "file": "tex/chr_analyste.png",
-   "format": "png-spritesheet",
-   "source": {
-    "kind": "created",
-    "from": "dessiné pour ce projet par tools/world3d/gen-characters.mjs, dans l'esprit des feuilles IcyEthics",
-    "note": null
-   },
-   "licence": "oeuvre-utilisateur",
-   "licenceUrl": null,
-   "licenceVerified": true,
-   "dimensions": {
-    "w": 1.25,
-    "h": 1.875,
-    "d": 0
-   },
-   "sheet": {
-    "px": [
-     128,
-     192
-    ],
-    "cell": [
-     32,
-     48
-    ],
-    "cols": 4,
-    "rows": 4,
-    "rowsOrder": [
-     "bas",
-     "gauche",
-     "droite",
-     "haut"
-    ],
-    "colsOrder": [
-     "statique",
-     "marche1",
-     "statique2",
-     "marche2"
-    ],
-    "footPx": 3
-   },
-   "anchor": "bottom-center",
-   "scale": 1,
-   "billboard": "yaw",
-   "materials": [
-    "alphaTest 0.5, nearest"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 0.3
-   },
-   "animations": [
-    {
-     "name": "idle",
-     "frames": [
-      0
-     ],
-     "fps": 1
-    },
-    {
-     "name": "walk",
-     "frames": [
-      1,
-      2,
-      3,
-      0
-     ],
-     "fps": 6
-    },
-    {
-     "name": "run",
-     "frames": [
-      1,
-      2,
-      3,
-      0
-     ],
-     "fps": 10
-    }
-   ],
-   "fallback": {
-    "shape": "capsule",
-    "color": "#8a6a4a"
-   }
-  },
-  {
-   "id": "chr_operateur",
+   "id": "ow_operateur",
    "label": "Opérateur",
    "category": "character",
    "tags": [
     "personnage",
     "overworld",
     "3/4",
-    "créé"
+    "icy"
    ],
-   "file": "tex/chr_operateur.png",
+   "file": "tex/ow_operateur.png",
    "format": "png-spritesheet",
    "source": {
-    "kind": "created",
-    "from": "dessiné pour ce projet par tools/world3d/gen-characters.mjs, dans l'esprit des feuilles IcyEthics",
-    "note": null
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets",
+    "importer": "tools/world3d/import-icy-extra.mjs",
+    "author": "IcyEthics",
+    "original": "Overworld Sprites/Trchar075.png",
+    "note": "variante de teinte de Trchar075 (bleu → vert)"
    },
-   "licence": "oeuvre-utilisateur",
-   "licenceUrl": null,
-   "licenceVerified": true,
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "usage personnel",
    "dimensions": {
     "w": 1.25,
-    "h": 1.875,
+    "h": 1.88,
     "d": 0
    },
    "sheet": {
@@ -2919,7 +3949,7 @@
      "statique2",
      "marche2"
     ],
-    "footPx": 3
+    "footPx": 2
    },
    "anchor": "bottom-center",
    "scale": 1,
@@ -2945,20 +3975,20 @@
     {
      "name": "walk",
      "frames": [
+      0,
       1,
       2,
-      3,
-      0
+      3
      ],
      "fps": 6
     },
     {
      "name": "run",
      "frames": [
+      0,
       1,
       2,
-      3,
-      0
+      3
      ],
      "fps": 10
     }
@@ -2969,28 +3999,32 @@
    }
   },
   {
-   "id": "chr_securite",
-   "label": "Sécurité",
+   "id": "ow_ingenieur",
+   "label": "Ingénieur",
    "category": "character",
    "tags": [
     "personnage",
     "overworld",
     "3/4",
-    "créé"
+    "icy"
    ],
-   "file": "tex/chr_securite.png",
+   "file": "tex/ow_ingenieur.png",
    "format": "png-spritesheet",
    "source": {
-    "kind": "created",
-    "from": "dessiné pour ce projet par tools/world3d/gen-characters.mjs, dans l'esprit des feuilles IcyEthics",
-    "note": null
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets",
+    "importer": "tools/world3d/import-icy-extra.mjs",
+    "author": "IcyEthics",
+    "original": "Overworld Sprites/Trchar074.png",
+    "note": "variante de palette de Trchar074"
    },
-   "licence": "oeuvre-utilisateur",
-   "licenceUrl": null,
-   "licenceVerified": true,
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "usage personnel",
    "dimensions": {
     "w": 1.25,
-    "h": 1.875,
+    "h": 1.88,
     "d": 0
    },
    "sheet": {
@@ -3016,7 +4050,7 @@
      "statique2",
      "marche2"
     ],
-    "footPx": 3
+    "footPx": 2
    },
    "anchor": "bottom-center",
    "scale": 1,
@@ -3042,20 +4076,20 @@
     {
      "name": "walk",
      "frames": [
+      0,
       1,
       2,
-      3,
-      0
+      3
      ],
      "fps": 6
     },
     {
      "name": "run",
      "frames": [
+      0,
       1,
       2,
-      3,
-      0
+      3
      ],
      "fps": 10
     }
@@ -3066,28 +4100,32 @@
    }
   },
   {
-   "id": "chr_livreur",
-   "label": "Livreur",
+   "id": "ow_analyste",
+   "label": "Analyste",
    "category": "character",
    "tags": [
     "personnage",
     "overworld",
     "3/4",
-    "créé"
+    "icy"
    ],
-   "file": "tex/chr_livreur.png",
+   "file": "tex/ow_analyste.png",
    "format": "png-spritesheet",
    "source": {
-    "kind": "created",
-    "from": "dessiné pour ce projet par tools/world3d/gen-characters.mjs, dans l'esprit des feuilles IcyEthics",
-    "note": null
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets",
+    "importer": "tools/world3d/import-icy-extra.mjs",
+    "author": "IcyEthics",
+    "original": "Overworld Sprites/Scarlet_Temp.png",
+    "note": "variante de palette de Scarlet_Temp"
    },
-   "licence": "oeuvre-utilisateur",
-   "licenceUrl": null,
-   "licenceVerified": true,
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "usage personnel",
    "dimensions": {
     "w": 1.25,
-    "h": 1.875,
+    "h": 1.88,
     "d": 0
    },
    "sheet": {
@@ -3113,7 +4151,7 @@
      "statique2",
      "marche2"
     ],
-    "footPx": 3
+    "footPx": 2
    },
    "anchor": "bottom-center",
    "scale": 1,
@@ -3139,214 +4177,20 @@
     {
      "name": "walk",
      "frames": [
+      0,
       1,
       2,
-      3,
-      0
+      3
      ],
      "fps": 6
     },
     {
      "name": "run",
      "frames": [
+      0,
       1,
       2,
-      3,
-      0
-     ],
-     "fps": 10
-    }
-   ],
-   "fallback": {
-    "shape": "capsule",
-    "color": "#8a6a4a"
-   }
-  },
-  {
-   "id": "chr_etudiant",
-   "label": "Étudiant",
-   "category": "character",
-   "tags": [
-    "personnage",
-    "overworld",
-    "3/4",
-    "créé"
-   ],
-   "file": "tex/chr_etudiant.png",
-   "format": "png-spritesheet",
-   "source": {
-    "kind": "created",
-    "from": "dessiné pour ce projet par tools/world3d/gen-characters.mjs, dans l'esprit des feuilles IcyEthics",
-    "note": null
-   },
-   "licence": "oeuvre-utilisateur",
-   "licenceUrl": null,
-   "licenceVerified": true,
-   "dimensions": {
-    "w": 1.25,
-    "h": 1.875,
-    "d": 0
-   },
-   "sheet": {
-    "px": [
-     128,
-     192
-    ],
-    "cell": [
-     32,
-     48
-    ],
-    "cols": 4,
-    "rows": 4,
-    "rowsOrder": [
-     "bas",
-     "gauche",
-     "droite",
-     "haut"
-    ],
-    "colsOrder": [
-     "statique",
-     "marche1",
-     "statique2",
-     "marche2"
-    ],
-    "footPx": 3
-   },
-   "anchor": "bottom-center",
-   "scale": 1,
-   "billboard": "yaw",
-   "materials": [
-    "alphaTest 0.5, nearest"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 0.3
-   },
-   "animations": [
-    {
-     "name": "idle",
-     "frames": [
-      0
-     ],
-     "fps": 1
-    },
-    {
-     "name": "walk",
-     "frames": [
-      1,
-      2,
-      3,
-      0
-     ],
-     "fps": 6
-    },
-    {
-     "name": "run",
-     "frames": [
-      1,
-      2,
-      3,
-      0
-     ],
-     "fps": 10
-    }
-   ],
-   "fallback": {
-    "shape": "capsule",
-    "color": "#8a6a4a"
-   }
-  },
-  {
-   "id": "chr_medecin",
-   "label": "Médecin",
-   "category": "character",
-   "tags": [
-    "personnage",
-    "overworld",
-    "3/4",
-    "créé"
-   ],
-   "file": "tex/chr_medecin.png",
-   "format": "png-spritesheet",
-   "source": {
-    "kind": "created",
-    "from": "dessiné pour ce projet par tools/world3d/gen-characters.mjs, dans l'esprit des feuilles IcyEthics",
-    "note": null
-   },
-   "licence": "oeuvre-utilisateur",
-   "licenceUrl": null,
-   "licenceVerified": true,
-   "dimensions": {
-    "w": 1.25,
-    "h": 1.875,
-    "d": 0
-   },
-   "sheet": {
-    "px": [
-     128,
-     192
-    ],
-    "cell": [
-     32,
-     48
-    ],
-    "cols": 4,
-    "rows": 4,
-    "rowsOrder": [
-     "bas",
-     "gauche",
-     "droite",
-     "haut"
-    ],
-    "colsOrder": [
-     "statique",
-     "marche1",
-     "statique2",
-     "marche2"
-    ],
-    "footPx": 3
-   },
-   "anchor": "bottom-center",
-   "scale": 1,
-   "billboard": "yaw",
-   "materials": [
-    "alphaTest 0.5, nearest"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 0.3
-   },
-   "animations": [
-    {
-     "name": "idle",
-     "frames": [
-      0
-     ],
-     "fps": 1
-    },
-    {
-     "name": "walk",
-     "frames": [
-      1,
-      2,
-      3,
-      0
-     ],
-     "fps": 6
-    },
-    {
-     "name": "run",
-     "frames": [
-      1,
-      2,
-      3,
-      0
+      3
      ],
      "fps": 10
     }
