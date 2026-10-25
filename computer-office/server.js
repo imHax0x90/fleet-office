@@ -2051,6 +2051,21 @@ const server = http.createServer(async (req, res) => {
     } catch (e) { return sendJSON(res, 400, { ok: false, error: String(e.message || e) }); }
   }
   if (p === "/api/world" && req.method === "GET") { try { return sendJSON(res, 200, { ok: true, ...world.get() }); } catch (e) { return sendJSON(res, 500, { ok: false, error: String(e.message || e) }); } }
+  // ---- export d'une carte Tiled depuis le monde (fichiers écrits dans public/world/maps/ uniquement) ----
+  if (req.method === "POST" && p === "/api/world/export") {
+    const b = await readBody(req);
+    try {
+      const files = Array.isArray(b.files) ? b.files : []; if (!files.length || files.length > 200) throw new Error("fichiers invalides");
+      const root = path.join(PUBLIC_DIR, "world", "maps"); let n = 0, bytes = 0;
+      for (const f of files) {
+        const rel = String(f.path || ""); if (!/^maps\/[a-z0-9_\-]+(\/[a-z0-9_\-]+)*\.(tmj|png|json)$/i.test(rel) || rel.includes("..")) throw new Error("chemin refusé : " + rel);
+        const buf = f.b64 ? Buffer.from(String(f.b64), "base64") : Buffer.from(String(f.text || ""), "utf8"); bytes += buf.length; if (bytes > 12 * 1024 * 1024) throw new Error("export trop gros");
+        const dest = path.join(PUBLIC_DIR, "world", rel); if (!dest.startsWith(root + path.sep)) throw new Error("chemin refusé");
+        fs.mkdirSync(path.dirname(dest), { recursive: true }); fs.writeFileSync(dest, buf); n++;
+      }
+      logAudit("world-export", { files: n, bytes }); return sendJSON(res, 200, { ok: true, files: n, bytes });
+    } catch (e) { return sendJSON(res, 400, { ok: false, error: String(e.message || e) }); }
+  }
   if (req.method === "POST" && p === "/api/world/remove") { const b = await readBody(req); try { world.remove(b.key); return sendJSON(res, 200, { ok: true }); } catch (e) { return sendJSON(res, 400, { ok: false, error: String(e.message || e) }); } }
   if (p === "/api/automations" && req.method === "GET") return sendJSON(res, 200, { ok: true, automations: automations.list(), tz: require("./automations").TZ });
   if (req.method === "POST" && p.startsWith("/api/automations/")) {

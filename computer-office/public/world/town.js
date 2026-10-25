@@ -98,10 +98,10 @@ function tree(tx, ty, r, opts = {}) {
   const pine = opts.pine !== undefined ? opts.pine : r() < .38;
   const spr = pine ? treeSprites.pine[(r() * 2) | 0] : treeSprites.oak[(r() * 3) | 0];
   const jx = opts.noj ? 0 : ((r() * 5 | 0) - 2), x = tx * TS + 8 - (spr.width >> 1) + jx, by = ty * TS + 15;
-  addSpr(spr, x, by - spr.height + 3, by);
+  addSpr(spr, x, by - spr.height + 3, by, { prop: (pine ? 'pine' : 'oak') + (pine ? treeSprites.pine : treeSprites.oak).indexOf(spr) });
   if (!opts.nob) block(tx, ty);
 }
-function bush(tx, ty, r) { const s = treeSprites.bush[(r() * 3) | 0]; addSpr(s, tx * TS + 8 - 8, ty * TS + 15 - 12, ty * TS + 15); block(tx, ty); }
+function bush(tx, ty, r) { const s = treeSprites.bush[(r() * 3) | 0]; addSpr(s, tx * TS + 8 - 8, ty * TS + 15 - 12, ty * TS + 15, { prop: 'bush' + treeSprites.bush.indexOf(s) }); block(tx, ty); }
 function bakeFence(tx, ty, gateL, gateR) {
   const c = gctx, x = tx * TS, y = ty * TS;
   R(c, x, y + 13, 16, 2, 'rgba(14,50,24,.30)');
@@ -273,12 +273,12 @@ function drawOverlays(b, bw, bh, now) {
 }
 
 /* ───── bâtiments, fontaine, place ───── */
-function addBuilding(kindName) {
+function addBuilding(kindName, noShadow) {
   const p = bld[kindName], x = p.x * TS, y = p.y * TS - 24, spr = buildingSprite(kindName);
   addObj({ sy: (p.y + BH) * TS - 1, x0: x - 4, y0: y - 4, x1: x + 196, y1: y + 140, draw: b => b.drawImage(spr, x - cam.x, y - cam.y) });
   block(p.x, p.y, BW, BH); for (const dx of [5, 6]) blk[(p.y + BH - 1) * MW + p.x + dx] = 0;
   // ombre
-  gctx.fillStyle = 'rgba(12,40,24,.24)'; gctx.fillRect(x + 192, y + 52, 10, 108); gctx.fillRect(x + 4, (p.y + BH) * TS, 192, 6);
+  if (!noShadow) { gctx.fillStyle = 'rgba(12,40,24,.24)'; gctx.fillRect(x + 192, y + 52, 10, 108); gctx.fillRect(x + 4, (p.y + BH) * TS, 192, 6); }
   p.door = { x0: (p.x + 5) * TS, x1: (p.x + 7) * TS, y: (p.y + BH) * TS };
 }
 function addFountain() {
@@ -295,7 +295,7 @@ function addFountain() {
   for (const [bx0, by0] of [[cx - 6, ac.y + BH + 2], [cx + 4, ac.y + BH + 2]]) { addSpr(benchS, bx0 * TS - 1, by0 * TS, by0 * TS + 16); block(bx0, by0, 2, 1); }
   return { cx, cy: ac.y + BH + 2 };
 }
-function addLamp(tx, ty) { addSpr(lampS, tx * TS + 2, ty * TS - 18, ty * TS + 15); block(tx, ty); }
+function addLamp(tx, ty) { addSpr(lampS, tx * TS + 2, ty * TS - 18, ty * TS + 15, { prop: 'lamp' }); block(tx, ty); }
 
 function decorWorld(w) {
   const r = rng(4242);
@@ -341,14 +341,134 @@ function decorWorld(w) {
 }
 
 /* ───── API ───── */
+
+/* ═════════ Carte Tiled (https://www.mapeditor.org) : export de la ville, chargement d'une carte éditée ═════════
+   Éditable à la main : sol (tuiles), décor peint (image), objets (arbres, buissons, lampadaires, herbes), collisions.
+   Reste piloté par le serveur : maisons, grands bâtiments, fontaine, panneaux de quartier, villageois.
+   Une carte n'est valable que pour la même grille (taille, quartiers, place) : sinon la ville revient à la génération procédurale. */
+const worldKey = w => JSON.stringify([w.size, w.lot, (w.districts || []).map(d => [d.name, d.x, d.y, d.w, d.h]), w.plaza]);
+let userMap = null, mapStatus = 'procédurale';
+const KIND_NAME = ['grass', 'street', 'path', 'plaza', 'water', 'sand'], KIND_ID = { grass: 0, street: 1, path: 2, plaza: 3, water: 4, sand: 5 };
+const propSprites = () => { const o = {}; treeSprites.oak.forEach((s, i) => o['oak' + i] = s); treeSprites.pine.forEach((s, i) => o['pine' + i] = s); treeSprites.bush.forEach((s, i) => o['bush' + i] = s); o.lamp = lampS; tuftS.forEach((s, i) => o['tuft' + i] = s); return o; };
+function tileDefs() {   // ordre FIXE du tileset de sol (92 tuiles) : herbe ×8, sable ×4, puis rue / place (2 parités) / chemin / eau × 16 bordures
+  const defs = []; for (let v = 0; v < 8; v++) defs.push({ k: K.GRASS, v }); for (let v = 0; v < 4; v++) defs.push({ k: K.SAND, v });
+  for (const k of [K.STREET]) for (let m = 0; m < 16; m++) defs.push({ k, m, par: 0 });
+  for (let p = 0; p < 2; p++) for (let m = 0; m < 16; m++) defs.push({ k: K.PLAZA, m, par: p });
+  for (const k of [K.PATH, K.WATER]) for (let m = 0; m < 16; m++) defs.push({ k, m, par: 0 });
+  return defs;
+}
+const softOf = (k, n) => k === K.WATER ? n !== K.WATER : k === K.PATH ? (n === K.GRASS || n === K.SAND) : (n === K.GRASS || n === K.SAND || n === K.WATER);
+function maskAt(x, y) { const k = kd(x, y); let m = 0; if (softOf(k, kd(x, y - 1))) m |= 1; if (softOf(k, kd(x, y + 1))) m |= 2; if (softOf(k, kd(x - 1, y))) m |= 4; if (softOf(k, kd(x + 1, y))) m |= 8; return m; }
+function renderCanon(def) {   // dessine UNE tuile canonique avec le vrai code de bakeTile, sur un mini-monde temporaire
+  const sv = { MW, MH, kind, gctx }; let cx = 1, cy = 1;
+  try {
+    const out = mk(16, 16);
+    if (def.k === K.GRASS || def.k === K.SAND) { MW = 12; MH = 1; kind = new Uint8Array(12).fill(def.k); gctx = mk(MW * 16, 16).getContext('2d'); bakeTile(def.v, 0); out.getContext('2d').drawImage(gctx.canvas, def.v * 16, 0, 16, 16, 0, 0, 16, 16); return out; }
+    MW = 3; MH = 4; cy = 1 + def.par; kind = new Uint8Array(12).fill(def.k);
+    const set = (x, y, soft) => { kind[y * 3 + x] = soft ? K.GRASS : def.k; };
+    set(1, cy - 1, def.m & 1); set(1, cy + 1, def.m & 2); set(0, cy, def.m & 4); set(2, cy, def.m & 8);
+    gctx = mk(48, 64).getContext('2d'); bakeTile(cx, cy); out.getContext('2d').drawImage(gctx.canvas, cx * 16, cy * 16, 16, 16, 0, 0, 16, 16); return out;
+  } finally { MW = sv.MW; MH = sv.MH; kind = sv.kind; gctx = sv.gctx; }
+}
+function b64(cv) { return cv.toDataURL('image/png').split(',')[1]; }
+function exportTiled() {
+  if (!W) return null;
+  const defs = tileDefs(), COLS = 16, rows = Math.ceil(defs.length / COLS), ts = mk(COLS * 16, rows * 16), tc = ts.getContext('2d'), gidOf = new Map();
+  defs.forEach((d, i) => { tc.drawImage(renderCanon(d), (i % COLS) * 16, ((i / COLS) | 0) * 16); });
+  const idFor = (k, m, par, v) => defs.findIndex(d => d.k === k && (k === K.GRASS || k === K.SAND ? d.v === v : d.m === m && (k !== K.PLAZA || d.par === par)));
+  const data = new Array(MW * MH);
+  for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) {
+    const k = kd(x, y); data[y * MW + x] = 1 + idFor(k, (k === K.GRASS || k === K.SAND) ? 0 : maskAt(x, y), (x + y) & 1, hash(x + ',' + y) % (k === K.SAND ? 4 : 8));
+  }
+  // décor peint = tout ce qui diffère d'un sol « nu » (fleurs, clôtures, jardins, ombres, panneaux…) : image transparente
+  const live = ground.getContext('2d').getImageData(0, 0, MW * TS, MH * TS), keepG = { gctx, ground };
+  ground = mk(MW * TS, MH * TS); gctx = ground.getContext('2d'); paintGrass(0, 0, MW * TS, MH * TS); for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) bakeTile(x, y);
+  const base = gctx.getImageData(0, 0, MW * TS, MH * TS); ground = keepG.ground; gctx = keepG.gctx;
+  const decor = mk(MW * TS, MH * TS), dctx = decor.getContext('2d'), dim = dctx.createImageData(MW * TS, MH * TS);
+  for (let i = 0; i < live.data.length; i += 4) if (Math.abs(live.data[i] - base.data[i]) + Math.abs(live.data[i + 1] - base.data[i + 1]) + Math.abs(live.data[i + 2] - base.data[i + 2]) > 6) { dim.data[i] = live.data[i]; dim.data[i + 1] = live.data[i + 1]; dim.data[i + 2] = live.data[i + 2]; dim.data[i + 3] = 255; }
+  dctx.putImageData(dim, 0, 0);
+  // objets (tile objects) : arbres, buissons, lampadaires, herbes hautes
+  const PS = propSprites(), names = Object.keys(PS), firstProps = 1 + COLS * rows;
+  let oid = 1; const objects = [], baseOf = {};
+  for (const o of objs) {
+    if (o.tuft) { objects.push({ id: oid++, name: 'tuft' + o.tv, type: '', x: o.tx * TS, y: (o.ty + 1) * TS, width: 16, height: 16, rotation: 0, gid: firstProps + names.indexOf('tuft' + o.tv), visible: true }); baseOf['tuft' + o.tv] = 0; continue; }
+    if (!o.prop || !PS[o.prop]) continue; const sp = PS[o.prop], bottom = o.y0 + sp.height;
+    baseOf[o.prop] = o.sy - bottom;
+    objects.push({ id: oid++, name: o.prop, type: '', x: o.x0, y: bottom, width: sp.width, height: sp.height, rotation: 0, gid: firstProps + names.indexOf(o.prop), visible: true });
+  }
+  // collisions : suites horizontales de cases bloquées -> rectangles (faciles à éditer dans Tiled)
+  const coll = [];
+  for (let y = 0; y < MH; y++) { let x = 0; while (x < MW) { if (blk[y * MW + x]) { let x1 = x; while (x1 < MW && blk[y * MW + x1]) x1++; coll.push({ id: oid++, name: '', type: 'solid', x: x * TS, y: y * TS, width: (x1 - x) * TS, height: TS, rotation: 0, visible: true }); x = x1; } else x++; } }
+  const tilesProps = defs.map((d, i) => ({ id: i, properties: [{ name: 'kind', type: 'string', value: KIND_NAME[d.k] }, ...(d.m != null ? [{ name: 'mask', type: 'int', value: d.m }] : [])] }));
+  const propTiles = names.map((n, i) => ({ id: i, image: 'props/' + n + '.png', imagewidth: PS[n].width, imageheight: PS[n].height, properties: [{ name: 'base', type: 'int', value: baseOf[n] != null ? baseOf[n] : -3 }] }));
+  const tmj = {
+    type: 'map', version: '1.10', tiledversion: '1.10.2', orientation: 'orthogonal', renderorder: 'right-down', infinite: false, compressionlevel: -1,
+    width: MW, height: MH, tilewidth: 16, tileheight: 16, nextlayerid: 5, nextobjectid: oid,
+    properties: [{ name: 'worldKey', type: 'string', value: worldKey(W) }, { name: 'aide', type: 'string', value: "Ground : tuiles du sol (propriété kind). decor : image peinte (fleurs, clôtures…). props : arbres/buissons/lampadaires. collision : rectangles solides. Maisons, bâtiments, fontaine et villageois restent gérés par le serveur." }],
+    tilesets: [
+      { firstgid: 1, name: 'town-ground', image: 'town-ground.png', imagewidth: COLS * 16, imageheight: rows * 16, tilewidth: 16, tileheight: 16, columns: COLS, tilecount: defs.length, margin: 0, spacing: 0, tiles: tilesProps },
+      { firstgid: firstProps, name: 'town-props', tilewidth: 16, tileheight: 16, tilecount: names.length, columns: 0, grid: { orientation: 'orthogonal', width: 1, height: 1 }, tiles: propTiles },
+    ],
+    layers: [
+      { id: 1, name: 'ground', type: 'tilelayer', x: 0, y: 0, width: MW, height: MH, opacity: 1, visible: true, data },
+      { id: 2, name: 'decor', type: 'imagelayer', image: 'town-decor.png', imagewidth: MW * TS, imageheight: MH * TS, x: 0, y: 0, opacity: 1, visible: true },
+      { id: 3, name: 'props', type: 'objectgroup', draworder: 'topdown', x: 0, y: 0, opacity: 1, visible: true, objects },
+      { id: 4, name: 'collision', type: 'objectgroup', draworder: 'topdown', x: 0, y: 0, opacity: .5, visible: true, objects: coll },
+    ],
+  };
+  const files = [{ path: 'maps/town.tmj', text: JSON.stringify(tmj, null, 1) }, { path: 'maps/town-ground.png', b64: b64(ts) }, { path: 'maps/town-decor.png', b64: b64(decor) }];
+  for (const n of names) files.push({ path: 'maps/props/' + n + '.png', b64: b64(PS[n]) });
+  return { files, stats: { w: MW, h: MH, tiles: defs.length, props: objects.length, collision: coll.length } };
+}
+function loadImg(src) { return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('image ' + src)); i.src = src; }); }
+async function loadUserMap() {
+  if (new URLSearchParams(location.search).get('map') === 'off') { mapStatus = 'procédurale (map=off)'; return; }
+  try {
+    const r = await fetch('maps/town.tmj', { cache: 'no-store' }); if (!r.ok) return;
+    const m = await r.json(), v = '?v=' + (r.headers.get('etag') || Date.now()), lay = n => m.layers.find(l => l.name === n);
+    const gts = m.tilesets.find(s => s.name === 'town-ground'), pts = m.tilesets.find(s => s.name === 'town-props'); if (!gts || !pts) throw new Error('tilesets manquants');
+    const gimg = await loadImg('maps/' + gts.image + v), dl = lay('decor'), dimg = dl && dl.image ? await loadImg('maps/' + dl.image + v) : null;
+    const kinds = new Map(); for (const t of gts.tiles || []) { const pr = Object.fromEntries((t.properties || []).map(p => [p.name, p.value])); if (pr.kind in KIND_ID) kinds.set(gts.firstgid + t.id, KIND_ID[pr.kind]); }
+    const props = new Map(); for (const t of pts.tiles || []) { const pr = Object.fromEntries((t.properties || []).map(p => [p.name, p.value])); props.set(pts.firstgid + t.id, { img: await loadImg('maps/' + t.image + v), name: (t.image.split('/').pop() || '').replace('.png', ''), base: pr.base != null ? pr.base : -3 }); }
+    const wk = (m.properties || []).find(p => p.name === 'worldKey');
+    userMap = { m, gts, gimg, dimg, kinds, props, layers: { ground: lay('ground'), props: lay('props'), collision: lay('collision') }, key: wk ? wk.value : '' };
+    mapStatus = 'carte chargée';
+    if (W) { sigKey = ''; setWorld(W, Date.now()); }
+  } catch (e) { mapStatus = 'erreur carte : ' + (e && e.message); }
+}
+function applyUserMap(w, um) {
+  const g = um.layers.ground, cols = um.gts.columns, f0 = um.gts.firstgid;
+  paintGrass(0, 0, MW * TS, MH * TS);
+  for (let i = 0; i < MW * MH; i++) {
+    const gid = (g.data[i] || 0) & 0x0FFFFFFF; if (!gid) continue;
+    const k = um.kinds.get(gid); if (k != null) kind[i] = k;
+    const id = gid - f0, x = (i % MW) * TS, y = ((i / MW) | 0) * TS;
+    gctx.drawImage(um.gimg, (id % cols) * 16, ((id / cols) | 0) * 16, 16, 16, x, y, 16, 16);
+  }
+  for (const h of w.houses) setPath(h);
+  if (um.dimg) gctx.drawImage(um.dimg, 0, 0);
+  const cl = um.layers.collision; if (cl) for (const o of cl.objects || []) block(Math.floor(o.x / TS), Math.floor(o.y / TS), Math.max(1, Math.round(o.width / TS)), Math.max(1, Math.round(o.height / TS)));
+  const pl = um.layers.props; if (pl) for (const o of pl.objects || []) {
+    const p = um.props.get((o.gid || 0) & 0x0FFFFFFF); if (!p) continue;
+    if (/^tuft\d$/.test(p.name)) { const tx = Math.floor(o.x / TS), ty = Math.round(o.y / TS) - 1, tv = +p.name.slice(4), spr = tuftS[tv], ph = ((tx * 7 + ty * 13) % 63) / 10; addObj({ tuft: true, tx, ty, tv, sy: (ty + 1) * TS, x0: tx * TS, y0: ty * TS, x1: tx * TS + 16, y1: ty * TS + 16, draw: b => { const x = tx * TS - cam.x, y = ty * TS - cam.y, sw = Math.round(Math.sin(nowT / 430 + ph)); b.drawImage(spr, 0, 0, 16, 9, x + sw, y, 16, 9); b.drawImage(spr, 0, 9, 16, 7, x, y + 9, 16, 7); } }); continue; }
+    const bottom = o.y, top = bottom - p.img.height; addSpr(p.img, Math.round(o.x), Math.round(top), Math.round(bottom + p.base), { prop: p.name });
+  }
+  addBuilding('academy', true); addBuilding('arena', true); addFountain();
+  for (const d of w.districts || []) d.signPos = { x: (d.x + 1) * TS + 32, y: d.y * TS + 1 + 12 };
+}
 function fullBuild(w) {
   layout(w); decorated = new Set(); objs = [];
   const oldHouses = houses; houses = new Map();
   ground = mk(MW * TS, MH * TS); gctx = ground.getContext('2d');
-  for (const h of w.houses) setPath(h);
-  paintGrass(0, 0, MW * TS, MH * TS);
-  for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) bakeTile(x, y);
-  decorWorld(w);
+  const um = userMap && userMap.key === worldKey(w) ? userMap : null;
+  mapStatus = !userMap ? (mapStatus.startsWith('erreur') ? mapStatus : 'procédurale') : um ? 'carte Tiled' : 'carte Tiled ignorée (taille/quartiers changés : ré-exporte)';
+  if (um) applyUserMap(w, um);
+  else {
+    for (const h of w.houses) setPath(h);
+    paintGrass(0, 0, MW * TS, MH * TS);
+    for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) bakeTile(x, y);
+    decorWorld(w);
+  }
   for (const h of w.houses) {
     const old = oldHouses.get(h.id), o = addHouse(h, false);
     if (old && old.born) o.born = old.born;
@@ -372,8 +492,8 @@ function tallGrassPatch(tx0, ty0, w, h, r) {
     if (kd(tx, ty) !== K.GRASS || blk[ty * MW + tx]) continue;
     const edge = tx === tx0 || tx === tx0 + w - 1 || ty === ty0 || ty === ty0 + h - 1; if (edge && r() < .35) continue;
     R(gctx, tx * TS, ty * TS, TS, TS, '#4f9d48');
-    const spr = tuftS[(r() * 3) | 0], ph = r() * 6.28;
-    addObj({ tuft: true, sy: (ty + 1) * TS, x0: tx * TS, y0: ty * TS, x1: tx * TS + 16, y1: ty * TS + 16, draw: b => {
+    const tvi = (r() * 3) | 0, spr = tuftS[tvi], ph = r() * 6.28;
+    addObj({ tuft: true, tx, ty, tv: tvi, sy: (ty + 1) * TS, x0: tx * TS, y0: ty * TS, x1: tx * TS + 16, y1: ty * TS + 16, draw: b => {
       const x = tx * TS - cam.x, y = ty * TS - cam.y, sw = Math.round(Math.sin(nowT / 430 + ph) * 1);
       b.drawImage(spr, 0, 0, 16, 9, x + sw, y, 16, 9); b.drawImage(spr, 0, 9, 16, 7, x, y + 9, 16, 7);
     } });
@@ -508,7 +628,7 @@ function nearHouse(p) {
 }
 function spawnPos(h) { const g = houseGeom(h); return { x: (g.hx + 3) * TS, y: (g.hy + HH) * TS + 12 }; }
 FW.Town = {
-  setWorld, update, draw, blocked, doorAt, nearHouse, spawnPos, houses, villagers,
+  setWorld, update, draw, blocked, doorAt, nearHouse, spawnPos, houses, villagers, exportTiled, loadUserMap, get mapStatus() { return mapStatus; },
   get w() { return MW * TS; }, get h() { return MH * TS; }, get tw() { return MW; }, get th() { return MH; },
   get data() { return W; }, get ready() { return !!W; }, plazaSpawn: () => W ? { x: W.plaza.spawn.x * TS + 8, y: W.plaza.spawn.y * TS + 12 } : { x: 100, y: 100 },
   doorOf(id) { const o = houses.get(id); return o ? { x: (o.g.hx + 3) * TS, y: (o.g.hy + HH) * TS } : null; },

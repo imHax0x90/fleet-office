@@ -551,8 +551,16 @@ function frame(now) {
   if (dlg) drawDialog(dt);
   if (mapOpen) drawMap(dt, now);
   if (fade) { const a = fade.phase === 0 ? Math.min(1, fade.t / .22) : 1 - Math.min(1, fade.t / .22); ctx.fillStyle = `rgba(8,10,28,${a})`; ctx.fillRect(0, 0, W, H); }
+  if (qs.has('export') && Town.ready && now > 3500) doExport();
   if (((frame.n = (frame.n || 0) + 1) % 8) === 0) debug();
   requestAnimationFrame(frame);
+}
+Town.loadUserMap();
+async function doExport() {
+  if (doExport.done || !Town.ready) return; doExport.done = true;
+  const ex = Town.exportTiled(); if (!ex) return;
+  const r = await fetch('/api/world/export', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ files: ex.files }) }).then(x => x.json()).catch(e => ({ ok: false, error: String(e) }));
+  window.__export = r.ok ? 'ok:' + ex.files.length + ' fichiers ' + JSON.stringify(ex.stats) : 'erreur:' + (r.error || '?'); setBanner('Export Tiled', r.ok ? ex.files.length + ' fichiers' : 'échec');
 }
 function debug() {
   const td = Town.data, tl = [];
@@ -565,7 +573,7 @@ function debug() {
     menu: dlg && dlg.rects ? dlg.menu.map(o => o.label).join('/') + '@' + dlg.sel : null, typing: typing ? typing.name : null, panel: panelOpen, wait: !!(dlg && dlg.wait),
     dialog: dlg ? (dlg.name + '|' + dlg.pages[dlg.page].join(' / ') + '|p' + (dlg.page + 1) + '/' + dlg.pages.length + (dlg.pending ? '|pending' : '')) : null,
     houses: td ? td.houses.length : 0, hl: tl, academy: bn('academy'), arena: bn('arena'), size: td ? td.size : null, spawn: td ? td.plaza.spawn : null,
-    npcs: nn.length, work: nn.filter(n => n.mode === 'work').length, seated: nn.filter(n => n.seated).length, net: stats.net, err: stats.err || null, vill: Town.villagers.map(v => v.name + ':' + Math.round(v.x) + ',' + Math.round(v.y)), map: mapOpen, sel: mapOpen ? (mapTargets()[mapSel] || {}).name : null, run: running(), Z, ZU, fps: Math.round(stats.fps), Z, bw, bh, cam: [cam.x, cam.y], touch: isTouch,
+    npcs: nn.length, work: nn.filter(n => n.mode === 'work').length, seated: nn.filter(n => n.seated).length, net: stats.net, err: stats.err || null, carte: Town.mapStatus, export: window.__export || null, vill: Town.villagers.map(v => v.name + ':' + Math.round(v.x) + ',' + Math.round(v.y)), map: mapOpen, sel: mapOpen ? (mapTargets()[mapSel] || {}).name : null, run: running(), Z, ZU, fps: Math.round(stats.fps), Z, bw, bh, cam: [cam.x, cam.y], touch: isTouch,
     names: nn.map(n => n.name + ':' + n.mode + ':' + Math.round(n.x) + ',' + Math.round(n.y)),
   });
 }
