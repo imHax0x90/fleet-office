@@ -3212,6 +3212,734 @@
     "shape": "plane",
     "color": "#5fae45"
    }
+  },
+  {
+   "id": "npc_analyste",
+   "category": "character",
+   "file": "tex/npc_analyste.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "imported",
+    "from": "persos_pixel_art_pack.zip fourni par l'utilisateur (généré par son generer_pack.py, voir assets/sources/)",
+    "importer": "tools/world3d/import-sprites.mjs",
+    "author": "utilisateur",
+    "original": "pnj/analyste"
+   },
+   "licence": "oeuvre-utilisateur",
+   "licenceUrl": null,
+   "licenceVerified": false,
+   "dimensions": {
+    "w": 2.4,
+    "h": 2.4,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     192,
+     256
+    ],
+    "cell": [
+     64,
+     64
+    ],
+    "cols": 3,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche",
+     "course"
+    ],
+    "footPx": 10
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      0,
+      1
+     ],
+     "fps": 5
+    },
+    {
+     "name": "run",
+     "frames": [
+      2,
+      1,
+      2,
+      1
+     ],
+     "fps": 8
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#2f9aa0"
+   }
+  },
+  {
+   "id": "npc_etudiant",
+   "category": "character",
+   "file": "tex/npc_etudiant.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "imported",
+    "from": "persos_pixel_art_pack.zip fourni par l'utilisateur (généré par son generer_pack.py, voir assets/sources/)",
+    "importer": "tools/world3d/import-sprites.mjs",
+    "author": "utilisateur",
+    "original": "pnj/etudiant"
+   },
+   "licence": "oeuvre-utilisateur",
+   "licenceUrl": null,
+   "licenceVerified": false,
+   "dimensions": {
+    "w": 2.4,
+    "h": 2.4,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     192,
+     256
+    ],
+    "cell": [
+     64,
+     64
+    ],
+    "cols": 3,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche",
+     "course"
+    ],
+    "footPx": 10
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      0,
+      1
+     ],
+     "fps": 5
+    },
+    {
+     "name": "run",
+     "frames": [
+      2,
+      1,
+      2,
+      1
+     ],
+     "fps": 8
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#2f9aa0"
+   }
+  },
+  {
+   "id": "npc_ingenieur",
+   "category": "character",
+   "file": "tex/npc_ingenieur.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "imported",
+    "from": "persos_pixel_art_pack.zip fourni par l'utilisateur (généré par son generer_pack.py, voir assets/sources/)",
+    "importer": "tools/world3d/import-sprites.mjs",
+    "author": "utilisateur",
+    "original": "pnj/ingenieur"
+   },
+   "licence": "oeuvre-utilisateur",
+   "licenceUrl": null,
+   "licenceVerified": false,
+   "dimensions": {
+    "w": 2.4,
+    "h": 2.4,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     192,
+     256
+    ],
+    "cell": [
+     64,
+     64
+    ],
+    "cols": 3,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche",
+     "course"
+    ],
+    "footPx": 10
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      0,
+      1
+     ],
+     "fps": 5
+    },
+    {
+     "name": "run",
+     "frames": [
+      2,
+      1,
+      2,
+      1
+     ],
+     "fps": 8
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#2f9aa0"
+   }
+  },
+  {
+   "id": "npc_livreur",
+   "category": "character",
+   "file": "tex/npc_livreur.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "imported",
+    "from": "persos_pixel_art_pack.zip fourni par l'utilisateur (généré par son generer_pack.py, voir assets/sources/)",
+    "importer": "tools/world3d/import-sprites.mjs",
+    "author": "utilisateur",
+    "original": "pnj/livreur"
+   },
+   "licence": "oeuvre-utilisateur",
+   "licenceUrl": null,
+   "licenceVerified": false,
+   "dimensions": {
+    "w": 2.4,
+    "h": 2.4,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     192,
+     256
+    ],
+    "cell": [
+     64,
+     64
+    ],
+    "cols": 3,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche",
+     "course"
+    ],
+    "footPx": 10
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      0,
+      1
+     ],
+     "fps": 5
+    },
+    {
+     "name": "run",
+     "frames": [
+      2,
+      1,
+      2,
+      1
+     ],
+     "fps": 8
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#2f9aa0"
+   }
+  },
+  {
+   "id": "npc_medecin",
+   "category": "character",
+   "file": "tex/npc_medecin.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "imported",
+    "from": "persos_pixel_art_pack.zip fourni par l'utilisateur (généré par son generer_pack.py, voir assets/sources/)",
+    "importer": "tools/world3d/import-sprites.mjs",
+    "author": "utilisateur",
+    "original": "pnj/medecin"
+   },
+   "licence": "oeuvre-utilisateur",
+   "licenceUrl": null,
+   "licenceVerified": false,
+   "dimensions": {
+    "w": 2.4,
+    "h": 2.4,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     192,
+     256
+    ],
+    "cell": [
+     64,
+     64
+    ],
+    "cols": 3,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche",
+     "course"
+    ],
+    "footPx": 10
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      0,
+      1
+     ],
+     "fps": 5
+    },
+    {
+     "name": "run",
+     "frames": [
+      2,
+      1,
+      2,
+      1
+     ],
+     "fps": 8
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#2f9aa0"
+   }
+  },
+  {
+   "id": "npc_operateur",
+   "category": "character",
+   "file": "tex/npc_operateur.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "imported",
+    "from": "persos_pixel_art_pack.zip fourni par l'utilisateur (généré par son generer_pack.py, voir assets/sources/)",
+    "importer": "tools/world3d/import-sprites.mjs",
+    "author": "utilisateur",
+    "original": "pnj/operateur"
+   },
+   "licence": "oeuvre-utilisateur",
+   "licenceUrl": null,
+   "licenceVerified": false,
+   "dimensions": {
+    "w": 2.4,
+    "h": 2.4,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     192,
+     256
+    ],
+    "cell": [
+     64,
+     64
+    ],
+    "cols": 3,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche",
+     "course"
+    ],
+    "footPx": 10
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      0,
+      1
+     ],
+     "fps": 5
+    },
+    {
+     "name": "run",
+     "frames": [
+      2,
+      1,
+      2,
+      1
+     ],
+     "fps": 8
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#2f9aa0"
+   }
+  },
+  {
+   "id": "npc_scientifique",
+   "category": "character",
+   "file": "tex/npc_scientifique.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "imported",
+    "from": "persos_pixel_art_pack.zip fourni par l'utilisateur (généré par son generer_pack.py, voir assets/sources/)",
+    "importer": "tools/world3d/import-sprites.mjs",
+    "author": "utilisateur",
+    "original": "pnj/scientifique"
+   },
+   "licence": "oeuvre-utilisateur",
+   "licenceUrl": null,
+   "licenceVerified": false,
+   "dimensions": {
+    "w": 2.4,
+    "h": 2.4,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     192,
+     256
+    ],
+    "cell": [
+     64,
+     64
+    ],
+    "cols": 3,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche",
+     "course"
+    ],
+    "footPx": 10
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      0,
+      1
+     ],
+     "fps": 5
+    },
+    {
+     "name": "run",
+     "frames": [
+      2,
+      1,
+      2,
+      1
+     ],
+     "fps": 8
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#2f9aa0"
+   }
+  },
+  {
+   "id": "npc_securite",
+   "category": "character",
+   "file": "tex/npc_securite.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "imported",
+    "from": "persos_pixel_art_pack.zip fourni par l'utilisateur (généré par son generer_pack.py, voir assets/sources/)",
+    "importer": "tools/world3d/import-sprites.mjs",
+    "author": "utilisateur",
+    "original": "pnj/securite"
+   },
+   "licence": "oeuvre-utilisateur",
+   "licenceUrl": null,
+   "licenceVerified": false,
+   "dimensions": {
+    "w": 2.4,
+    "h": 2.4,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     192,
+     256
+    ],
+    "cell": [
+     64,
+     64
+    ],
+    "cols": 3,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche",
+     "course"
+    ],
+    "footPx": 10
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      0,
+      1
+     ],
+     "fps": 5
+    },
+    {
+     "name": "run",
+     "frames": [
+      2,
+      1,
+      2,
+      1
+     ],
+     "fps": 8
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#2f9aa0"
+   }
   }
  ]
 }

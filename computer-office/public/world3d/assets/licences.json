@@ -1,12 +1,52 @@
 {
   "version": 1,
   "licences": {
-    "CC0-1.0": { "nom": "Creative Commons Zéro", "redistribuable": true, "attribution": false, "url": "https://creativecommons.org/publicdomain/zero/1.0/" },
-    "CC-BY-4.0": { "nom": "Creative Commons Attribution 4.0", "redistribuable": true, "attribution": true, "url": "https://creativecommons.org/licenses/by/4.0/" },
-    "CC-BY-SA-4.0": { "nom": "Creative Commons Attribution – Partage dans les mêmes conditions 4.0", "redistribuable": true, "attribution": true, "partageIdentique": true, "url": "https://creativecommons.org/licenses/by-sa/4.0/" },
-    "MIT": { "nom": "MIT", "redistribuable": true, "attribution": true, "url": "https://opensource.org/license/mit" },
-    "OFL-1.1": { "nom": "SIL Open Font License 1.1", "redistribuable": true, "attribution": true, "url": "https://openfontlicense.org/" },
-    "propriétaire-nintendo": { "nom": "Contenu Nintendo / Game Freak (extrait de jeu ou recréation de ses personnages et bâtiments)", "redistribuable": false, "note": "Jamais dans le dépôt. Usage privé hors dépôt uniquement, à vos risques ; ce n'est pas un contenu libre." },
-    "tous-droits-réservés": { "nom": "Aucune licence publiée (all rights reserved par défaut)", "redistribuable": false, "note": "Ex. Pokémon DS Map Studio (dépôt sans fichier LICENSE) : outil utilisable, code et tilesets non redistribuables." }
+    "CC0-1.0": {
+      "nom": "Creative Commons Zéro",
+      "redistribuable": true,
+      "attribution": false,
+      "url": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    "CC-BY-4.0": {
+      "nom": "Creative Commons Attribution 4.0",
+      "redistribuable": true,
+      "attribution": true,
+      "url": "https://creativecommons.org/licenses/by/4.0/"
+    },
+    "CC-BY-SA-4.0": {
+      "nom": "Creative Commons Attribution – Partage dans les mêmes conditions 4.0",
+      "redistribuable": true,
+      "attribution": true,
+      "partageIdentique": true,
+      "url": "https://creativecommons.org/licenses/by-sa/4.0/"
+    },
+    "MIT": {
+      "nom": "MIT",
+      "redistribuable": true,
+      "attribution": true,
+      "url": "https://opensource.org/license/mit"
+    },
+    "OFL-1.1": {
+      "nom": "SIL Open Font License 1.1",
+      "redistribuable": true,
+      "attribution": true,
+      "url": "https://openfontlicense.org/"
+    },
+    "propriétaire-nintendo": {
+      "nom": "Contenu Nintendo / Game Freak (extrait de jeu ou recréation de ses personnages et bâtiments)",
+      "redistribuable": false,
+      "note": "Jamais dans le dépôt. Usage privé hors dépôt uniquement, à vos risques ; ce n'est pas un contenu libre."
+    },
+    "tous-droits-réservés": {
+      "nom": "Aucune licence publiée (all rights reserved par défaut)",
+      "redistribuable": false,
+      "note": "Ex. Pokémon DS Map Studio (dépôt sans fichier LICENSE) : outil utilisable, code et tilesets non redistribuables."
+    },
+    "oeuvre-utilisateur": {
+      "nom": "Œuvre fournie par l'utilisateur (générée par son propre script)",
+      "redistribuable": true,
+      "attribution": false,
+      "note": "Licence à confirmer par son auteur avant toute diffusion publique ; usage dans ce dépôt privé autorisé par l'utilisateur."
+    }
   }
 }
