@@ -30,7 +30,7 @@ const zones = [
   { id: "dev_workshop", asset: "dev_workshop", x: 13, y: 34, rot: 0, label: "Atelier dev", role: "workshop", view: "teams", blurb: "Équipes et missions de développement en cours." },
   { id: "supervision", asset: "supervision", x: 51, y: 34, rot: 0, label: "Centre de supervision", role: "supervision", view: "reviews", blurb: "Évaluations, arène et agents à surveiller (bloqués / en échec)." },
 ];
-for (const z of zones) { const x = Math.round(z.x), yf = Math.round(z.y) + 4, road = z.y < 24 ? 24 : 40; rect(x - 3, yf, x + 3, yf, "c"); rect(x - 1, Math.min(yf, road), x, Math.max(yf, road), "c"); }
+for (const z of zones) { const x = Math.round(z.x), yf = Math.round(z.y) + 4, road = z.y < 24 ? 24 : 40; rect(x - 3, yf, x + 3, yf, "c"); if (z.id === "hq") rect(x - 1, yf, x + 1, 18, "c"); else rect(x - 1, Math.min(yf, road), x, Math.max(yf, road), "c"); }
 // --- lots : deux rangées face à face le long de chaque rue de lotissement, 4 maisons de chaque côté de l'avenue
 const lots = [], XL = [5, 12.5, 20, 27.5], XR = [38, 45.5, 53, 60.5];
 STREETS.forEach((ys, pair) => { for (const [row, y, rot] of [[0, ys - 5, 0], [1, ys + 6.5, Math.PI]]) for (const [side, xs] of [[0, XL], [1, XR]]) for (const x of xs) lots.push({ x, y, rot, district: pair * 2 + side, street: ys }); });
@@ -82,16 +82,20 @@ const npcs = [
   { id: "meunier", name: "Meunier", sheet: 10, kind: "wander", x: 6, y: 12, r: 2.5, lines: ["Le vent tourne bien aujourd'hui.", "Mes voiles tournent depuis ce matin !"] },
   { id: "pecheur", name: "Pêcheur", sheet: 9, kind: "stand", x: 59.2, y: 31, dir: 2, lines: ["Chut… ça mord, peut-être.", "Le lac est calme ce soir."] },
   { id: "jardinier", name: "Jardinier", sheet: 10, kind: "wander", x: 32, y: 15, r: 3.5, lines: ["Les parterres sont fraîchement arrosés.", "Ne marchez pas sur les fleurs !"] },
-  { id: "facteur", name: "Facteur", sheet: 11, kind: "route", speed: 1.9, route: [[3, 53.8], [26, 53.8], [37, 53.8], [60, 53.8], [37, 53.8], [26, 53.8]], lines: ["Courrier ! Il y a beaucoup de lettres pour les agents.", "Je fais ma tournée."] },
+  { id: "facteur", name: "Facteur", sheet: 17, kind: "route", speed: 1.9, route: [[3, 53.8], [26, 53.8], [37, 53.8], [60, 53.8], [37, 53.8], [26, 53.8]], lines: ["Courrier ! Il y a beaucoup de lettres pour les agents.", "Je fais ma tournée."] },
   { id: "joggeur", name: "Joggeur", sheet: 5, kind: "route", speed: 2.6, route: [[22, 20], [42, 20], [42, 30], [22, 30]], lines: ["Un tour de place de plus !", "Pas le temps de parler…"] },
   { id: "enfant1", name: "Enfant", sheet: 3, scale: 0.8, kind: "wander", x: 28, y: 24, r: 4, lines: ["Tu veux jouer à chat ?", "J'ai vu le moulin tourner !"] },
   { id: "enfant2", name: "Enfant", sheet: 7, scale: 0.8, kind: "wander", x: 37, y: 27, r: 4, lines: ["La fontaine est trop belle.", "Mon papa dit que les agents travaillent dur."] },
   { id: "ancien", name: "Ancien", sheet: 8, kind: "stand", x: 22.2, y: 22.4, dir: 0, lines: ["De mon banc, je vois toute la place.", "De mon temps, il n'y avait pas d'agents IA."] },
   { id: "promeneuse1", name: "Promeneuse", sheet: 4, kind: "route", speed: 1.1, route: [[6, 25], [22, 25], [6, 25]], lines: ["Quelle belle ville !", "Je profite des lampadaires."] },
   { id: "promeneur2", name: "Promeneur", sheet: 2, kind: "route", speed: 1.0, route: [[44, 25], [60, 25], [44, 25]], lines: ["On respire bien, ici.", "Le lac est juste à côté."] },
-  { id: "gardien-n", name: "Gardien de porte", sheet: 6, kind: "stand", x: 29, y: 4.2, dir: 0, lines: ["Bienvenue à Fleet Office.", "Au nord : le Quartier général."] },
-  { id: "gardien-e", name: "Gardien de porte", sheet: 6, kind: "stand", x: 60.5, y: 22.5, dir: 1, lines: ["La route de l'est mène au lac.", "Restez sur les pavés !"] },
-  { id: "botaniste", name: "Botaniste", sheet: 1, kind: "wander", x: 4.5, y: 20, r: 2, lines: ["Ces hautes herbes sont magnifiques.", "Attention, on s'y perd facilement."] },
+  { id: "gardien-n", name: "Gardien de porte", sheet: 16, kind: "stand", x: 29, y: 4.2, dir: 0, lines: ["Bienvenue à Fleet Office.", "Au nord : le Quartier général."] },
+  { id: "gardien-e", name: "Gardien de porte", sheet: 16, kind: "stand", x: 60.5, y: 22.5, dir: 1, lines: ["La route de l'est mène au lac.", "Restez sur les pavés !"] },
+  { id: "botaniste", name: "Botaniste", sheet: 12, kind: "wander", x: 4.5, y: 20, r: 2, lines: ["Ces hautes herbes sont magnifiques.", "Attention, on s'y perd facilement."] },
+  { id: "scientifique", name: "Scientifique", sheet: 12, kind: "wander", x: 13, y: 19.5, r: 2.2, lines: ["Les métiers se forment ici, au laboratoire.", "Chaque skill est évalué avant d'être classé."] },
+  { id: "ingenieur", name: "Ingénieur", sheet: 13, kind: "wander", x: 13, y: 39, r: 2, lines: ["L'atelier ne désemplit pas.", "Un bon agent, ça se règle comme une machine."] },
+  { id: "operateur", name: "Opérateur", sheet: 15, kind: "wander", x: 51, y: 19.5, r: 2.2, lines: ["Tous les nœuds sont au vert, ou presque.", "Je surveille les machines."] },
+  { id: "etudiant", name: "Étudiant", sheet: 18, kind: "wander", x: 20, y: 20, r: 2.5, lines: ["J'apprends les skills du laboratoire.", "Un jour je serai un agent Senior !"] },
   { id: "fleuriste", name: "Fleuriste", sheet: 7, kind: "wander", x: 36, y: 31.5, r: 2.5, lines: ["Des fleurs fraîches pour vos agents ?", "Les parterres de la place, c'est moi."] },
 ];
 const rows = g.map((r) => r.join(""));

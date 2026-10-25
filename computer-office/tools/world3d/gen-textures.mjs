@@ -109,6 +109,15 @@ const PAL = [ // coat, pants, hair, skin, acc (écharpe/col), head: 0 cheveux / 
   { coat: "#2f6f9a", pants: "#3a4a3a", hair: "#6b3a1f", skin: "#f1c6a0", acc: "#ffe27a", head: 2, hat: "#e8c870", bag: true }, // 9 pêcheur
   { coat: "#5a8a3a", pants: "#6b5a3a", hair: "#4a2f1d", skin: "#c58a62", acc: "#fbfbff", head: 1, hat: "#e8c870" },   // 10 jardinier
   { coat: "#2f4aa0", pants: "#2e3340", hair: "#1f1a18", skin: "#f1c6a0", acc: "#ffd24a", head: 1, hat: "#2f4aa0", bag: true }, // 11 facteur
+  // 12-19 : tenues par métier (inspirées de la liste de rôles fournie : scientifique, ingénieur, analyste, opérateur, sécurité, livreur, étudiant, médecin) — dessins originaux
+  { coat: "#f4f4f8", pants: "#7a8aa8", hair: "#e6e6ee", skin: "#f1c6a0", acc: "#4a6fb8", head: 0, skirt: true },             // 12 scientifique (blouse)
+  { coat: "#e0a02f", pants: "#4a4a58", hair: "#4a2f1d", skin: "#e0ac84", acc: "#ffffff", head: 1, hat: "#ffd24a", bag: true }, // 13 ingénieur (casque)
+  { coat: "#8a5a3a", pants: "#3a3a4a", hair: "#4a2f1d", skin: "#f1c6a0", acc: "#f4f4f8", head: 0, glasses: true },             // 14 analyste (lunettes)
+  { coat: "#4e8a4a", pants: "#40382c", hair: "#2a1d1a", skin: "#c58a62", acc: "#ffe27a", head: 1, hat: "#4e8a4a" },           // 15 opérateur
+  { coat: "#1f2230", pants: "#14161f", hair: "#1f1a18", skin: "#e0ac84", acc: "#8a93a8", head: 1, hat: "#1f2230" },           // 16 sécurité
+  { coat: "#d9483a", pants: "#3a3347", hair: "#6b3a1f", skin: "#f1c6a0", acc: "#ffffff", head: 1, hat: "#d9483a", bag: true }, // 17 livreur
+  { coat: "#3a66c8", pants: "#2e3340", hair: "#3a2418", skin: "#f1c6a0", acc: "#ffd24a", head: 1, hat: "#3a66c8", bag: true }, // 18 étudiant
+  { coat: "#f0a0b8", pants: "#f4f4f8", hair: "#f0a0b8", skin: "#f1c6a0", acc: "#ffffff", head: 1, hat: "#f4f4f8", skirt: true },  // 19 médecin
 ];
 const LINE = [29, 26, 36, 255];
 const drawChar = (img, ox, oy, p, dir, f) => {
@@ -129,6 +138,7 @@ const drawChar = (img, ox, oy, p, dir, f) => {
   const eye = (x, y) => { R(x, y, 2, 2, LINE); R(x, y, 1, 1, [255, 255, 255, 255]); };
   if (dir === 0) { eye(5, 6 + by); eye(9, 6 + by); R(7, 8 + by, 2, 1, shade(skin, .8)); }
   if (dir === 1) { eye(4, 6 + by); } if (dir === 2) { eye(10, 6 + by); }
+  if (p.glasses && dir !== 3) { const g = [60, 52, 60, 255]; if (dir === 0) { R(4, 5 + by, 3, 1, g); R(9, 5 + by, 3, 1, g); R(4, 8 + by, 3, 1, g); R(9, 8 + by, 3, 1, g); R(7, 6 + by, 2, 1, g); } else R(dir === 1 ? 3 : 10, 5 + by, 3, 1, g); }
   // cheveux / couvre-chef
   const hat = p.hat && C(p.hat);
   if (p.head === 3) { R(2, 1 + by, 12, 5, hat); R(2, 4 + by, 2, 6, hat); R(12, 4 + by, 2, 6, hat); if (dir === 3) R(3, 5 + by, 10, 5, hat); if (dir === 0) { R(4, 4 + by, 8, 1, shade(hat, .85)); } }

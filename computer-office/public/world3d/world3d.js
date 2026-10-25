@@ -143,7 +143,7 @@ function highlight(b, on) { b.group.traverse((o) => { if (o.isMesh) { o.material
 
 // ---------------------------------------------------------------------------------------------- personnages (billboards)
 const sheets = new Map(), badgeTex = new Map();
-async function sheet(i) { const k = "tex/char_" + (i % 12) + ".png"; return loadTex(k); }
+async function sheet(i) { const k = "tex/char_" + (i % 20) + ".png"; return loadTex(k); }
 function badge(kind) { if (badgeTex.has(kind)) return badgeTex.get(kind); const c = document.createElement("canvas"); c.width = c.height = 32; const x = c.getContext("2d"); const col = { working: "#3ddc84", blocked: "#ffb020", failed: "#ff4d4d", queued: "#9fb0d0" }[kind] || "#9fb0d0"; x.fillStyle = "#0e1322"; x.beginPath(); x.arc(16, 16, 14, 0, 7); x.fill(); x.fillStyle = col; x.beginPath(); x.arc(16, 16, 11, 0, 7); x.fill(); x.fillStyle = "#0e1322"; x.font = "bold 17px sans-serif"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(kind === "working" ? "…" : kind === "blocked" ? "!" : kind === "failed" ? "✕" : "z", 16, 17); const t = new THREE.CanvasTexture(c); nearest(t); badgeTex.set(kind, t); return t; }
 const shadowGeo = new THREE.CircleGeometry(0.34, 14).rotateX(-Math.PI / 2), shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.28, depthWrite: false });
 class Actor {
@@ -258,6 +258,8 @@ async function applyWorld() {
   for (const [k, o] of [...houseObjs]) if (!seen.has(k)) { removeBuilding(o.b); houseObjs.delete(k); }
   S.houses = houseObjs.size;
 }
+const OUTFIT = [[/architect/, 13], [/back/, 15], [/front/, 18], [/devops/, 17], [/\bqa\b|test/, 14], [/visual|valid/, 12], [/pentest|secur|sécur/, 16], [/m[ée]decin|doc/, 19]];
+function outfitFor(a) { const r = String(a.role || "").toLowerCase(); for (const [re, i] of OUTFIT) if (re.test(r)) return i; return 1 + (hashStr(a.id) % 7); }
 const hq = () => buildings.find((b) => b.id === "hq");
 function homeFor(a) {
   const h = houseOfAgent.get(a.id), o = h && houseObjs.get(h.key);
@@ -267,7 +269,7 @@ function homeFor(a) {
 async function applyAgents() {
   if (!adata) return; const list = (adata.agents || []).filter((a) => !a.internal); agentsById = new Map(list.map((a) => [a.id, a]));
   for (const a of list) {
-    let ac = actors.get(a.id); if (!ac) { ac = new Actor(await sheet(1 + (hashStr(a.id) % 7)), { id: a.id, name: a.name, kind: "agent" }); const hm = homeFor(a); ac.x = hm.x; ac.z = hm.z; actors.set(a.id, ac); }
+    let ac = actors.get(a.id); if (!ac) { ac = new Actor(await sheet(outfitFor(a)), { id: a.id, name: a.name, kind: "agent" }); const hm = homeFor(a); ac.x = hm.x; ac.z = hm.z; actors.set(a.id, ac); }
     const hm = homeFor(a); ac.home = hm; ac.house = hm.house; ac.agent = a; ac.name = a.name; ac.setStatus(a.status);
   }
   for (const [id, ac] of [...actors]) if (!agentsById.has(id)) { ac.dispose(); actors.delete(id); }
