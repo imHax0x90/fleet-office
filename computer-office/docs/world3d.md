@@ -136,3 +136,8 @@ Archive de 3 Go (64 606 fichiers) examinée sans extraction complète : `Pokemon
 1. Déposer le PNG (fond transparent) et lancer `import-overworld.mjs` (grille 4×4 de 32×48) ou `import-sprites.mjs` (cellules 64×64, 3 états) — ou ajouter à la main une entrée de registre avec `sheet: { px, cell, cols, rows, rowsOrder, colsOrder, footPx }` et `animations` (`idle`/`walk`/`run` = indices de colonnes + fps), `licence`, `source`.
 2. L'utiliser : `sheet: "mon_id"` dans un habitant de `gen-pilot-map.mjs` (`npcs[]`), ou dans la liste `HEROES` (touche C) ; les agents prennent la tenue de leur métier (`OUTFIT`).
 3. `node tools/world3d/validate.mjs` puis `npm run test:world3d`.
+
+## Nettoyage et choix du personnage
+
+* Les 20 feuilles de personnages **générées** à la main du début (`char_*`, code de dessin et repli associé) ont été supprimées. Tout personnage vient maintenant du pack utilisateur ou de l'archive IcyEthics ; un id absent donne un fantôme magenta « ? » (jamais de plantage).
+* **Choisir son personnage** : touche **C** ou bouton « Personnage (C) » → grille de tous les personnages jouables du catalogue (21 : héros et métiers du pack utilisateur, habitants IcyEthics) avec aperçu ; le choix est mémorisé (`localStorage`, ou `?hero=<id>`). Un nouveau personnage importé dans le registre apparaît automatiquement dans la grille.

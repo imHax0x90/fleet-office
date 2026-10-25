@@ -144,13 +144,17 @@ function highlight(b, on) { b.group.traverse((o) => { if (o.isMesh) { o.material
 
 // ---------------------------------------------------------------------------------------------- personnages (billboards)
 const sheets = new Map(), badgeTex = new Map();
-const ROLE_SHEETS = { 12: "scientifique", 13: "ingenieur", 14: "analyste", 15: "operateur", 16: "securite", 17: "livreur", 18: "etudiant", 19: "medecin" }; // feuilles importées (pack fourni) ; repli : tenues générées
 let cat = null; // catalogue d'assets (assetcat.mjs) construit sur registry.json
-async function sheet(i) { // → { tex, cols, rows, size, foot, frames, rates } ; id de registre (chaîne), index de tenue générée, ou rôle
-  const id = typeof i === "string" ? i : ROLE_SHEETS[i % 20] ? "npc_" + ROLE_SHEETS[i % 20] : null, inf = id && cat.sheetInfo(id);
+let placeholderTex = null;
+function placeholderInfo(id) { // asset absent / illisible : silhouette « ? » identifiable (jamais de plantage)
+  if (!placeholderTex) { const c = document.createElement("canvas"); c.width = 32; c.height = 48; const x = c.getContext("2d"); x.fillStyle = "#ff00ff"; x.fillRect(8, 6, 16, 38); x.fillStyle = "#fff"; x.font = "bold 22px sans-serif"; x.textAlign = "center"; x.fillText("?", 16, 32); placeholderTex = nearest(new THREE.CanvasTexture(c)); }
+  return { tex: placeholderTex, cols: 1, rows: 1, size: [1.25, 1.875], foot: 0, frames: { idle: [0], walk: [0], run: [0] }, rates: { idle: 1, walk: 1, run: 1 }, placeholder: id };
+}
+async function sheet(id) { // → { tex, cols, rows, size, foot, frames, rates } d'après le catalogue ; placeholder si absent
+  const inf = cat.sheetInfo(id);
   if (inf) { try { return { tex: await loadTex(inf.file), cols: inf.cols, rows: inf.rows, size: inf.size, foot: inf.foot, frames: inf.frames, rates: inf.rates }; } catch (err) { S.assets.failed.push({ id, error: String(err.message || err) }); } }
-  const k = typeof i === "string" ? 0 : i % 20 < 12 ? i % 20 : i % 12; // repli : tenue générée (ou premier personnage si l'asset est absent)
-  return { tex: await loadTex("tex/char_" + k + ".png"), cols: 4, rows: 4, size: [1.25, 1.875], foot: 0, frames: null };
+  else S.assets.failed.push({ id, error: "personnage absent du catalogue" });
+  return placeholderInfo(id);
 }
 function badge(kind) { if (badgeTex.has(kind)) return badgeTex.get(kind); const c = document.createElement("canvas"); c.width = c.height = 32; const x = c.getContext("2d"); const col = { working: "#3ddc84", blocked: "#ffb020", error: "#ff4d4d", failed: "#ff4d4d", queued: "#9fb0d0", thinking: "#b48cff", success: "#6aa9ff", offline: "#7d879c" }[kind] || "#9fb0d0"; x.fillStyle = "#0e1322"; x.beginPath(); x.arc(16, 16, 14, 0, 7); x.fill(); x.fillStyle = col; x.beginPath(); x.arc(16, 16, 11, 0, 7); x.fill(); x.fillStyle = "#0e1322"; x.font = "bold 17px sans-serif"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText({ working: "…", thinking: "?", blocked: "!", error: "✕", failed: "✕", success: "✓", offline: "⏻" }[kind] || "z", 16, 17); const t = new THREE.CanvasTexture(c); nearest(t); badgeTex.set(kind, t); return t; }
 const shadowGeo = new THREE.CircleGeometry(0.34, 14).rotateX(-Math.PI / 2), shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.28, depthWrite: false });
@@ -179,12 +183,31 @@ class Actor {
 }
 
 // ---------------------------------------------------------------------------------------------- apparence du joueur (touche C) : feuilles du pack utilisateur ou tenue générée
-const HEROES = ["hero_peter", "hero_red", "hero_gold", "hero_cynthia", "hero_pierre_rochard", "ow_allison", "ow_macdonald", "ow_scarlett", "ow_wilbur", 0]; let heroIdx = 0;
-try { const w = Q.get("hero") || localStorage.getItem("w3d.hero"); const i = HEROES.findIndex((h) => h === w || (h === 0 && w === "generated")); if (i >= 0) heroIdx = i; } catch { /* stockage indisponible */ }
-async function setHero(i) {
-  heroIdx = (i + HEROES.length) % HEROES.length; try { localStorage.setItem("w3d.hero", HEROES[heroIdx] || "generated"); } catch { /* ignoré */ }
-  const info = await sheet(HEROES[heroIdx]), old = player; player = new Actor(info, { id: "player", name: "Vous", kind: "player", x: old ? old.x : MAP.spawn.x, z: old ? old.z : MAP.spawn.y }); player.dir = old ? old.dir : 0; if (old) old.dispose(); applyTime(true);
+const DEFAULT_HERO = "hero_peter"; let heroId = DEFAULT_HERO;
+try { const w = Q.get("hero") || localStorage.getItem("w3d.hero"); if (w) heroId = w; } catch { /* stockage indisponible */ }
+async function setHero(id) {
+  if (!cat.sheetInfo(id)) id = DEFAULT_HERO; heroId = id; try { localStorage.setItem("w3d.hero", id); } catch { /* ignoré */ }
+  const info = await sheet(id), old = player; player = new Actor(info, { id: "player", name: "Vous", kind: "player", x: old ? old.x : MAP.spawn.x, z: old ? old.z : MAP.spawn.y }); player.dir = old ? old.dir : 0; if (old) old.dispose(); applyTime(true);
 }
+// sélecteur de personnage : tous les personnages jouables du catalogue, avec aperçu de la frame « face, au repos »
+const GROUPS = [["hero_", "Héros (pack utilisateur)"], ["npc_", "Métiers (pack utilisateur)"], ["ow_", "Habitants (IcyEthics, non commercial)"]];
+const NICE = { etudiant: "Étudiant", ingenieur: "Ingénieur", medecin: "Médecin", securite: "Sécurité", operateur: "Opérateur", pierre_rochard: "Pierre Rochard", mrfrost: "M. Frost", macdonald: "MacDonald" };
+const labelOf = (id) => { const k = id.replace(/^(hero_|npc_|ow_)/, ""); if (NICE[k]) return NICE[k]; const t = id.replace(/^(hero_|npc_|ow_)/, "").replace(/_/g, " "); return t.charAt(0).toUpperCase() + t.slice(1); };
+function openHeroPicker() {
+  keys.clear(); const box = $("herogrid"); box.innerHTML = "";
+  for (const [prefix, title] of GROUPS) {
+    const list = cat.find({ category: "character", sheet: true }).filter((e) => e.id.startsWith(prefix) && e.id.indexOf("tree") < 0); if (!list.length) continue;
+    const h = document.createElement("h4"); h.textContent = title; box.appendChild(h); const row = document.createElement("div"); row.className = "hrow"; box.appendChild(row);
+    for (const e of list) {
+      const b = document.createElement("button"); b.className = "hbtn" + (e.id === heroId ? " on" : ""); b.title = e.id; b.dataset.id = e.id; const c = document.createElement("canvas"); c.width = e.sheet.cell[0]; c.height = e.sheet.cell[1]; b.appendChild(c); const sp = document.createElement("span"); sp.textContent = labelOf(e.id); b.appendChild(sp); row.appendChild(b);
+      const r = cat.frameRect(e.id, { dir: "bas", frame: 0 }), img = new Image(); img.onload = () => { const g = c.getContext("2d"); g.imageSmoothingEnabled = false; g.drawImage(img, r.x, r.y, r.w, r.h, 0, 0, r.w, r.h); }; img.onerror = () => { c.getContext("2d").fillStyle = "#ff00ff"; c.getContext("2d").fillRect(4, 4, c.width - 8, c.height - 8); }; img.src = BASE + e.file;
+      b.onclick = async () => { await setHero(e.id); closeHeroPicker(); };
+    }
+  }
+  $("hero").hidden = false;
+}
+function closeHeroPicker() { $("hero").hidden = true; }
+$("herox").onclick = closeHeroPicker; $("herobtn").onclick = () => ($("hero").hidden ? openHeroPicker() : closeHeroPicker()); $("hero").addEventListener("pointerdown", (e) => { if (e.target === $("hero")) closeHeroPicker(); });
 
 // ---------------------------------------------------------------------------------------------- habitants décoratifs (aucun lien avec les agents)
 async function spawnNpcs() {
@@ -223,8 +246,8 @@ function placeCamera() {
   sun.target.position.copy(camTarget); sun.position.set(camTarget.x - 22, camTarget.y + 34, camTarget.z + 16); const ext = clamp(dist * 0.85, 22, 60); Object.assign(sun.shadow.camera, { left: -ext, right: ext, top: ext, bottom: -ext }); sun.shadow.camera.updateProjectionMatrix();
 }
 addEventListener("keydown", (e) => { if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return; const k = e.key.toLowerCase(); if (["arrowup", "arrowdown", "arrowleft", "arrowright", " "].includes(k)) e.preventDefault();
-  if (!$("ov").hidden && k !== "escape") return; if (mapOpen) { if (k === "m" || k === "escape") closeMap(); return; }
-  if (k === "p") { $("perf").hidden = !$("perf").hidden; } else if (k === "m") openMap(); else if (k === "f") { S.followed = true; } else if (k === "c") { setHero(heroIdx + 1); } else if (k === "n") { nightMode = nightMode === "auto" || nightMode === "fix" ? "night" : nightMode === "night" ? "day" : "auto"; applyTime(true); } else if (k === "a") yawT -= Math.PI / 4; else if (k === "e") yawT += Math.PI / 4; else if (k === "escape") { if (!$("ov").hidden) closeConsole(); else select(null); } else { keys.add(k); S.followed = true; goal = null; } });
+  if (!$("ov").hidden && k !== "escape") return; if (!$("hero").hidden) { if (k === "c" || k === "escape") closeHeroPicker(); return; } if (mapOpen) { if (k === "m" || k === "escape") closeMap(); return; }
+  if (k === "p") { $("perf").hidden = !$("perf").hidden; } else if (k === "m") openMap(); else if (k === "f") { S.followed = true; } else if (k === "c") { $("hero").hidden ? openHeroPicker() : closeHeroPicker(); } else if (k === "n") { nightMode = nightMode === "auto" || nightMode === "fix" ? "night" : nightMode === "night" ? "day" : "auto"; applyTime(true); } else if (k === "a") yawT -= Math.PI / 4; else if (k === "e") yawT += Math.PI / 4; else if (k === "escape") { if (!$("ov").hidden) closeConsole(); else select(null); } else { keys.add(k); S.followed = true; goal = null; } });
 addEventListener("keyup", (e) => keys.delete(e.key.toLowerCase())); addEventListener("blur", () => keys.clear());
 canvas.addEventListener("wheel", (e) => { e.preventDefault(); distT = clamp(distT * Math.exp(e.deltaY * 0.0012), 9, 90); }, { passive: false });
 canvas.addEventListener("contextmenu", (e) => e.preventDefault());
@@ -275,8 +298,8 @@ async function applyWorld() {
   for (const [k, o] of [...houseObjs]) if (!seen.has(k)) { removeBuilding(o.b); houseObjs.delete(k); }
   S.houses = houseObjs.size;
 }
-const OUTFIT = [[/architect/, 13], [/back/, 15], [/front/, 18], [/devops/, 17], [/\bqa\b|test/, 14], [/visual|valid/, 12], [/pentest|secur|sécur/, 16], [/m[ée]decin|doc/, 19]];
-function outfitFor(a) { const r = String(a.role || "").toLowerCase(); for (const [re, i] of OUTFIT) if (re.test(r)) return i; return 1 + (hashStr(a.id) % 7); }
+const OUTFIT = [[/architect/, "npc_ingenieur"], [/back/, "npc_operateur"], [/front/, "npc_etudiant"], [/devops/, "npc_livreur"], [/\bqa\b|test/, "npc_analyste"], [/visual|valid/, "npc_scientifique"], [/pentest|secur|sécur/, "npc_securite"], [/m[ée]decin|doc/, "npc_medecin"]];
+function outfitFor(a) { const r = String(a.role || "").toLowerCase(); for (const [re, id] of OUTFIT) if (re.test(r)) return id; const pool = cat.find({ category: "character", sheet: true }).filter((e) => e.id.startsWith("npc_")); return pool.length ? pool[hashStr(a.id) % pool.length].id : "npc_ingenieur"; }
 const hq = () => buildings.find((b) => b.id === "hq");
 function homeFor(a) {
   const h = houseOfAgent.get(a.id), o = h && houseObjs.get(h.key);
@@ -456,7 +479,7 @@ const dbgState = () => ({ ready: S.ready, map: mapOpen, player: player && { h: +
     for (const a of MAP.animated || []) { const pr = await loadModel(a.asset), inner = pr.clone(true), P = new THREE.Group(); P.add(inner); P.position.set(a.x, a.h + heightAt(a.x, a.y), a.y); P.rotation.y = a.rot || 0; scene.add(P); spinners.push({ node: inner, speed: a.speed || 0.5 }); }
     buildHalos(); applyTime(true);
     // joueur
-    await setHero(heroIdx); if (Q.get("px")) { player.x = +Q.get("px"); player.z = +Q.get("pz") || MAP.spawn.y; }
+    await setHero(heroId); if (Q.get("px")) { player.x = +Q.get("px"); player.z = +Q.get("pz") || MAP.spawn.y; }
     camTarget.set(player.x, heightAt(player.x, player.z), player.z);
     await spawnNpcs(); S.ready = true; refreshHud(); $("boot").classList.add("done"); requestAnimationFrame(loop);
     poll().then(() => { const sel = Q.get("select"); if (sel) { const b = buildings.find((x) => x.id === sel || x.group.name === sel); if (b) select({ type: "building", b }); } }); setInterval(poll, 4000); pollSlow(); setInterval(pollSlow, 30000);

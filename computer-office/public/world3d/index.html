@@ -12,14 +12,15 @@
 <canvas id="gl"></canvas>
 <div id="labels"></div>
 <div id="hud">
-  <div id="title"><b>Fleet Office</b> · Ville 3D <span class="tag">pilote</span><button id="mapbtn" class="btn">Carte (M)</button><a href="../world/" class="lnk">↩ ville 2D</a></div>
+  <div id="title"><b>Fleet Office</b> · Ville 3D <span class="tag">pilote</span><button id="mapbtn" class="btn">Carte (M)</button><button id="herobtn" class="btn">Personnage (C)</button><a href="../world/" class="lnk">↩ ville 2D</a></div>
   <div id="assets"></div>
   <div id="perf" hidden></div>
 </div>
-<div id="help">ZQSD / flèches : marcher · Maj : courir · M : carte · N : jour/nuit · C : apparence · molette : zoom · A / E : pivoter · clic : sélectionner / aller · clic droit + glisser : déplacer la vue · F : recentrer · P : perfs</div>
+<div id="help">ZQSD / flèches : marcher · Maj : courir · M : carte · N : jour/nuit · C : personnage · molette : zoom · A / E : pivoter · clic : sélectionner / aller · clic droit + glisser : déplacer la vue · F : recentrer · P : perfs</div>
 <aside id="panel" hidden><header><span id="p-title"></span><button id="p-x" aria-label="Fermer">✕</button></header><div id="p-body"></div></aside>
 <div id="ov" hidden><div id="ovf"><div id="ovh"><span id="ovt"></span><button id="ovx" aria-label="Fermer">✕</button></div><iframe id="ovi" title="console"></iframe></div></div>
 <div id="map" hidden><div id="mapbox"><div id="maph"><b>Carte de la ville</b><span id="maphint">clic = s'y rendre · M / Échap = fermer</span><button id="mapx" aria-label="Fermer">✕</button></div><canvas id="mapc"></canvas><div id="maptip"></div></div></div>
+<div id="hero" hidden><div id="herobox"><div id="heroh"><b>Choisir mon personnage</b><span id="herohint">C / Échap = fermer</span><button id="herox" aria-label="Fermer">✕</button></div><div id="herogrid"></div></div></div>
 <div id="boot"><div id="boot-t">Chargement des assets…</div><pre id="boot-e"></pre></div>
 <pre id="dbg" hidden></pre>
 <script type="module" src="world3d.js"></script>

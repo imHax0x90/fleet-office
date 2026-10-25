@@ -99,65 +99,6 @@ roof("roof_orange", "#dd8a3a", 205); roof("roof_teal", "#2f9aa0", 206); roof("ro
   const img = new Img(16, 8); img.rect(0, 0, 16, 8, "#d9483a"); img.rect(0, 3, 16, 2, "#fbfbff"); save("flag", img);
 }
 
-// ---- personnages : proportions « overworld » (grosse tête, petit corps), contour sombre, 4 directions × 4 frames, cellule 16×24
-// feuille : colonnes = idle, marche A, idle bis, marche B ; lignes = bas, gauche, droite, haut. Six à huit tenues originales (aucun personnage existant).
-const PAL = [ // coat, pants, hair, skin, acc (écharpe/col), head: 0 cheveux / 1 casquette / 2 bonnet / 3 capuche, bag, skirt
-  { coat: "#2f9aa0", pants: "#2b3a55", hair: "#4a2f1d", skin: "#f1c6a0", acc: "#ff9a3a", head: 1, hat: "#d9483a", bag: true }, // 0 joueur
-  { coat: "#d9483a", pants: "#3a3347", hair: "#1f1a18", skin: "#e0ac84", acc: "#ffe27a", head: 0 },
-  { coat: "#4a6fb8", pants: "#2e3340", hair: "#8a5a2b", skin: "#f1c6a0", acc: "#ffffff", head: 2, hat: "#ffd24a" },
-  { coat: "#4e9b62", pants: "#40382c", hair: "#d8c27a", skin: "#c58a62", acc: "#ffe27a", head: 0, bag: true },
-  { coat: "#b48cff", pants: "#6b4a8a", hair: "#2a1d3a", skin: "#f1c6a0", acc: "#ffd24a", head: 0, skirt: true },
-  { coat: "#e0a02f", pants: "#3b3b3b", hair: "#6b3a1f", skin: "#8c5a3c", acc: "#fbfbff", head: 1, hat: "#2f9aa0" },
-  { coat: "#e8e8f0", pants: "#4a5878", hair: "#7a5a3a", skin: "#f1c6a0", acc: "#d9483a", head: 3, hat: "#e8e8f0" },
-  { coat: "#e86a9a", pants: "#8a3a5a", hair: "#3a2418", skin: "#e0ac84", acc: "#ffffff", head: 0, skirt: true, bag: true },
-  { coat: "#8a6a4a", pants: "#4a4a4a", hair: "#e6e6e6", skin: "#e0ac84", acc: "#d9483a", head: 0 },               // 8 ancien
-  { coat: "#2f6f9a", pants: "#3a4a3a", hair: "#6b3a1f", skin: "#f1c6a0", acc: "#ffe27a", head: 2, hat: "#e8c870", bag: true }, // 9 pêcheur
-  { coat: "#5a8a3a", pants: "#6b5a3a", hair: "#4a2f1d", skin: "#c58a62", acc: "#fbfbff", head: 1, hat: "#e8c870" },   // 10 jardinier
-  { coat: "#2f4aa0", pants: "#2e3340", hair: "#1f1a18", skin: "#f1c6a0", acc: "#ffd24a", head: 1, hat: "#2f4aa0", bag: true }, // 11 facteur
-  // 12-19 : tenues par métier (inspirées de la liste de rôles fournie : scientifique, ingénieur, analyste, opérateur, sécurité, livreur, étudiant, médecin) — dessins originaux
-  { coat: "#f4f4f8", pants: "#7a8aa8", hair: "#e6e6ee", skin: "#f1c6a0", acc: "#4a6fb8", head: 0, skirt: true },             // 12 scientifique (blouse)
-  { coat: "#e0a02f", pants: "#4a4a58", hair: "#4a2f1d", skin: "#e0ac84", acc: "#ffffff", head: 1, hat: "#ffd24a", bag: true }, // 13 ingénieur (casque)
-  { coat: "#8a5a3a", pants: "#3a3a4a", hair: "#4a2f1d", skin: "#f1c6a0", acc: "#f4f4f8", head: 0, glasses: true },             // 14 analyste (lunettes)
-  { coat: "#4e8a4a", pants: "#40382c", hair: "#2a1d1a", skin: "#c58a62", acc: "#ffe27a", head: 1, hat: "#4e8a4a" },           // 15 opérateur
-  { coat: "#1f2230", pants: "#14161f", hair: "#1f1a18", skin: "#e0ac84", acc: "#8a93a8", head: 1, hat: "#1f2230" },           // 16 sécurité
-  { coat: "#d9483a", pants: "#3a3347", hair: "#6b3a1f", skin: "#f1c6a0", acc: "#ffffff", head: 1, hat: "#d9483a", bag: true }, // 17 livreur
-  { coat: "#3a66c8", pants: "#2e3340", hair: "#3a2418", skin: "#f1c6a0", acc: "#ffd24a", head: 1, hat: "#3a66c8", bag: true }, // 18 étudiant
-  { coat: "#f0a0b8", pants: "#f4f4f8", hair: "#f0a0b8", skin: "#f1c6a0", acc: "#ffffff", head: 1, hat: "#f4f4f8", skirt: true },  // 19 médecin
-];
-const LINE = [29, 26, 36, 255];
-const drawChar = (img, ox, oy, p, dir, f) => {
-  const C = (h) => hex(h), walk = f === 1 || f === 3, stepL = f === 1, by = f === 2 ? 1 : 0, coat = C(p.coat), hair = C(p.hair), skin = C(p.skin), pants = C(p.pants), acc = C(p.acc);
-  const R = (x, y, w, h, c) => img.rect(ox + x, oy + y, w, h, c);
-  // jambes (3 px de haut), pieds sombres
-  const legTop = p.skirt ? 17 : 16;
-  if (dir === 1 || dir === 2) { R(5, legTop + by, 6, 22 - legTop - by - 1, pants); if (walk) { R(stepL ? 4 : 7, 20, 4, 2, pants); } R(5, 21, 6, 1, [60, 52, 60, 255]); }
-  else { const lh = (l) => (walk && l === (stepL ? 0 : 1) ? 1 : 0); R(5, legTop + by, 3, 21 - legTop - by - lh(0), pants); R(8, legTop + by, 3, 21 - legTop - by - lh(1), pants); R(5, 21 - lh(0), 3, 1, [60, 52, 60, 255]); R(8, 21 - lh(1), 3, 1, [60, 52, 60, 255]); }
-  if (p.skirt) R(4, 15 + by, 8, 3, shade(coat, .9));
-  // corps + bras
-  R(4, 10 + by, 8, 7 - (p.skirt ? 1 : 0), coat); R(4, 10 + by, 8, 1, shade(coat, 1.25)); R(4, 15 + by, 8, 1, shade(coat, .8)); R(4, 10 + by, 8, 1, acc);
-  if (dir === 1 || dir === 2) { const ax = dir === 1 ? 5 : 8; R(ax, 11 + by, 3, 4, shade(coat, .85)); R(ax, 15 + by + (walk ? (stepL ? 0 : 1) : 0), 3, 1, skin); }
-  else { R(3, 11 + by, 2, 4, shade(coat, .85)); R(11, 11 + by, 2, 4, shade(coat, .85)); R(3, 15 + by + (walk && stepL ? 1 : 0), 2, 1, skin); R(11, 15 + by + (walk && !stepL ? 1 : 0), 2, 1, skin); }
-  if (p.bag) { if (dir === 3) R(5, 11 + by, 6, 5, shade(C("#c9a46a"), .95)); else if (dir === 1) R(10, 11 + by, 2, 4, C("#c9a46a")); else if (dir === 2) R(4, 11 + by, 2, 4, C("#c9a46a")); }
-  // tête (10 × 9)
-  R(3, 2 + by, 10, 8, skin);
-  const eye = (x, y) => { R(x, y, 2, 2, LINE); R(x, y, 1, 1, [255, 255, 255, 255]); };
-  if (dir === 0) { eye(5, 6 + by); eye(9, 6 + by); R(7, 8 + by, 2, 1, shade(skin, .8)); }
-  if (dir === 1) { eye(4, 6 + by); } if (dir === 2) { eye(10, 6 + by); }
-  if (p.glasses && dir !== 3) { const g = [60, 52, 60, 255]; if (dir === 0) { R(4, 5 + by, 3, 1, g); R(9, 5 + by, 3, 1, g); R(4, 8 + by, 3, 1, g); R(9, 8 + by, 3, 1, g); R(7, 6 + by, 2, 1, g); } else R(dir === 1 ? 3 : 10, 5 + by, 3, 1, g); }
-  // cheveux / couvre-chef
-  const hat = p.hat && C(p.hat);
-  if (p.head === 3) { R(2, 1 + by, 12, 5, hat); R(2, 4 + by, 2, 6, hat); R(12, 4 + by, 2, 6, hat); if (dir === 3) R(3, 5 + by, 10, 5, hat); if (dir === 0) { R(4, 4 + by, 8, 1, shade(hat, .85)); } }
-  else { // cheveux
-    if (dir === 0) { R(3, 1 + by, 10, 3, hair); R(3, 4 + by, 2, 2, hair); R(11, 4 + by, 2, 2, hair); }
-    else if (dir === 3) { R(3, 1 + by, 10, 8, hair); }
-    else { R(3, 1 + by, 10, 3, hair); R(dir === 1 ? 8 : 3, 3 + by, 5, 6, hair); }
-    if (p.head === 1) { R(3, 0 + by, 10, 3, hat); if (dir === 0) R(3, 3 + by, 10, 1, shade(hat, .75)); if (dir === 1) R(0, 2 + by, 5, 1, shade(hat, .75)); if (dir === 2) R(11, 2 + by, 5, 1, shade(hat, .75)); }
-    if (p.head === 2) { R(3, 0 + by, 10, 4, hat); R(3, 3 + by, 10, 1, shade(hat, .8)); R(7, -1 + by, 2, 1, shade(hat, 1.2)); }
-  }
-};
-const outline = (img, ox, oy, w, h) => { const keep = []; for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { if (img.get(ox + x, oy + y)[3]) continue; let n = false; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const X = x + dx, Y = y + dy; if (X >= 0 && Y >= 0 && X < w && Y < h && img.get(ox + X, oy + Y)[3]) n = true; } if (n) keep.push([x, y]); } for (const [x, y] of keep) img.px(ox + x, oy + y, LINE); };
-PAL.forEach((p, i) => { const img = new Img(64, 96); for (let d = 0; d < 4; d++) for (let f = 0; f < 4; f++) { drawChar(img, f * 16, d * 24, p, d, f); outline(img, f * 16, d * 24, 16, 24); } save("char_" + i, img); });
-
 // ---- touffes d'herbe haute (billboard croisé), voile de moulin, cadran d'horloge
 { const img = new Img(16, 16), q = rng(95); for (let b = 0; b < 7; b++) { const x0 = 1 + b * 2 + (q() * 2 | 0), h = 7 + (q() * 8 | 0), lean = (q() * 3 | 0) - 1; for (let y = 0; y < h; y++) { const x = x0 + Math.round(lean * y / h * 2); img.px(x, 15 - y, y > h - 3 ? "#9be06a" : y > h / 2 ? "#4aa63f" : "#2f7d3c"); img.px(x + 1, 15 - y, y > h - 3 ? "#79c457" : "#2f7d3c"); } } save("tallgrass", img); }
 { const img = new Img(16, 32); img.rect(0, 0, 16, 32, "#f4ecd0"); for (let y = 0; y < 32; y += 4) img.rect(0, y, 16, 1, "#d9cfa8"); img.rect(0, 0, 16, 2, "#6b4a2b"); img.rect(0, 30, 16, 2, "#6b4a2b"); img.rect(0, 0, 2, 32, "#6b4a2b"); img.rect(14, 0, 2, 32, "#6b4a2b"); img.rect(7, 0, 2, 32, "#8c6a43"); for (let y = 6; y < 30; y += 8) img.rect(0, y, 16, 2, "#8c6a43"); save("sail", img); }
