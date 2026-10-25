@@ -2068,6 +2068,24 @@ const server = http.createServer(async (req, res) => {
       logAudit("world-export", { files: n, bytes }); return sendJSON(res, 200, { ok: true, files: n, bytes });
     } catch (e) { return sendJSON(res, 400, { ok: false, error: String(e.message || e) }); }
   }
+  // fermer / rouvrir une session depuis la ville 3D (la maison mémorise les sessions fermées)
+  if (req.method === "POST" && p === "/api/world/close") {
+    const b = await readBody(req);
+    try {
+      const rec = managed.get(b.id), a = snapshot().agents.find((x) => x.id === b.id); if (!rec && !a) throw new Error("agent introuvable");
+      const src = rec || a, key = world.keyOf(a || { cwd: src.cwd, repoRoot: src.repoRoot });
+      world.recordClosed(key, { id: b.id, name: src.name, role: src.role, cwd: src.cwd, host: src.host || "local", model: src.model || "sonnet", perm: src.perm || DEFAULT_PERM, startedAt: src.startedAt });
+      killAgent(b.id); broadcast(true); return sendJSON(res, 200, { ok: true });
+    } catch (e) { return sendJSON(res, 400, { ok: false, error: String(e.message || e) }); }
+  }
+  if (req.method === "POST" && p === "/api/world/reopen") {
+    const b = await readBody(req);
+    try {
+      const m = world.takeClosed(b.id); if (!m) throw new Error("session fermée introuvable");
+      hidden.delete(m.id); managed.set(m.id, { id: m.id, name: m.name, role: m.role, cwd: m.cwd, host: m.host === "local" ? undefined : m.host, model: m.model, perm: m.perm, status: "idle", startedAt: m.startedAt || Date.now(), lastPrompt: null, costUsd: 0, adopted: true });
+      broadcast(true); return sendJSON(res, 200, { ok: true });
+    } catch (e) { return sendJSON(res, 400, { ok: false, error: String(e.message || e) }); }
+  }
   if (req.method === "POST" && p === "/api/world/remove") { const b = await readBody(req); try { world.remove(b.key); return sendJSON(res, 200, { ok: true }); } catch (e) { return sendJSON(res, 400, { ok: false, error: String(e.message || e) }); } }
   if (p === "/api/automations" && req.method === "GET") return sendJSON(res, 200, { ok: true, automations: automations.list(), tz: require("./automations").TZ });
   if (req.method === "POST" && p.startsWith("/api/automations/")) {

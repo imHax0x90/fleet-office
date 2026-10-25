@@ -24,8 +24,8 @@ const keyOf = (a) => String(a.repoRoot || a.cwd || "").replace(/\/+$/, "");
 
 function createWorld({ dir, getAgents }) {
   const FILE = path.join(dir, "world.json");
-  let db = { houses: {}, districts: [], seq: 0, hidden: [] };
-  try { const j = JSON.parse(fs.readFileSync(FILE, "utf8")); if (j && j.houses) db = { houses: j.houses, districts: j.districts || [], seq: j.seq || 0, hidden: j.hidden || [] }; } catch { /* première fois */ }
+  let db = { houses: {}, districts: [], seq: 0, hidden: [], closed: {} };
+  try { const j = JSON.parse(fs.readFileSync(FILE, "utf8")); if (j && j.houses) db = { houses: j.houses, districts: j.districts || [], seq: j.seq || 0, hidden: j.hidden || [], closed: j.closed || {} }; } catch { /* première fois */ }
   let saveT = null;
   const saveNow = () => { try { fs.mkdirSync(dir, { recursive: true }); const t = FILE + ".tmp"; fs.writeFileSync(t, JSON.stringify(db, null, 1)); fs.renameSync(t, FILE); } catch (e) { console.error("[world] save:", e.message); } };
   const save = () => { clearTimeout(saveT); saveT = setTimeout(saveNow, 300); if (saveT.unref) saveT.unref(); };
@@ -69,13 +69,16 @@ function createWorld({ dir, getAgents }) {
     const houses = Object.values(db.houses).map((h) => {
       const members = byKey[h.key] || [], n = (s) => members.filter((a) => s(a)).length;
       return { id: h.id, key: h.key, name: h.name, district: h.district, x: h.x, y: h.y, style: h.style, createdAt: h.createdAt,
-        agentIds: members.map((a) => a.id), working: n((a) => a.busy || a.status === "working"), blocked: n((a) => a.status === "blocked"), failed: n((a) => a.status === "failed") };
+        agentIds: members.map((a) => a.id), closed: (db.closed[h.key] || []).map((c) => ({ id: c.id, name: c.name, role: c.role, closedAt: c.closedAt })), working: n((a) => a.busy || a.status === "working"), blocked: n((a) => a.status === "blocked"), failed: n((a) => a.status === "failed") };
     });
     return { lot: { w: LOT_W, h: LOT_H }, ...lay, houses, serverTime: Date.now() };
   }
   // supprime une maison (et l'empêche de réapparaître tant qu'on ne la rétablit pas)
   function remove(key) { if (!db.houses[key]) throw new Error("maison introuvable"); delete db.houses[key]; if (!db.hidden.includes(key)) db.hidden.push(key); save(); }
-  return { get, sync, remove, houseOf: (a) => db.houses[keyOf(a)] || null, keyOf, flush: saveNow };
+  // sessions fermées depuis la ville : mémorisées par maison pour pouvoir les rouvrir (la conversation reste sur disque)
+  function recordClosed(key, meta) { const L = (db.closed[key] = (db.closed[key] || []).filter((c) => c.id !== meta.id)); L.unshift({ ...meta, closedAt: Date.now() }); db.closed[key] = L.slice(0, 30); save(); }
+  function takeClosed(id) { for (const [k, L] of Object.entries(db.closed)) { const i = L.findIndex((c) => c.id === id); if (i >= 0) { const [m] = L.splice(i, 1); save(); return m; } } return null; }
+  return { get, sync, remove, recordClosed, takeClosed, houseOf: (a) => db.houses[keyOf(a)] || null, keyOf, flush: saveNow };
 }
 
 module.exports = { createWorld, districtOf, keyOf };

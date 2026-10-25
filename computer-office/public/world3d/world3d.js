@@ -149,7 +149,8 @@ function placeCamera() {
   sun.target.position.copy(camTarget); sun.position.set(camTarget.x - 22, camTarget.y + 34, camTarget.z + 16); const ext = clamp(dist * 0.85, 22, 60); Object.assign(sun.shadow.camera, { left: -ext, right: ext, top: ext, bottom: -ext }); sun.shadow.camera.updateProjectionMatrix();
 }
 addEventListener("keydown", (e) => { if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return; const k = e.key.toLowerCase(); if (["arrowup", "arrowdown", "arrowleft", "arrowright", " "].includes(k)) e.preventDefault();
-  if (k === "p") { $("perf").hidden = !$("perf").hidden; } else if (k === "f") { S.followed = true; } else if (k === "q") yawT -= Math.PI / 4; else if (k === "e") yawT += Math.PI / 4; else if (k === "escape") { if (!$("ov").hidden) closeConsole(); else select(null); } else { keys.add(k); S.followed = true; goal = null; } });
+  if (!$("ov").hidden && k !== "escape") return; if (mapOpen) { if (k === "m" || k === "escape") closeMap(); return; }
+  if (k === "p") { $("perf").hidden = !$("perf").hidden; } else if (k === "m") openMap(); else if (k === "f") { S.followed = true; } else if (k === "a") yawT -= Math.PI / 4; else if (k === "e") yawT += Math.PI / 4; else if (k === "escape") { if (!$("ov").hidden) closeConsole(); else select(null); } else { keys.add(k); S.followed = true; goal = null; } });
 addEventListener("keyup", (e) => keys.delete(e.key.toLowerCase())); addEventListener("blur", () => keys.clear());
 canvas.addEventListener("wheel", (e) => { e.preventDefault(); distT = clamp(distT * Math.exp(e.deltaY * 0.0012), 14, 90); }, { passive: false });
 canvas.addEventListener("contextmenu", (e) => e.preventDefault());
@@ -218,7 +219,7 @@ async function applyAgents() {
 async function poll() {
   try { const [w, a] = await Promise.all([getJSON("/api/world"), getJSON("/api/agents")]); wdata = w; adata = a; S.data = { ok: true, error: null, at: Date.now() }; await applyWorld(); await applyAgents(); }
   catch (e) { S.data = { ok: false, error: String(e.message || e), at: S.data.at }; }
-  refreshHud(); if (S.sel) renderPanel();
+  refreshHud(); const ae = document.activeElement; if (S.sel && !(ae && $("p-body").contains(ae) && /INPUT|TEXTAREA|SELECT/.test(ae.tagName))) renderPanel();
 }
 async function pollSlow() { for (const [k, p] of [["roles", "/api/roles"], ["hosts", "/api/hosts"], ["skills", "/api/skills"], ["reviews", "/api/reviews?limit=5"]]) { try { S.extra[k] = await getJSON(p); } catch { S.extra[k] = null; } } if (S.sel) renderPanel(); }
 
@@ -229,14 +230,36 @@ function closeConsole() { $("ov").hidden = true; $("ovi").src = "about:blank"; }
 $("ovx").onclick = closeConsole; $("p-x").onclick = () => select(null);
 function select(s) { if (S.sel && S.sel.type === "building") highlight(S.sel.b, false); S.sel = s; if (s && s.type === "building") highlight(s.b, true); $("panel").hidden = !s; if (s) renderPanel(); }
 const dot = (s) => `<span class="dot" style="background:${STATUS_COL[s] || "#9fb0d0"}"></span>`;
-const agentRow = (a) => `<div class="row">${dot(a.status)}<div class="meta"><b>${esc(a.name)}</b><small>${esc(STATUS_FR[a.status] || a.status)}${a.role ? " · " + esc(a.role) : ""}${a.intent ? " — " + esc(String(a.intent).replace(/\s+/g, " ").slice(0, 70)) : ""}</small></div><button class="btn" data-open="${esc(a.id)}">Parler</button></div>`;
+const ago = (t) => { const m = Math.round((Date.now() - t) / 60000); return m < 1 ? "à l'instant" : m < 60 ? "il y a " + m + " min" : m < 1440 ? "il y a " + Math.round(m / 60) + " h" : "il y a " + Math.round(m / 1440) + " j"; };
+const agentRow = (a, manage) => `<div class="row">${dot(a.status)}<div class="meta"><b>${esc(a.name)}</b><small>${esc(STATUS_FR[a.status] || a.status)}${a.role ? " · " + esc(a.role) : ""}${a.intent ? " — " + esc(String(a.intent).replace(/\s+/g, " ").slice(0, 70)) : ""}</small></div><button class="btn" data-open="${esc(a.id)}">Parler</button>${manage ? `<button class="btn ghost" data-close="${esc(a.id)}" title="Fermer la session (réouvrable)">Fermer</button>` : ""}</div>`;
+let formOpen = false, notice = null, draft = { name: "", role: "", prompt: "", worktree: false }, noticeT = 0;
+async function post(path, body) { const r = await fetch(API + path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }); const j = await r.json().catch(() => ({})); if (!r.ok || j.ok === false) throw new Error(j.error || "HTTP " + r.status); return j; }
+function say(msg, err) { notice = { msg, err }; clearTimeout(noticeT); noticeT = setTimeout(() => { notice = null; if (S.sel) renderPanel(); }, 6000); }
+function wireForm(body) {
+  const keep = () => { const g = (id) => body.querySelector(id); if (g("#f-name")) draft = { name: g("#f-name").value, role: g("#f-role").value, prompt: g("#f-prompt").value, worktree: g("#f-wt").checked }; };
+  body.querySelectorAll("#f-name,#f-role,#f-prompt,#f-wt").forEach((el) => el.addEventListener("input", keep));
+  const open = body.querySelector("#f-open"); if (open) open.onclick = () => { formOpen = true; renderPanel(); const n = $("p-body").querySelector("#f-prompt"); if (n) n.focus(); };
+  const x = body.querySelector("#f-x"); if (x) x.onclick = () => { formOpen = false; renderPanel(); };
+  const go = body.querySelector("#f-go"); if (go) go.onclick = async () => {
+    keep(); const h = S.sel && S.sel.b && S.sel.b.info; if (!h) return; if (!draft.prompt.trim()) { say("Écris la mission de l'agent.", true); renderPanel(); return; }
+    const peer = h.agentIds.map((id) => agentsById.get(id)).find((a) => a && a.host && a.host !== "local"); go.disabled = true;
+    try { await post("/api/spawn", { cwd: h.key, name: draft.name.trim() || undefined, role: draft.role || undefined, prompt: draft.prompt.trim(), host: peer ? peer.host : undefined, worktree: draft.worktree }); formOpen = false; draft = { name: "", role: "", prompt: "", worktree: false }; say("Agent créé : il arrive devant la maison."); await poll(); }
+    catch (e) { say("Création impossible : " + e.message, true); renderPanel(); }
+  };
+  body.querySelectorAll("[data-close]").forEach((b) => (b.onclick = async () => { const a = agentsById.get(b.dataset.close); if (a && a.status === "working" && !confirm("Cet agent travaille : l'interrompre et fermer sa session ?")) return; try { await post("/api/world/close", { id: b.dataset.close }); say("Session fermée — elle reste dans « Sessions fermées »."); await poll(); } catch (e) { say("Fermeture impossible : " + e.message, true); renderPanel(); } }));
+  body.querySelectorAll("[data-reopen]").forEach((b) => (b.onclick = async () => { try { await post("/api/world/reopen", { id: b.dataset.reopen }); say("Session rouverte."); await poll(); } catch (e) { say("Réouverture impossible : " + e.message, true); renderPanel(); } }));
+}
 function renderPanel() {
   const s = S.sel; if (!s) return; const body = $("p-body"); let html = "";
   if (!S.data.ok) html += `<div class="warn">Orchestrateur injoignable${S.data.error ? " (" + esc(S.data.error) + ")" : ""} — données non connectées.</div>`;
   if (s.type === "building" && s.b.kind === "house") {
     const h = s.b.info, ags = h.agentIds.map((id) => agentsById.get(id)).filter(Boolean); $("p-title").textContent = h.name;
     html += `<div class="kv"><span>Quartier</span><span>${esc(h.district)}</span><span>Agents</span><span>${ags.length}</span><span>Au travail</span><span>${h.working}</span><span>Bloqués</span><span>${h.blocked}</span><span>En échec</span><span>${h.failed}</span></div>`;
-    html += `<h4>Dossier</h4><div style="word-break:break-all;color:#5b6682">${esc(h.key)}</div><h4>Agents</h4>` + (ags.length ? ags.map(agentRow).join("") : `<div class="off">Aucun agent dans ce dossier pour le moment.</div>`);
+    if (notice) html += `<div class="${notice.err ? "warn" : "okb"}">${esc(notice.msg)}</div>`;
+    html += `<h4>Dossier</h4><div style="word-break:break-all;color:#5b6682">${esc(h.key)}</div><h4>Agents</h4>` + (ags.length ? ags.map((a) => agentRow(a, true)).join("") : `<div class="off">Aucun agent ouvert dans cette maison.</div>`);
+    const cl = h.closed || []; if (cl.length) html += `<h4>Sessions fermées</h4>` + cl.map((c) => `<div class="row"><span class="dot" style="background:#6b7488"></span><div class="meta"><b>${esc(c.name)}</b><small>fermée ${esc(ago(c.closedAt))}${c.role ? " · " + esc(c.role) : ""}</small></div><button class="btn" data-reopen="${esc(c.id)}">Rouvrir</button></div>`).join("");
+    const roles = (S.extra.roles && S.extra.roles.roles) || [];
+    html += `<h4>Nouvel agent</h4>` + (formOpen ? `<div class="form"><input id="f-name" placeholder="Nom (facultatif)" maxlength="60" value="${esc(draft.name)}"><select id="f-role"><option value="">Rôle : aucun</option>${roles.map((r) => `<option ${draft.role === r ? "selected" : ""}>${esc(r)}</option>`).join("")}</select><textarea id="f-prompt" rows="4" placeholder="Mission : que doit faire cet agent ?">${esc(draft.prompt)}</textarea><label class="chk"><input type="checkbox" id="f-wt" ${draft.worktree ? "checked" : ""}> branche git isolée (worktree)</label><div class="acts"><button class="btn" id="f-go">Créer l'agent</button><button class="btn ghost" id="f-x">Annuler</button></div></div>` : `<button class="btn" id="f-open">+ Créer un agent dans cette maison</button>`);
   } else if (s.type === "building") {
     const z = MAP.zones.find((q) => q.id === s.b.id); $("p-title").textContent = z.label; html += `<p>${esc(z.blurb)}</p>` + zoneBody(z) + `<h4>Console</h4><button class="btn" data-view="${z.view}">Ouvrir « ${esc(viewName(z.view))} »</button>` + (z.view2 ? ` <button class="btn" data-view="${z.view2}">Ouvrir « ${esc(viewName(z.view2))} »</button>` : "");
   } else if (s.type === "actor") {
@@ -244,6 +267,7 @@ function renderPanel() {
   }
   body.innerHTML = html;
   body.querySelectorAll("[data-open]").forEach((b) => (b.onclick = () => openConsole("/lite?embed=1&select=" + encodeURIComponent(b.dataset.open), "Agent")));
+  wireForm(body);
   body.querySelectorAll("[data-view]").forEach((b) => (b.onclick = () => openConsole("/lite?embed=1&view=" + b.dataset.view, viewName(b.dataset.view))));
 }
 const viewName = (v) => ({ board: "Tableau de bord", teams: "Équipes", jobs: "Métiers", reviews: "Évaluations", machines: "Machines", skills: "Skills" }[v] || v);
@@ -278,15 +302,40 @@ function refreshHud() {
   if (A.failed.length) a.title = A.failed.map((f) => f.id + ": " + f.error).join("\n");
 }
 
+// ---------------------------------------------------------------------------------------------- carte (touche M)
+let mapOpen = false, mapScale = 1, mapHit = [];
+function openMap() { if (!S.ready) return; mapOpen = true; keys.clear(); goal = null; $("map").hidden = false; drawMap(); }
+function closeMap() { mapOpen = false; $("map").hidden = true; $("maptip").style.display = "none"; }
+function drawMap() {
+  const cv = $("mapc"), W = MAP.size.w, H = MAP.size.h; mapScale = Math.max(4, Math.floor(Math.min((innerWidth * 0.92) / W, (innerHeight * 0.8) / H))); cv.width = W * mapScale; cv.height = H * mapScale; const g = cv.getContext("2d"), k = mapScale;
+  const col = { g: "#5fae45", c: "#a8997f", p: "#d9d2c0", d: "#c9a46a", w: "#3f86d8" }; for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { g.fillStyle = col[rows[y][x]] || "#5fae45"; g.fillRect(x * k, y * k, k, k); }
+  g.fillStyle = "#2f7d3c"; for (const o of MAP.objects) if (o.asset.startsWith("tree")) g.fillRect((o.x - 0.4) * k, (o.y - 0.4) * k, k * 0.8, k * 0.8);
+  mapHit = []; g.textAlign = "center"; g.font = "600 " + Math.max(10, k * 1.5) + "px Geist,sans-serif";
+  for (const b of buildings) { const e = reg.get(b.asset), w = (e.collision ? e.collision.w : e.dimensions.w), d = (e.collision ? e.collision.d : e.dimensions.d), cx = b.x + ((e.collision && e.collision.cx) || 0);
+    const st = b.kind === "house" ? (b.info.failed ? "failed" : b.info.blocked ? "blocked" : b.info.working ? "working" : "idle") : "zone"; g.fillStyle = b.kind === "zone" ? "#2c3a56" : "#7d8aa6"; g.fillRect((cx - w / 2) * k, (b.z - d / 2) * k, w * k, d * k);
+    g.fillStyle = STATUS_COL[st] || "#ffd24a"; g.fillRect((cx - w / 2) * k + 2, (b.z - d / 2) * k + 2, Math.max(6, k * 1.2), Math.max(6, k * 1.2));
+    const name = b.kind === "house" ? b.info.name : MAP.zones.find((z) => z.id === b.id).label; if (b.kind === "zone") { g.fillStyle = "#fff"; g.fillText(name, b.x * k, (b.z + 0.4) * k); }
+    mapHit.push({ b, name, x0: (cx - w / 2) * k, y0: (b.z - d / 2) * k, x1: (cx + w / 2) * k, y1: (b.z + d / 2) * k }); }
+  if (player) { g.fillStyle = "#ff3d6e"; g.strokeStyle = "#fff"; g.lineWidth = 2; g.beginPath(); g.arc(player.x * k, player.z * k, Math.max(4, k * 0.9), 0, 7); g.fill(); g.stroke(); }
+}
+$("mapbtn").onclick = () => (mapOpen ? closeMap() : openMap()); $("mapx").onclick = closeMap; $("map").addEventListener("pointerdown", (e) => { if (e.target === $("map")) closeMap(); });
+$("mapc").addEventListener("pointermove", (e) => { const r = $("mapc").getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, h = mapHit.find((q) => x >= q.x0 && x <= q.x1 && y >= q.y0 && y <= q.y1), t = $("maptip"); if (h) { t.textContent = h.name; t.style.display = "block"; t.style.left = x + 12 + "px"; t.style.top = y + 40 + "px"; } else t.style.display = "none"; });
+$("mapc").addEventListener("click", (e) => {
+  const r = $("mapc").getBoundingClientRect(), px = (e.clientX - r.left) * ($("mapc").width / r.width), py = (e.clientY - r.top) * ($("mapc").height / r.height), h = mapHit.find((q) => px >= q.x0 && px <= q.x1 && py >= q.y0 && py <= q.y1);
+  let tx = px / mapScale, tz = py / mapScale; if (h) { tx = h.b.x; tz = h.b.z + (reg.get(h.b.asset).collision ? reg.get(h.b.asset).collision.d / 2 + 1.3 : 4); }
+  for (let rr = 0; rr < 8 && blocked(tx, tz, 0.3); rr += 0.5) { tz += 0.5; } // pose le joueur sur une case libre devant la cible
+  player.x = clamp(tx, 1, MAP.size.w - 1); player.z = clamp(tz, 1, MAP.size.h - 1); camTarget.set(player.x, 0, player.z); S.followed = true; closeMap(); if (h) select({ type: "building", b: h.b });
+});
+
 // ---------------------------------------------------------------------------------------------- boucle
 let last = performance.now(), fadeT = 0, perfT = 0, frames = 0; const raycaster2 = new THREE.Raycaster();
 function loop(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now; frames++;
   yaw = lerp(yaw, yawT, 1 - Math.exp(-dt * 8)); dist = lerp(dist, distT, 1 - Math.exp(-dt * 8));
-  if (player) {
-    let ix = (keys.has("d") || keys.has("arrowright") ? 1 : 0) - (keys.has("a") || keys.has("arrowleft") ? 1 : 0), iz = (keys.has("s") || keys.has("arrowdown") ? 1 : 0) - (keys.has("w") || keys.has("z") || keys.has("arrowup") ? 1 : 0), run = keys.has("shift");
+  if (player && !mapOpen) {
+    let ix = (keys.has("d") || keys.has("arrowright") ? 1 : 0) - (keys.has("q") || keys.has("arrowleft") ? 1 : 0), iz = (keys.has("s") || keys.has("arrowdown") ? 1 : 0) - (keys.has("z") || keys.has("arrowup") ? 1 : 0), run = keys.has("shift");
     let vx = 0, vz = 0; const sp = run ? 6.4 : 3.3;
-    if (ix || iz) { const l = Math.hypot(ix, iz); ix /= l; iz /= l; vx = (ix * Math.cos(yawT) - iz * Math.sin(yawT)) * sp; vz = (-ix * Math.sin(yawT) - iz * Math.cos(yawT)) * sp; goal = null; }
+    if (ix || iz) { const l = Math.hypot(ix, iz); ix /= l; iz /= l; vx = (ix * Math.cos(yawT) + iz * Math.sin(yawT)) * sp; vz = (-ix * Math.sin(yawT) + iz * Math.cos(yawT)) * sp; goal = null; }
     else if (goal) { const dx = goal.x - player.x, dz = goal.z - player.z, d = Math.hypot(dx, dz); if (d < 0.2) goal = null; else { vx = (dx / d) * 4; vz = (dz / d) * 4; } }
     player.run = run; if (!(player.step(dt, vx, vz)) && goal) goal = null; if (!vx && !vz) player.moving = false; player.update(dt);
   }
@@ -307,7 +356,7 @@ function loop(now) {
   perfT += dt; if (perfT > 0.5) { S.fps = Math.round(frames / perfT); frames = 0; perfT = 0; const i = renderer.info; $("perf").textContent = `${S.fps} fps · ${i.render.calls} draw calls · ${(i.render.triangles / 1000).toFixed(1)}k tris · ${i.memory.geometries} géom · ${i.memory.textures} tex · ${instStats.instances} instances / ${instStats.meshes} blocs · mode ${RES > 1 ? "basse résolution ×" + RES : "natif"}`; if (Q.get("dbg")) { $("dbg").hidden = false; $("dbg").style.display = "block"; $("dbg").textContent = JSON.stringify(dbgState()); } }
   requestAnimationFrame(loop);
 }
-const dbgState = () => ({ ready: S.ready, player: player && { x: +player.x.toFixed(2), z: +player.z.toFixed(2), dir: player.dir, moving: player.moving }, cam: { yaw: +yaw.toFixed(2), dist: +dist.toFixed(1), x: +camTarget.x.toFixed(1), z: +camTarget.z.toFixed(1) }, assets: { total: S.assets.total, loaded: S.assets.loaded, failed: S.assets.failed, fallbacks: S.assets.fallbacks }, houses: S.houses, agents: S.agents, spill: S.spill, data: S.data, sel: S.sel && (S.sel.type + ":" + (S.sel.b ? S.sel.b.id : S.sel.actor.id)), fps: S.fps, buildings: buildings.length, colliders: colliders.length, calls: renderer.info.render.calls, tris: renderer.info.render.triangles, instances: instStats, followed: S.followed });
+const dbgState = () => ({ ready: S.ready, map: mapOpen, player: player && { x: +player.x.toFixed(2), z: +player.z.toFixed(2), dir: player.dir, moving: player.moving }, cam: { yaw: +yaw.toFixed(2), dist: +dist.toFixed(1), x: +camTarget.x.toFixed(1), z: +camTarget.z.toFixed(1) }, assets: { total: S.assets.total, loaded: S.assets.loaded, failed: S.assets.failed, fallbacks: S.assets.fallbacks }, houses: S.houses, agents: S.agents, spill: S.spill, data: S.data, sel: S.sel && (S.sel.type + ":" + (S.sel.b ? S.sel.b.id : S.sel.actor.id)), fps: S.fps, buildings: buildings.length, colliders: colliders.length, calls: renderer.info.render.calls, tris: renderer.info.render.triangles, instances: instStats, followed: S.followed });
 
 // ---------------------------------------------------------------------------------------------- démarrage
 (async () => {
