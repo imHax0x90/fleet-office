@@ -3,6 +3,7 @@
    aucune donnée fictive — ce qui n'est pas connecté est affiché comme tel. */
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { AssetCatalog, agentVisual } from "./assetcat.mjs";
 
 const Q = new URLSearchParams(location.search), $ = (id) => document.getElementById(id);
 const BASE = new URL("./assets/", import.meta.url).href, API = (Q.get("api") || "").replace(/\/$/, "");
@@ -144,13 +145,14 @@ function highlight(b, on) { b.group.traverse((o) => { if (o.isMesh) { o.material
 // ---------------------------------------------------------------------------------------------- personnages (billboards)
 const sheets = new Map(), badgeTex = new Map();
 const ROLE_SHEETS = { 12: "scientifique", 13: "ingenieur", 14: "analyste", 15: "operateur", 16: "securite", 17: "livreur", 18: "etudiant", 19: "medecin" }; // feuilles importées (pack fourni) ; repli : tenues générées
-async function sheet(i) {
-  const role = typeof i === "string" ? null : ROLE_SHEETS[i % 20], e = typeof i === "string" ? reg.get(i) : role && reg.get("npc_" + role);
-  if (e) { try { const m = e.sheet; return { tex: await loadTex(e.file), cols: m.cols, rows: m.rows, size: [e.dimensions.w, e.dimensions.h], foot: (m.footPx || 0) / m.cell[1] * e.dimensions.h, frames: { idle: [0], walk: [0, 1, 0, 1], run: [2, 1, 2, 1] } }; } catch (err) { S.assets.failed.push({ id: e.id, error: String(err.message || err) }); } }
-  if (typeof i === "string") i = 0;
-  return { tex: await loadTex("tex/char_" + (i % 12 < 12 && i % 20 < 12 ? i % 20 : i % 12) + ".png"), cols: 4, rows: 4, size: [1.25, 1.875], foot: 0, frames: null };
+let cat = null; // catalogue d'assets (assetcat.mjs) construit sur registry.json
+async function sheet(i) { // → { tex, cols, rows, size, foot, frames, rates } ; id de registre (chaîne), index de tenue générée, ou rôle
+  const id = typeof i === "string" ? i : ROLE_SHEETS[i % 20] ? "npc_" + ROLE_SHEETS[i % 20] : null, inf = id && cat.sheetInfo(id);
+  if (inf) { try { return { tex: await loadTex(inf.file), cols: inf.cols, rows: inf.rows, size: inf.size, foot: inf.foot, frames: inf.frames, rates: inf.rates }; } catch (err) { S.assets.failed.push({ id, error: String(err.message || err) }); } }
+  const k = typeof i === "string" ? 0 : i % 20 < 12 ? i % 20 : i % 12; // repli : tenue générée (ou premier personnage si l'asset est absent)
+  return { tex: await loadTex("tex/char_" + k + ".png"), cols: 4, rows: 4, size: [1.25, 1.875], foot: 0, frames: null };
 }
-function badge(kind) { if (badgeTex.has(kind)) return badgeTex.get(kind); const c = document.createElement("canvas"); c.width = c.height = 32; const x = c.getContext("2d"); const col = { working: "#3ddc84", blocked: "#ffb020", failed: "#ff4d4d", queued: "#9fb0d0" }[kind] || "#9fb0d0"; x.fillStyle = "#0e1322"; x.beginPath(); x.arc(16, 16, 14, 0, 7); x.fill(); x.fillStyle = col; x.beginPath(); x.arc(16, 16, 11, 0, 7); x.fill(); x.fillStyle = "#0e1322"; x.font = "bold 17px sans-serif"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(kind === "working" ? "…" : kind === "blocked" ? "!" : kind === "failed" ? "✕" : "z", 16, 17); const t = new THREE.CanvasTexture(c); nearest(t); badgeTex.set(kind, t); return t; }
+function badge(kind) { if (badgeTex.has(kind)) return badgeTex.get(kind); const c = document.createElement("canvas"); c.width = c.height = 32; const x = c.getContext("2d"); const col = { working: "#3ddc84", blocked: "#ffb020", error: "#ff4d4d", failed: "#ff4d4d", queued: "#9fb0d0", thinking: "#b48cff", success: "#6aa9ff", offline: "#7d879c" }[kind] || "#9fb0d0"; x.fillStyle = "#0e1322"; x.beginPath(); x.arc(16, 16, 14, 0, 7); x.fill(); x.fillStyle = col; x.beginPath(); x.arc(16, 16, 11, 0, 7); x.fill(); x.fillStyle = "#0e1322"; x.font = "bold 17px sans-serif"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText({ working: "…", thinking: "?", blocked: "!", error: "✕", failed: "✕", success: "✓", offline: "⏻" }[kind] || "z", 16, 17); const t = new THREE.CanvasTexture(c); nearest(t); badgeTex.set(kind, t); return t; }
 const shadowGeo = new THREE.CircleGeometry(0.34, 14).rotateX(-Math.PI / 2), shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.28, depthWrite: false });
 class Actor {
   constructor(info, o = {}) {
@@ -161,7 +163,7 @@ class Actor {
     this.x = o.x || 0; this.z = o.z || 0; this.dir = 0; this.moving = false; this.t = Math.random() * 10; this.status = "idle"; this.home = { x: this.x, z: this.z }; this.target = null; this.wait = Math.random() * 3; this.run = false;
     this.badge = null; this.agent = null; this.house = null; this.setFrame(0, 0);
   }
-  setStatus(s) { this.status = s; const kind = ["working", "blocked", "failed", "queued"].includes(s) ? s : null; if (kind) { if (!this.badge) { this.badge = new THREE.Sprite(new THREE.SpriteMaterial({ map: badge(kind), depthTest: true })); this.badge.scale.set(0.5, 0.5, 1); this.root.add(this.badge); } this.badge.material.map = badge(kind); this.badge.material.needsUpdate = true; } else if (this.badge) { this.root.remove(this.badge); this.badge = null; } }
+  setStatus(s) { this.status = s; const kind = ["working", "thinking", "blocked", "error", "failed", "success", "offline"].includes(s) ? s : null; if (this.mesh) { const g = s === "offline" ? 0.5 : 1; this.mesh.material.color.setRGB(lerp(g, g * 0.55, nightK), lerp(g, g * 0.62, nightK), lerp(g, g * 0.95, nightK)); } if (kind) { if (!this.badge) { this.badge = new THREE.Sprite(new THREE.SpriteMaterial({ map: badge(kind), depthTest: true })); this.badge.scale.set(0.5, 0.5, 1); this.root.add(this.badge); } this.badge.material.map = badge(kind); this.badge.material.needsUpdate = true; } else if (this.badge) { this.root.remove(this.badge); this.badge = null; } }
   setFrame(dir, f) { this.tex.offset.set(f / this.info.cols, 1 - (dir + 1) / this.info.rows); }
   face(vx, vz) { const cr = Math.cos(yaw), sr = -Math.sin(yaw), fx = -Math.sin(yaw), fz = -Math.cos(yaw), sx = vx * cr + vz * sr, sy = vx * fx + vz * fz; this.dir = Math.abs(sx) > Math.abs(sy) ? (sx < 0 ? 1 : 2) : (sy < 0 ? 0 : 3); }
   step(dt, vx, vz) { // déplacement avec glissement le long des obstacles
@@ -169,7 +171,7 @@ class Actor {
     if (!blocked(nx, this.z) && Math.abs(heightAt(nx, this.z) - h0) < 0.45) { this.x = nx; moved = true; } h0 = heightAt(this.x, this.z); if (!blocked(this.x, nz) && Math.abs(heightAt(this.x, nz) - h0) < 0.45) { this.z = nz; moved = true; } this.moving = moved && (vx || vz); if (vx || vz) this.face(vx, vz); return moved;
   }
   update(dt, bob = true) {
-    this.t += dt; const fr = this.info.frames, f = fr ? (this.moving ? (this.run ? fr.run : fr.walk)[Math.floor(this.t * (this.run ? 8 : 5)) % 4] : fr.idle[0]) : (this.moving ? [0, 1, 2, 3][Math.floor(this.t * (this.run ? 11 : 7)) % 4] : (Math.floor(this.t * 1.5) % 2 ? 2 : 0));
+    this.t += dt; const fr = this.info.frames, f = fr ? (this.moving ? (this.run ? fr.run : fr.walk)[Math.floor(this.t * (this.run ? (this.info.rates ? this.info.rates.run : 8) : (this.info.rates ? this.info.rates.walk : 5))) % (this.run ? fr.run : fr.walk).length] : fr.idle[0]) : (this.moving ? [0, 1, 2, 3][Math.floor(this.t * (this.run ? 11 : 7)) % 4] : (Math.floor(this.t * 1.5) % 2 ? 2 : 0));
     this.setFrame(this.dir, f); const hy = heightAt(this.x, this.z); this.root.position.set(this.x, hy, this.z); this.mesh.rotation.y = yaw; this.sh.position.set(this.x, hy + 0.03, this.z); const sc = this.scale || 1; this.root.scale.setScalar(sc); this.sh.scale.setScalar(sc);
     if (this.badge) { this.badge.position.set(0, this.hgt + 0.42 + Math.sin(this.t * 3) * 0.06, 0); }
   }
@@ -177,7 +179,7 @@ class Actor {
 }
 
 // ---------------------------------------------------------------------------------------------- apparence du joueur (touche C) : feuilles du pack utilisateur ou tenue générée
-const HEROES = ["hero_peter", "hero_red", "hero_gold", "hero_cynthia", "hero_pierre_rochard", 0]; let heroIdx = 0;
+const HEROES = ["hero_peter", "hero_red", "hero_gold", "hero_cynthia", "hero_pierre_rochard", "ow_allison", "ow_macdonald", "ow_scarlett", "ow_wilbur", 0]; let heroIdx = 0;
 try { const w = Q.get("hero") || localStorage.getItem("w3d.hero"); const i = HEROES.findIndex((h) => h === w || (h === 0 && w === "generated")); if (i >= 0) heroIdx = i; } catch { /* stockage indisponible */ }
 async function setHero(i) {
   heroIdx = (i + HEROES.length) % HEROES.length; try { localStorage.setItem("w3d.hero", HEROES[heroIdx] || "generated"); } catch { /* ignoré */ }
@@ -285,7 +287,7 @@ async function applyAgents() {
   if (!adata) return; const list = (adata.agents || []).filter((a) => !a.internal); agentsById = new Map(list.map((a) => [a.id, a]));
   for (const a of list) {
     let ac = actors.get(a.id); if (!ac) { ac = new Actor(await sheet(outfitFor(a)), { id: a.id, name: a.name, kind: "agent" }); const hm = homeFor(a); ac.x = hm.x; ac.z = hm.z; actors.set(a.id, ac); }
-    const hm = homeFor(a); ac.home = hm; ac.house = hm.house; ac.agent = a; ac.name = a.name; ac.setStatus(a.status);
+    const hm = homeFor(a); ac.home = hm; ac.house = hm.house; ac.agent = a; ac.name = a.name; const hostRec = (S.extra.hosts && S.extra.hosts.hosts || []).find((x) => x.id === (a.host || "local")); ac.visual = agentVisual(a, { hostOnline: hostRec ? !!hostRec.online : undefined }); ac.setStatus(ac.visual.state);
   }
   for (const [id, ac] of [...actors]) if (!agentsById.has(id)) { ac.dispose(); actors.delete(id); }
   S.agents = actors.size;
@@ -298,7 +300,7 @@ async function poll() {
 async function pollSlow() { for (const [k, p] of [["roles", "/api/roles"], ["hosts", "/api/hosts"], ["skills", "/api/skills"], ["reviews", "/api/reviews?limit=5"]]) { try { S.extra[k] = await getJSON(p); } catch { S.extra[k] = null; } } if (S.sel) renderPanel(); }
 
 // ---------------------------------------------------------------------------------------------- panneau & étiquettes
-const STATUS_COL = { working: "#3ddc84", blocked: "#ffb020", failed: "#ff4d4d", idle: "#9fb0d0", queued: "#9fb0d0", done: "#6aa9ff" }, STATUS_FR = { working: "au travail", blocked: "bloqué", failed: "en échec", idle: "au repos", queued: "en file", done: "terminé" };
+const STATUS_COL = { error: "#ff4d4d", success: "#6aa9ff", offline: "#7d879c", thinking: "#b48cff", working: "#3ddc84", blocked: "#ffb020", failed: "#ff4d4d", idle: "#9fb0d0", queued: "#9fb0d0", done: "#6aa9ff" }, STATUS_FR = { working: "au travail", blocked: "bloqué", failed: "en échec", idle: "au repos", queued: "en file", done: "terminé" };
 function openConsole(path, title) { $("ovt").textContent = title; $("ovi").src = path; $("ov").hidden = false; keys.clear(); }
 function closeConsole() { $("ov").hidden = true; $("ovi").src = "about:blank"; }
 $("ovx").onclick = closeConsole; $("p-x").onclick = () => select(null);
@@ -369,7 +371,7 @@ function updateLabels() {
     const l = label(b.kind + b.id); const html = `<span class="n">${esc(name)}</span>${extra}`; if (l.dataset.h !== html) { l.innerHTML = html; l.dataset.h = html; l.title = name; } l.classList.toggle("sel", !!sel);
     place(l, b.x, b.height + 0.6, b.z + (b.kind === "house" ? 0 : 0)); }
   if (wdata) wdata.districts.forEach((d, i) => { const ls = MAP.lots.filter((l) => l.district === i); if (!ls.length || !wdata.houses.some((h) => h.district === d.name && lotsAssign.has(h.key) && MAP.lots[lotsAssign.get(h.key)].district === i)) return; const cx = ls.reduce((s, l) => s + l.x, 0) / ls.length, cz = Math.min(...ls.map((l) => l.y)) - 3.4; const l = label("d" + i, "dist"); if (l.dataset.h !== d.name) { l.textContent = d.name; l.dataset.h = d.name; } place(l, cx, 0.2, cz); });
-  const showA = new Set([hoverA, S.sel && S.sel.type === "actor" ? S.sel.actor : null].filter(Boolean)); for (const a of showA) { const l = label("a" + a.id, "ag"); const t = a.name + (a.agent ? " · " + (STATUS_FR[a.agent.status] || a.agent.status) : a.npc ? " · décor" : ""); if (l.dataset.h !== t) { l.textContent = t; l.dataset.h = t; } place(l, a.x, (a.hgt + 0.7) * (a.scale || 1) + heightAt(a.x, a.z), a.z); }
+  const showA = new Set([hoverA, S.sel && S.sel.type === "actor" ? S.sel.actor : null].filter(Boolean)); for (const a of showA) { const l = label("a" + a.id, "ag"); const t = a.name + (a.agent ? " · " + (a.visual ? a.visual.label : (STATUS_FR[a.agent.status] || a.agent.status)) : a.npc ? " · décor" : ""); if (l.dataset.h !== t) { l.textContent = t; l.dataset.h = t; } place(l, a.x, (a.hgt + 0.7) * (a.scale || 1) + heightAt(a.x, a.z), a.z); }
   for (const [k, l] of [...labels]) if (!l.dataset.used) { l.remove(); labels.delete(k); }
 }
 function refreshHud() {
@@ -422,7 +424,7 @@ function loop(now) {
     if (ac.fixed) { ac.moving = false; ac.update(dt); continue; }
     if (ac.route && !ac.target) { ac.ri = (ac.ri + 1) % ac.route.length; ac.target = ac.route[ac.ri]; }
     if (ac.target) { const dx = ac.target.x - ac.x, dz = ac.target.z - ac.z, d = Math.hypot(dx, dz), sp = ac.speed || 1.25; if (d < 0.2) { ac.target = null; ac.moving = false; ac.wait = ac.route ? 0.1 : 1.5 + Math.random() * 3; } else { const mv = ac.step(dt, (dx / d) * sp, (dz / d) * sp); if (!mv) { ac.target = null; ac.moving = false; ac.wait = 0.5; } } }
-    else { ac.moving = false; ac.wait -= dt; if (ac.wait <= 0) { const active = st === "working" || (st === "idle" && Math.random() < 0.35) || ac.radius; if (active) { for (let k = 0; k < 6; k++) { const R = ac.radius, t = R ? { x: ac.home.x + (Math.random() - 0.5) * 2 * R, z: ac.home.z + (Math.random() - 0.5) * 2 * R } : { x: ac.home.x + (Math.random() - 0.5) * 2.4, z: ac.home.z + (Math.random() - 0.5) * 1.2 }; if (!blocked(t.x, t.z, 0.35)) { ac.target = t; break; } } } ac.wait = 1.5 + Math.random() * 3; if (!ac.target && (st === "blocked" || st === "failed")) ac.dir = 0; } }
+    else { ac.moving = false; ac.wait -= dt; if (ac.wait <= 0) { const active = st === "working" || st === "thinking" || (st === "idle" && Math.random() < 0.35) || ac.radius; if (active) { for (let k = 0; k < 6; k++) { const R = ac.radius, t = R ? { x: ac.home.x + (Math.random() - 0.5) * 2 * R, z: ac.home.z + (Math.random() - 0.5) * 2 * R } : { x: ac.home.x + (Math.random() - 0.5) * 2.4, z: ac.home.z + (Math.random() - 0.5) * 1.2 }; if (!blocked(t.x, t.z, 0.35)) { ac.target = t; break; } } } ac.wait = 1.5 + Math.random() * 3; if (!ac.target && (st === "blocked" || st === "failed")) ac.dir = 0; } }
     ac.update(dt);
   }
   if (S.followed && player) { camTarget.x = lerp(camTarget.x, player.x, 1 - Math.exp(-dt * 6)); camTarget.z = lerp(camTarget.z, player.z, 1 - Math.exp(-dt * 6)); }
@@ -443,6 +445,7 @@ const dbgState = () => ({ ready: S.ready, map: mapOpen, player: player && { h: +
 (async () => {
   try {
     const r = await (await fetch(BASE + "registry.json", { cache: "no-cache" })).json(); for (const a of r.assets) reg.set(a.id, a);
+    cat = new AssetCatalog(r.assets, { base: BASE }); window.__w3d_cat = cat;
     MAP = await (await fetch(BASE + "maps/pilot.json", { cache: "no-cache" })).json(); rows = MAP.rows;
     buildRelief(); cliffMat = new THREE.MeshLambertMaterial({ map: await cliffTex(), side: THREE.DoubleSide }); const atlas = await loadTex("tex/ground.png"); const gm = groundMesh(atlas); groundObj = gm.children[0]; scene.add(gm); const nk = await kerbs();
     // décor de la carte (arbres, buissons, fleurs, mobilier) + forêt de bordure

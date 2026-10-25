@@ -172,3 +172,6 @@ PAL.forEach((p, i) => { const img = new Img(64, 96); for (let d = 0; d < 4; d++)
 
 // ---- décor et emblèmes du pack utilisateur, copiés comme textures du moteur
 for (const [src, dst] of [["decor/arbre.png", "tree_sprite"], ["batiments/quartier_general.png", "emblem_hq"], ["batiments/centre_operations.png", "emblem_ops"], ["batiments/laboratoire.png", "emblem_lab"], ["batiments/atelier.png", "emblem_workshop"]]) { fs.copyFileSync(path.join(PACK, src), path.join(OUT, dst + ".png")); console.log("tex", dst, "(pack utilisateur)"); }
+
+// arbres découpés dans la planche de tuiles de icyethics/PokemonAssets (dérivés produits par import-overworld.mjs)
+{ const D = path.join(path.dirname(fileURLToPath(import.meta.url)), "../../public/world3d/assets/sources/icyethics_pokemonassets/derived"); for (const n of ["ow_tree_green", "ow_tree_autumn"]) if (fs.existsSync(path.join(D, n + ".png"))) { fs.copyFileSync(path.join(D, n + ".png"), path.join(OUT, n + ".png")); console.log("tex", n, "(icyethics)"); } }

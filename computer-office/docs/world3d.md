@@ -120,3 +120,19 @@ Le pack est généré par un script écrit par l'utilisateur (`assets/sources/pe
 * **Bâtiments** : les 4 icônes deviennent les **enseignes illustrées** posées devant le QG, le labo IA, le centre d'opérations et l'atelier (`sign_*`).
 * **Décor** : l'arbre devient `tree_sprite` (deux plans croisés), mélangé aux arbres de la ceinture de la ville. Banc et lampadaire du pack n'ont pas été repris : les modèles 3D du projet les remplacent avec relief et ombres.
 * `build-models.mjs` conserve les entrées de registre importées lors d'une régénération.
+
+## Archive de fan-assets (pokemon_assets.zip) — audit, catalogue, licences
+
+Archive de 3 Go (64 606 fichiers) examinée sans extraction complète : `PokemonSprites` (≈ 64 000 sprites de **créatures**) et `PokemonAssets` (personnages overworld, tilesets, interface). Inventaire complet dans `public/world3d/assets/inventory.json` (chemin, catégorie, dimensions, transparence, grille probable, états/directions, méthode de découpe, confiance, statut `utilisé / candidat / écarté / exclu`, raison). Régénération : `node tools/world3d/inventory.mjs --assets <PokemonAssets> --sprites-list <liste du zip>`.
+
+**Licences — ce qui est utilisé et pourquoi**
+* `ukbigdave/PokemonSprites` : licence du dépôt « *All image contents within are Copyright The Pokémon Company* » (le CC0 ne couvre que le code). **Aucune image n'est copiée** dans ce dépôt ni déployée ; hors sujet pour un village d'agents de toute façon (créatures).
+* `icyethics/PokemonAssets` : README = usage **non commercial**, dérivés libres d'usage, crédit à IcyEthics (licence `icyethics-noncommercial`, texte non juridique, marquée *non vérifiée*). Utilisés : 8 personnages overworld (`ow_*`, feuilles 4×4 de 32×48, fond transparent, convention RPG Maker : bas/gauche/droite/haut) et 2 arbres découpés dans la planche de tuiles (`ow_tree_*`, rectangles consignés au registre). **Exclus** : `Trchar*`/`trchar*` (nommage des trainers par défaut d'Essentials, probable contenu Nintendo), `trainer_image_hilda`, `speech hgss*`, tous les sprites de créatures et icônes ; les `OW_*` (fond opaque) sont écartés. Les originaux sont copiés **intacts** dans `assets/sources/icyethics_pokemonassets/` ; les dérivés sont dans `derived/` avec lien vers leur source.
+* Les tilesets 32 px de l'archive (planches d'autotiles top-down de 256×11 072) sont inventoriés mais **non intégrés** : la ville est en 3D, leurs autotiles 2D n'y ont pas de sens.
+
+**Catalogue d'assets** (`public/world3d/assetcat.mjs`, construit sur `registry.json`) : ids stables, `find({category, tags, text, minW…})`, `frameRect(id, {dir, state|frame})` (découpe d'une spritesheet par métadonnées, sans fichier par frame), `sheetInfo(id)` (séquences idle/walk/run), `image(id)` (chargement paresseux, cache, requêtes en vol dédoublonnées, **placeholder identifiable** si absent). États d'agents → visuel : `agentState/agentVisual` (idle, working, thinking, success, error, offline, blocked ; `offline` d'après `/api/hosts`, `thinking` seulement si le backend fournit `phase`). Tests : `npm run test:world3d` (6 tests + validation du registre).
+
+**Ajouter un asset / associer une spritesheet à un personnage**
+1. Déposer le PNG (fond transparent) et lancer `import-overworld.mjs` (grille 4×4 de 32×48) ou `import-sprites.mjs` (cellules 64×64, 3 états) — ou ajouter à la main une entrée de registre avec `sheet: { px, cell, cols, rows, rowsOrder, colsOrder, footPx }` et `animations` (`idle`/`walk`/`run` = indices de colonnes + fps), `licence`, `source`.
+2. L'utiliser : `sheet: "mon_id"` dans un habitant de `gen-pilot-map.mjs` (`npcs[]`), ou dans la liste `HEROES` (touche C) ; les agents prennent la tenue de leur métier (`OUTFIT`).
+3. `node tools/world3d/validate.mjs` puis `npm run test:world3d`.

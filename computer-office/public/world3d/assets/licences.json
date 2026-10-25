@@ -47,6 +47,12 @@
       "redistribuable": true,
       "attribution": false,
       "note": "Licence à confirmer par son auteur avant toute diffusion publique ; usage dans ce dépôt privé autorisé par l'utilisateur."
+    },
+    "icyethics-noncommercial": {
+      "nom": "Licence du dépôt icyethics/PokemonAssets (texte du README, non standard)",
+      "redistribuable": true,
+      "attribution": true,
+      "note": "Usage NON COMMERCIAL ; les projets dérivés doivent rester libres d'usage et d'adaptation ; crédit à IcyEthics. Texte non juridique : à relire avant toute diffusion. Ne couvre pas les éléments issus de Pokémon (exclus du projet)."
     }
   }
 }

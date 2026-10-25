@@ -1,0 +1,4326 @@
+{
+ "version": 1,
+ "generated": "2026-10-25",
+ "sources": {
+  "icyethics/PokemonAssets": {
+   "licence": "README du dépôt : « utilisable pour tout projet NON COMMERCIAL, lié à Pokémon ou non ; projets dérivés eux aussi libres ; crédit à IcyEthics »",
+   "remarque": "fichiers de jeu de fan ; certains éléments sont d'origine Pokémon (exclus ici)"
+  },
+  "ukbigdave/PokemonSprites": {
+   "licence": "code CC0, mais « All image contents within are Copyright The Pokémon Company » : aucun droit sur les images",
+   "remarque": "fork de PokeAPI/sprites"
+  }
+ },
+ "summary": {
+  "PokemonAssets": {
+   "fichiers": 159,
+   "parCategorie": {
+    "aseprite": 72,
+    "personnage-overworld": 20,
+    "personnage-grille-atypique": 4,
+    "objet-decor": 2,
+    "objet": 4,
+    "creature-ou-ui-pokemon": 23,
+    "tileset": 11,
+    "portrait-combat": 10,
+    "interface": 13
+   },
+   "parStatut": {
+    "ignoré": 72,
+    "candidat": 51,
+    "écarté": 5,
+    "exclu": 31
+   }
+  },
+  "PokemonSprites": {
+   "fichiers": 64124,
+   "dossiers": 48
+  }
+ },
+ "assets": [
+  {
+   "id": "icy:assorted_pokemon_sprites_96xdex",
+   "path": "Assorted Pokémon Sprites/96xDex.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:assorted_pokemon_sprites_dex_new2023",
+   "path": "Assorted Pokémon Sprites/Dex_New2023.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:assorted_pokemon_sprites_digletts_96_worksheet",
+   "path": "Assorted Pokémon Sprites/Digletts_96_worksheet.ase",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".ase",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:overworld_sprites_macdonald_ow",
+   "path": "Overworld Sprites/MacDonald_OW.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:overworld_sprites_navy_temp",
+   "path": "Overworld Sprites/Navy_Temp.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    192
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    0,
+    8,
+    128,
+    184
+   ],
+   "frames": 4,
+   "directions": [
+    "bas",
+    "gauche",
+    "droite",
+    "haut"
+   ],
+   "states": [
+    "statique",
+    "marche"
+   ],
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "note": "convention RPG Maker/Essentials : colonne 0 = pied au repos, 4 colonnes = cycle de marche"
+   },
+   "category": "personnage-overworld",
+   "confidence": 0.95,
+   "status": "candidat",
+   "reason": "16/16 cellules 32×48 non vides",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:overworld_sprites_ow_cyan",
+   "path": "Overworld Sprites/OW_Cyan.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    192
+   ],
+   "transparency": "aucune (fond opaque)",
+   "opaqueBBox": [
+    0,
+    0,
+    128,
+    192
+   ],
+   "frames": 4,
+   "directions": [
+    "bas",
+    "gauche",
+    "droite",
+    "haut"
+   ],
+   "states": [
+    "statique",
+    "marche"
+   ],
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "note": "convention RPG Maker/Essentials : colonne 0 = pied au repos, 4 colonnes = cycle de marche"
+   },
+   "category": "personnage-overworld",
+   "confidence": 0.6,
+   "status": "écarté",
+   "reason": "16/16 cellules 32×48 non vides ; fond opaque (pas de transparence) : détourage nécessaire",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:overworld_sprites_ow_green",
+   "path": "Overworld Sprites/OW_Green.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    192
+   ],
+   "transparency": "aucune (fond opaque)",
+   "opaqueBBox": [
+    0,
+    0,
+    128,
+    192
+   ],
+   "frames": 4,
+   "directions": [
+    "bas",
+    "gauche",
+    "droite",
+    "haut"
+   ],
+   "states": [
+    "statique",
+    "marche"
+   ],
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "note": "convention RPG Maker/Essentials : colonne 0 = pied au repos, 4 colonnes = cycle de marche"
+   },
+   "category": "personnage-overworld",
+   "confidence": 0.6,
+   "status": "écarté",
+   "reason": "16/16 cellules 32×48 non vides ; fond opaque (pas de transparence) : détourage nécessaire",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:overworld_sprites_ow_pink",
+   "path": "Overworld Sprites/OW_Pink.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    192
+   ],
+   "transparency": "aucune (fond opaque)",
+   "opaqueBBox": [
+    0,
+    0,
+    128,
+    192
+   ],
+   "frames": 4,
+   "directions": [
+    "bas",
+    "gauche",
+    "droite",
+    "haut"
+   ],
+   "states": [
+    "statique",
+    "marche"
+   ],
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "note": "convention RPG Maker/Essentials : colonne 0 = pied au repos, 4 colonnes = cycle de marche"
+   },
+   "category": "personnage-overworld",
+   "confidence": 0.6,
+   "status": "écarté",
+   "reason": "16/16 cellules 32×48 non vides ; fond opaque (pas de transparence) : détourage nécessaire",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:overworld_sprites_ow_purple",
+   "path": "Overworld Sprites/OW_Purple.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    192
+   ],
+   "transparency": "aucune (fond opaque)",
+   "opaqueBBox": [
+    0,
+    0,
+    128,
+    192
+   ],
+   "frames": 4,
+   "directions": [
+    "bas",
+    "gauche",
+    "droite",
+    "haut"
+   ],
+   "states": [
+    "statique",
+    "marche"
+   ],
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "note": "convention RPG Maker/Essentials : colonne 0 = pied au repos, 4 colonnes = cycle de marche"
+   },
+   "category": "personnage-overworld",
+   "confidence": 0.6,
+   "status": "écarté",
+   "reason": "16/16 cellules 32×48 non vides ; fond opaque (pas de transparence) : détourage nécessaire",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:overworld_sprites_ow_yellow",
+   "path": "Overworld Sprites/OW_Yellow.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    192
+   ],
+   "transparency": "aucune (fond opaque)",
+   "opaqueBBox": [
+    0,
+    0,
+    128,
+    192
+   ],
+   "frames": 4,
+   "directions": [
+    "bas",
+    "gauche",
+    "droite",
+    "haut"
+   ],
+   "states": [
+    "statique",
+    "marche"
+   ],
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "note": "convention RPG Maker/Essentials : colonne 0 = pied au repos, 4 colonnes = cycle de marche"
+   },
+   "category": "personnage-overworld",
+   "confidence": 0.6,
+   "status": "écarté",
+   "reason": "16/16 cellules 32×48 non vides ; fond opaque (pas de transparence) : détourage nécessaire",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:overworld_sprites_ow_worksheet",
+   "path": "Overworld Sprites/OW_worksheet.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:overworld_sprites_scarlet_temp",
+   "path": "Overworld Sprites/Scarlet_Temp.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    192
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    0,
+    6,
+    128,
+    186
+   ],
+   "frames": 4,
+   "directions": [
+    "bas",
+    "gauche",
+    "droite",
+    "haut"
+   ],
+   "states": [
+    "statique",
+    "marche"
+   ],
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "note": "convention RPG Maker/Essentials : colonne 0 = pied au repos, 4 colonnes = cycle de marche"
+   },
+   "category": "personnage-overworld",
+   "confidence": 0.95,
+   "status": "candidat",
+   "reason": "16/16 cellules 32×48 non vides",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:overworld_sprites_trchar074",
+   "path": "Overworld Sprites/Trchar074.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    192
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    0,
+    8,
+    128,
+    184
+   ],
+   "frames": 4,
+   "directions": [
+    "bas",
+    "gauche",
+    "droite",
+    "haut"
+   ],
+   "states": [
+    "statique",
+    "marche"
+   ],
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "note": "convention RPG Maker/Essentials : colonne 0 = pied au repos, 4 colonnes = cycle de marche"
+   },
+   "category": "personnage-overworld",
+   "confidence": 0.95,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon ; 16/16 cellules 32×48 non vides",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:overworld_sprites_trchar075",
+   "path": "Overworld Sprites/Trchar075.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    192
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    2,
+    6,
+    126,
+    186
+   ],
+   "frames": 4,
+   "directions": [
+    "bas",
+    "gauche",
+    "droite",
+    "haut"
+   ],
+   "states": [
+    "statique",
+    "marche"
+   ],
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "note": "convention RPG Maker/Essentials : colonne 0 = pied au repos, 4 colonnes = cycle de marche"
+   },
+   "category": "personnage-overworld",
+   "confidence": 0.95,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon ; 16/16 cellules 32×48 non vides",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:overworld_sprites_trchar076",
+   "path": "Overworld Sprites/Trchar076.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    192
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    0,
+    6,
+    128,
+    186
+   ],
+   "frames": 4,
+   "directions": [
+    "bas",
+    "gauche",
+    "droite",
+    "haut"
+   ],
+   "states": [
+    "statique",
+    "marche"
+   ],
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "note": "convention RPG Maker/Essentials : colonne 0 = pied au repos, 4 colonnes = cycle de marche"
+   },
+   "category": "personnage-overworld",
+   "confidence": 0.95,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon ; 16/16 cellules 32×48 non vides",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:overworld_sprites_char_allison",
+   "path": "Overworld Sprites/char_Allison.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "utilisé",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)",
+   "registryId": "ow_allison"
+  },
+  {
+   "id": "icy:overworld_sprites_char_allison",
+   "path": "Overworld Sprites/char_Allison.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    192
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    2,
+    6,
+    124,
+    186
+   ],
+   "frames": 4,
+   "directions": [
+    "bas",
+    "gauche",
+    "droite",
+    "haut"
+   ],
+   "states": [
+    "statique",
+    "marche"
+   ],
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "note": "convention RPG Maker/Essentials : colonne 0 = pied au repos, 4 colonnes = cycle de marche"
+   },
+   "category": "personnage-overworld",
+   "confidence": 0.95,
+   "status": "candidat",
+   "reason": "16/16 cellules 32×48 non vides",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:overworld_sprites_char_elmyne",
+   "path": "Overworld Sprites/char_Elmyne.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "utilisé",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)",
+   "registryId": "ow_elmyne"
+  },
+  {
+   "id": "icy:overworld_sprites_char_elmyne",
+   "path": "Overworld Sprites/char_Elmyne.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    192
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    2,
+    6,
+    126,
+    186
+   ],
+   "frames": 4,
+   "directions": [
+    "bas",
+    "gauche",
+    "droite",
+    "haut"
+   ],
+   "states": [
+    "statique",
+    "marche"
+   ],
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "note": "convention RPG Maker/Essentials : colonne 0 = pied au repos, 4 colonnes = cycle de marche"
+   },
+   "category": "personnage-overworld",
+   "confidence": 0.95,
+   "status": "candidat",
+   "reason": "16/16 cellules 32×48 non vides",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:overworld_sprites_char_macdonald",
+   "path": "Overworld Sprites/char_MacDonald.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    192
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    0,
+    6,
+    128,
+    186
+   ],
+   "frames": 4,
+   "directions": [
+    "bas",
+    "gauche",
+    "droite",
+    "haut"
+   ],
+   "states": [
+    "statique",
+    "marche"
+   ],
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "note": "convention RPG Maker/Essentials : colonne 0 = pied au repos, 4 colonnes = cycle de marche"
+   },
+   "category": "personnage-overworld",
+   "confidence": 0.95,
+   "status": "utilisé",
+   "reason": "16/16 cellules 32×48 non vides",
+   "perspective": "3/4 (type Pokémon DS)",
+   "registryId": "ow_macdonald"
+  },
+  {
+   "id": "icy:overworld_sprites_char_pliny",
+   "path": "Overworld Sprites/char_Pliny.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "utilisé",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)",
+   "registryId": "ow_pliny"
+  },
+  {
+   "id": "icy:overworld_sprites_char_pliny",
+   "path": "Overworld Sprites/char_Pliny.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    192
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    0,
+    10,
+    128,
+    182
+   ],
+   "frames": 4,
+   "directions": [
+    "bas",
+    "gauche",
+    "droite",
+    "haut"
+   ],
+   "states": [
+    "statique",
+    "marche"
+   ],
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "note": "convention RPG Maker/Essentials : colonne 0 = pied au repos, 4 colonnes = cycle de marche"
+   },
+   "category": "personnage-overworld",
+   "confidence": 0.95,
+   "status": "candidat",
+   "reason": "16/16 cellules 32×48 non vides",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:overworld_sprites_char_scarlett",
+   "path": "Overworld Sprites/char_Scarlett.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "utilisé",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)",
+   "registryId": "ow_scarlett"
+  },
+  {
+   "id": "icy:overworld_sprites_char_scarlett",
+   "path": "Overworld Sprites/char_Scarlett.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    192
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    2,
+    2,
+    126,
+    190
+   ],
+   "frames": 4,
+   "directions": [
+    "bas",
+    "gauche",
+    "droite",
+    "haut"
+   ],
+   "states": [
+    "statique",
+    "marche"
+   ],
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "note": "convention RPG Maker/Essentials : colonne 0 = pied au repos, 4 colonnes = cycle de marche"
+   },
+   "category": "personnage-overworld",
+   "confidence": 0.95,
+   "status": "candidat",
+   "reason": "16/16 cellules 32×48 non vides",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:overworld_sprites_char_wilbur",
+   "path": "Overworld Sprites/char_Wilbur.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "utilisé",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)",
+   "registryId": "ow_wilbur"
+  },
+  {
+   "id": "icy:overworld_sprites_char_wilbur",
+   "path": "Overworld Sprites/char_Wilbur.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    192
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    2,
+    8,
+    126,
+    184
+   ],
+   "frames": 4,
+   "directions": [
+    "bas",
+    "gauche",
+    "droite",
+    "haut"
+   ],
+   "states": [
+    "statique",
+    "marche"
+   ],
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "note": "convention RPG Maker/Essentials : colonne 0 = pied au repos, 4 colonnes = cycle de marche"
+   },
+   "category": "personnage-overworld",
+   "confidence": 0.95,
+   "status": "candidat",
+   "reason": "16/16 cellules 32×48 non vides",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:overworld_sprites_char_grandmother",
+   "path": "Overworld Sprites/char_grandmother.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "utilisé",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)",
+   "registryId": "ow_grandmother"
+  },
+  {
+   "id": "icy:overworld_sprites_char_grandmother",
+   "path": "Overworld Sprites/char_grandmother.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    192
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    0,
+    8,
+    128,
+    184
+   ],
+   "frames": 4,
+   "directions": [
+    "bas",
+    "gauche",
+    "droite",
+    "haut"
+   ],
+   "states": [
+    "statique",
+    "marche"
+   ],
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "note": "convention RPG Maker/Essentials : colonne 0 = pied au repos, 4 colonnes = cycle de marche"
+   },
+   "category": "personnage-overworld",
+   "confidence": 0.95,
+   "status": "candidat",
+   "reason": "16/16 cellules 32×48 non vides",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:overworld_sprites_char_magdalyne",
+   "path": "Overworld Sprites/char_magdalyne.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:overworld_sprites_char_magdalyne",
+   "path": "Overworld Sprites/char_magdalyne.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    160,
+    208
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    2,
+    0,
+    158,
+    208
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "personnage-grille-atypique",
+   "confidence": 0.5,
+   "status": "candidat",
+   "reason": "dimensions 160×208 hors grille standard 128×192 : grille non déterminable avec certitude",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:overworld_sprites_char_mrfrost",
+   "path": "Overworld Sprites/char_mrFrost.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "utilisé",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)",
+   "registryId": "ow_mrfrost"
+  },
+  {
+   "id": "icy:overworld_sprites_char_mrfrost",
+   "path": "Overworld Sprites/char_mrFrost.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    192
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    0,
+    4,
+    128,
+    188
+   ],
+   "frames": 4,
+   "directions": [
+    "bas",
+    "gauche",
+    "droite",
+    "haut"
+   ],
+   "states": [
+    "statique",
+    "marche"
+   ],
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "note": "convention RPG Maker/Essentials : colonne 0 = pied au repos, 4 colonnes = cycle de marche"
+   },
+   "category": "personnage-overworld",
+   "confidence": 0.95,
+   "status": "candidat",
+   "reason": "16/16 cellules 32×48 non vides",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:overworld_sprites_door_large",
+   "path": "Overworld Sprites/door_Large.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:overworld_sprites_door_large",
+   "path": "Overworld Sprites/door_Large.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    256,
+    256
+   ],
+   "transparency": "aucune (fond opaque)",
+   "opaqueBBox": [
+    0,
+    0,
+    256,
+    256
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "objet-decor",
+   "confidence": 0.5,
+   "status": "candidat",
+   "reason": "dimensions 256×256 hors grille standard 128×192 : grille non déterminable avec certitude",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:overworld_sprites_door_large2",
+   "path": "Overworld Sprites/door_Large2.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:overworld_sprites_item_berrypile",
+   "path": "Overworld Sprites/item_berrypile.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:overworld_sprites_item_berrypile",
+   "path": "Overworld Sprites/item_berrypile.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    128
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    2,
+    16,
+    120,
+    106
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "objet",
+   "confidence": 0.5,
+   "status": "candidat",
+   "reason": "dimensions 128×128 hors grille standard 128×192 : grille non déterminable avec certitude",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:overworld_sprites_item_chest",
+   "path": "Overworld Sprites/item_chest.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:overworld_sprites_item_chest",
+   "path": "Overworld Sprites/item_chest.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    256
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    0,
+    34,
+    128,
+    222
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "objet",
+   "confidence": 0.5,
+   "status": "candidat",
+   "reason": "dimensions 128×256 hors grille standard 128×192 : grille non déterminable avec certitude",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:overworld_sprites_item_lilypadflowers",
+   "path": "Overworld Sprites/item_lilypadflowers.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:overworld_sprites_item_lilypadflowers",
+   "path": "Overworld Sprites/item_lilypadflowers.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    256
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    2,
+    14,
+    126,
+    238
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "objet",
+   "confidence": 0.5,
+   "status": "candidat",
+   "reason": "dimensions 128×256 hors grille standard 128×192 : grille non déterminable avec certitude",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:overworld_sprites_item_lilypads",
+   "path": "Overworld Sprites/item_lilypads.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:overworld_sprites_item_lilypads",
+   "path": "Overworld Sprites/item_lilypads.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    176,
+    128
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    4,
+    0,
+    168,
+    124
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "objet",
+   "confidence": 0.5,
+   "status": "candidat",
+   "reason": "dimensions 176×128 hors grille standard 128×192 : grille non déterminable avec certitude",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:overworld_sprites_ladder_3x4",
+   "path": "Overworld Sprites/ladder_3x4.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:overworld_sprites_ladder_3x4",
+   "path": "Overworld Sprites/ladder_3x4.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    384,
+    512
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    26,
+    16,
+    332,
+    496
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "objet-decor",
+   "confidence": 0.5,
+   "status": "candidat",
+   "reason": "dimensions 384×512 hors grille standard 128×192 : grille non déterminable avec certitude",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:overworld_sprites_object_sheet",
+   "path": "Overworld Sprites/object_sheet.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:overworld_sprites_olderwoman_1",
+   "path": "Overworld Sprites/olderwoman_1.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:overworld_sprites_olderwoman_2",
+   "path": "Overworld Sprites/olderwoman_2.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:overworld_sprites_trainer_teamdruid_f",
+   "path": "Overworld Sprites/trainer_TEAMDRUID_f.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:overworld_sprites_trainer_teamdruid_f",
+   "path": "Overworld Sprites/trainer_TEAMDRUID_f.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    176,
+    192
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    2,
+    4,
+    172,
+    188
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "personnage-grille-atypique",
+   "confidence": 0.5,
+   "status": "candidat",
+   "reason": "dimensions 176×192 hors grille standard 128×192 : grille non déterminable avec certitude",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:overworld_sprites_trainer_teamdruid_m",
+   "path": "Overworld Sprites/trainer_TEAMDRUID_m.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:overworld_sprites_trainer_teamdruid_m",
+   "path": "Overworld Sprites/trainer_TEAMDRUID_m.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    176,
+    192
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    2,
+    4,
+    172,
+    188
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "personnage-grille-atypique",
+   "confidence": 0.5,
+   "status": "candidat",
+   "reason": "dimensions 176×192 hors grille standard 128×192 : grille non déterminable avec certitude",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:overworld_sprites_trchar077",
+   "path": "Overworld Sprites/trchar077.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    192
+   ],
+   "transparency": "aucune (fond opaque)",
+   "opaqueBBox": [
+    0,
+    0,
+    128,
+    192
+   ],
+   "frames": 4,
+   "directions": [
+    "bas",
+    "gauche",
+    "droite",
+    "haut"
+   ],
+   "states": [
+    "statique",
+    "marche"
+   ],
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "note": "convention RPG Maker/Essentials : colonne 0 = pied au repos, 4 colonnes = cycle de marche"
+   },
+   "category": "personnage-overworld",
+   "confidence": 0.6,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon ; 16/16 cellules 32×48 non vides ; fond opaque (pas de transparence) : détourage nécessaire",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:overworld_sprites_trchar078",
+   "path": "Overworld Sprites/trchar078.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    192
+   ],
+   "transparency": "aucune (fond opaque)",
+   "opaqueBBox": [
+    0,
+    0,
+    128,
+    192
+   ],
+   "frames": 4,
+   "directions": [
+    "bas",
+    "gauche",
+    "droite",
+    "haut"
+   ],
+   "states": [
+    "statique",
+    "marche"
+   ],
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     48
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "note": "convention RPG Maker/Essentials : colonne 0 = pied au repos, 4 colonnes = cycle de marche"
+   },
+   "category": "personnage-overworld",
+   "confidence": 0.6,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon ; 16/16 cellules 32×48 non vides ; fond opaque (pas de transparence) : détourage nécessaire",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_back_shiny_803",
+   "path": "Pokémon Sprites Formatted/Back Shiny/803.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    96,
+    96
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    14,
+    59,
+    64,
+    37
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "creature-ou-ui-pokemon",
+   "confidence": 0.3,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_back_shiny_canight",
+   "path": "Pokémon Sprites Formatted/Back Shiny/CANIGHT.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_back_shiny_canight",
+   "path": "Pokémon Sprites Formatted/Back Shiny/CANIGHT.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    96,
+    96
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    14,
+    59,
+    64,
+    37
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "creature-ou-ui-pokemon",
+   "confidence": 0.3,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_back_canight",
+   "path": "Pokémon Sprites Formatted/Back/CANIGHT.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_back_canight",
+   "path": "Pokémon Sprites Formatted/Back/CANIGHT.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    96,
+    96
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    14,
+    59,
+    64,
+    37
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "creature-ou-ui-pokemon",
+   "confidence": 0.3,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_diglett",
+   "path": "Pokémon Sprites Formatted/DIGLETT.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_diglett",
+   "path": "Pokémon Sprites Formatted/DIGLETT.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    96,
+    96
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    29,
+    45,
+    38,
+    37
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "creature-ou-ui-pokemon",
+   "confidence": 0.3,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_footprints_canight",
+   "path": "Pokémon Sprites Formatted/Footprints/CANIGHT.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    32,
+    32
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": null,
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "creature-ou-ui-pokemon",
+   "confidence": 0.3,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_front_shiny_803",
+   "path": "Pokémon Sprites Formatted/Front Shiny/803.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    96,
+    96
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    31,
+    42,
+    33,
+    32
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "creature-ou-ui-pokemon",
+   "confidence": 0.3,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_front_shiny_canight",
+   "path": "Pokémon Sprites Formatted/Front Shiny/CANIGHT.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_front_shiny_canight",
+   "path": "Pokémon Sprites Formatted/Front Shiny/CANIGHT.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    96,
+    96
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    31,
+    42,
+    33,
+    32
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "creature-ou-ui-pokemon",
+   "confidence": 0.3,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_front_shiny_diglett_2",
+   "path": "Pokémon Sprites Formatted/Front Shiny/DIGLETT_2.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    96,
+    96
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    29,
+    45,
+    38,
+    37
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "creature-ou-ui-pokemon",
+   "confidence": 0.3,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_front_shiny_gulpin_2",
+   "path": "Pokémon Sprites Formatted/Front Shiny/GULPIN_2.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    192,
+    192
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    54,
+    94,
+    74,
+    60
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "creature-ou-ui-pokemon",
+   "confidence": 0.3,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_front_shiny_hoothoot_2",
+   "path": "Pokémon Sprites Formatted/Front Shiny/HOOTHOOT_2.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    96,
+    96
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    28,
+    43,
+    37,
+    40
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "creature-ou-ui-pokemon",
+   "confidence": 0.3,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_front_shiny_paras_1",
+   "path": "Pokémon Sprites Formatted/Front Shiny/PARAS_1.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    96,
+    96
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    23,
+    49,
+    48,
+    36
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "creature-ou-ui-pokemon",
+   "confidence": 0.3,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_front_shiny_perropello",
+   "path": "Pokémon Sprites Formatted/Front Shiny/PERROPELLO.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    96,
+    96
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    22,
+    50,
+    50,
+    33
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "creature-ou-ui-pokemon",
+   "confidence": 0.3,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_front_803",
+   "path": "Pokémon Sprites Formatted/Front/803.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    96,
+    96
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    31,
+    42,
+    33,
+    32
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "creature-ou-ui-pokemon",
+   "confidence": 0.3,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_front_canight",
+   "path": "Pokémon Sprites Formatted/Front/CANIGHT.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_front_canight",
+   "path": "Pokémon Sprites Formatted/Front/CANIGHT.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    96,
+    96
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    31,
+    42,
+    33,
+    32
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "creature-ou-ui-pokemon",
+   "confidence": 0.3,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_front_diglett_2",
+   "path": "Pokémon Sprites Formatted/Front/DIGLETT_2.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    96,
+    96
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    29,
+    45,
+    38,
+    37
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "creature-ou-ui-pokemon",
+   "confidence": 0.3,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_front_gulpin_1",
+   "path": "Pokémon Sprites Formatted/Front/GULPIN_1.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    96,
+    96
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    27,
+    47,
+    37,
+    30
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "creature-ou-ui-pokemon",
+   "confidence": 0.3,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_front_hoothoot_1",
+   "path": "Pokémon Sprites Formatted/Front/HOOTHOOT_1.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    96,
+    96
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    28,
+    43,
+    37,
+    40
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "creature-ou-ui-pokemon",
+   "confidence": 0.3,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_front_paras_1",
+   "path": "Pokémon Sprites Formatted/Front/PARAS_1.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    96,
+    96
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    23,
+    49,
+    48,
+    36
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "creature-ou-ui-pokemon",
+   "confidence": 0.3,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_front_perropello",
+   "path": "Pokémon Sprites Formatted/Front/PERROPELLO.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    96,
+    96
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    22,
+    50,
+    50,
+    33
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "creature-ou-ui-pokemon",
+   "confidence": 0.3,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_gulpin",
+   "path": "Pokémon Sprites Formatted/GULPIN.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_hoothoot",
+   "path": "Pokémon Sprites Formatted/HOOTHOOT.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_icons_shiny_canight",
+   "path": "Pokémon Sprites Formatted/Icons Shiny/CANIGHT.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    64
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    12,
+    22,
+    106,
+    38
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "creature-ou-ui-pokemon",
+   "confidence": 0.3,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_icons_canight",
+   "path": "Pokémon Sprites Formatted/Icons/CANIGHT.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    64
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    12,
+    22,
+    106,
+    38
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "creature-ou-ui-pokemon",
+   "confidence": 0.3,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_paras",
+   "path": "Pokémon Sprites Formatted/PARAS.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_paras",
+   "path": "Pokémon Sprites Formatted/PARAS.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    192,
+    192
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    46,
+    98,
+    96,
+    72
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "creature-ou-ui-pokemon",
+   "confidence": 0.3,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:pokemon_sprites_formatted_perropello",
+   "path": "Pokémon Sprites Formatted/PERROPELLO.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    96,
+    96
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    22,
+    50,
+    50,
+    33
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "creature-ou-ui-pokemon",
+   "confidence": 0.3,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:tilesets_outside_draft",
+   "path": "Tilesets/Outside_draft.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:tilesets_outside_v1_temp",
+   "path": "Tilesets/Outside_v1_TEMP.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:tilesets_outside_v1_tempbig",
+   "path": "Tilesets/Outside_v1_TEMPBIG.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:tilesets_outside_v3_tempbig",
+   "path": "Tilesets/Outside_v3_TEMPBIG.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    256,
+    4000
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    0,
+    0,
+    256,
+    3998
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     32
+    ],
+    "cols": 8,
+    "rows": 125,
+    "note": "planche d'autotiles annotée par sections (« Grass & Foliage », « Paths & Texture », « Trees »…) ; découpe par rectangles manuels"
+   },
+   "category": "tileset",
+   "confidence": 0.85,
+   "status": "candidat",
+   "reason": "8×125 tuiles de 32 px, vue de dessus / 3-4",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:tilesets_testmap",
+   "path": "Tilesets/Testmap.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:tilesets_building_worksheet",
+   "path": "Tilesets/building_worksheet.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:tilesets_flooring_test1_recovered",
+   "path": "Tilesets/flooring_test1-Recovered.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:tilesets_flooring_test1",
+   "path": "Tilesets/flooring_test1.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:tilesets_flooring_test2",
+   "path": "Tilesets/flooring_test2.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:tilesets_grass_testing",
+   "path": "Tilesets/grass_testing.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:tilesets_padded_bogofyore",
+   "path": "Tilesets/padded_BogOfYore.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:tilesets_padded_bogofyore",
+   "path": "Tilesets/padded_BogOfYore.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    256,
+    11072
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    0,
+    0,
+    256,
+    10782
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     32
+    ],
+    "cols": 8,
+    "rows": 346,
+    "note": "planche d'autotiles annotée par sections (« Grass & Foliage », « Paths & Texture », « Trees »…) ; découpe par rectangles manuels"
+   },
+   "category": "tileset",
+   "confidence": 0.85,
+   "status": "candidat",
+   "reason": "8×346 tuiles de 32 px, vue de dessus / 3-4",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:tilesets_padded_folley",
+   "path": "Tilesets/padded_Folley.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:tilesets_padded_folley",
+   "path": "Tilesets/padded_Folley.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    256,
+    11072
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    0,
+    0,
+    256,
+    10048
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     32
+    ],
+    "cols": 8,
+    "rows": 346,
+    "note": "planche d'autotiles annotée par sections (« Grass & Foliage », « Paths & Texture », « Trees »…) ; découpe par rectangles manuels"
+   },
+   "category": "tileset",
+   "confidence": 0.85,
+   "status": "candidat",
+   "reason": "8×346 tuiles de 32 px, vue de dessus / 3-4",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:tilesets_padded_macdonaldfarm",
+   "path": "Tilesets/padded_MacDonaldFarm.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:tilesets_padded_macdonaldfarm",
+   "path": "Tilesets/padded_MacDonaldFarm.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    256,
+    11072
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    0,
+    0,
+    256,
+    10048
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     32
+    ],
+    "cols": 8,
+    "rows": 346,
+    "note": "planche d'autotiles annotée par sections (« Grass & Foliage », « Paths & Texture », « Trees »…) ; découpe par rectangles manuels"
+   },
+   "category": "tileset",
+   "confidence": 0.85,
+   "status": "candidat",
+   "reason": "8×346 tuiles de 32 px, vue de dessus / 3-4",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:tilesets_padded_cavetiles",
+   "path": "Tilesets/padded_caveTiles.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:tilesets_padded_cavetiles",
+   "path": "Tilesets/padded_caveTiles.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    256,
+    9024
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    0,
+    0,
+    256,
+    4448
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     32
+    ],
+    "cols": 8,
+    "rows": 282,
+    "note": "planche d'autotiles annotée par sections (« Grass & Foliage », « Paths & Texture », « Trees »…) ; découpe par rectangles manuels"
+   },
+   "category": "tileset",
+   "confidence": 0.85,
+   "status": "candidat",
+   "reason": "8×282 tuiles de 32 px, vue de dessus / 3-4",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:tilesets_padded_mountain",
+   "path": "Tilesets/padded_mountain.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:tilesets_padded_mountain",
+   "path": "Tilesets/padded_mountain.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    256,
+    11072
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    0,
+    0,
+    256,
+    10048
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     32
+    ],
+    "cols": 8,
+    "rows": 346,
+    "note": "planche d'autotiles annotée par sections (« Grass & Foliage », « Paths & Texture », « Trees »…) ; découpe par rectangles manuels"
+   },
+   "category": "tileset",
+   "confidence": 0.85,
+   "status": "candidat",
+   "reason": "8×346 tuiles de 32 px, vue de dessus / 3-4",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:tilesets_padded_mycortown",
+   "path": "Tilesets/padded_mycorTown.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "utilisé",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)",
+   "registryId": "ow_tree_autumn"
+  },
+  {
+   "id": "icy:tilesets_padded_mycortown",
+   "path": "Tilesets/padded_mycorTown.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    256,
+    11072
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    0,
+    0,
+    256,
+    11040
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     32
+    ],
+    "cols": 8,
+    "rows": 346,
+    "note": "planche d'autotiles annotée par sections (« Grass & Foliage », « Paths & Texture », « Trees »…) ; découpe par rectangles manuels"
+   },
+   "category": "tileset",
+   "confidence": 0.85,
+   "status": "candidat",
+   "reason": "8×346 tuiles de 32 px, vue de dessus / 3-4",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:tilesets_padded_mycortownuniversity",
+   "path": "Tilesets/padded_mycorTownUniversity.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:tilesets_padded_mycortownuniversity",
+   "path": "Tilesets/padded_mycorTownUniversity.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    256,
+    11072
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    0,
+    0,
+    256,
+    11040
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     32
+    ],
+    "cols": 8,
+    "rows": 346,
+    "note": "planche d'autotiles annotée par sections (« Grass & Foliage », « Paths & Texture », « Trees »…) ; découpe par rectangles manuels"
+   },
+   "category": "tileset",
+   "confidence": 0.85,
+   "status": "candidat",
+   "reason": "8×346 tuiles de 32 px, vue de dessus / 3-4",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:tilesets_padded_outside_with_giant_tree",
+   "path": "Tilesets/padded_outside_with_giant_tree.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    256,
+    4640
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    0,
+    0,
+    256,
+    4598
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     32
+    ],
+    "cols": 8,
+    "rows": 145,
+    "note": "planche d'autotiles annotée par sections (« Grass & Foliage », « Paths & Texture », « Trees »…) ; découpe par rectangles manuels"
+   },
+   "category": "tileset",
+   "confidence": 0.85,
+   "status": "candidat",
+   "reason": "8×145 tuiles de 32 px, vue de dessus / 3-4",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:tilesets_padded_staureyoutside",
+   "path": "Tilesets/padded_staureyoutside.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:tilesets_padded_staureyoutside",
+   "path": "Tilesets/padded_staureyoutside.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    256,
+    11072
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    0,
+    0,
+    256,
+    10782
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     32
+    ],
+    "cols": 8,
+    "rows": 346,
+    "note": "planche d'autotiles annotée par sections (« Grass & Foliage », « Paths & Texture », « Trees »…) ; découpe par rectangles manuels"
+   },
+   "category": "tileset",
+   "confidence": 0.85,
+   "status": "candidat",
+   "reason": "8×346 tuiles de 32 px, vue de dessus / 3-4",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:tilesets_padded_tileset",
+   "path": "Tilesets/padded_tileset.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:tilesets_padded_tileset",
+   "path": "Tilesets/padded_tileset.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    256,
+    11072
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    0,
+    0,
+    256,
+    10048
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": {
+    "method": "grille",
+    "cell": [
+     32,
+     32
+    ],
+    "cols": 8,
+    "rows": 346,
+    "note": "planche d'autotiles annotée par sections (« Grass & Foliage », « Paths & Texture », « Trees »…) ; découpe par rectangles manuels"
+   },
+   "category": "tileset",
+   "confidence": 0.85,
+   "status": "candidat",
+   "reason": "8×346 tuiles de 32 px, vue de dessus / 3-4",
+   "perspective": "3/4 (type Pokémon DS)"
+  },
+  {
+   "id": "icy:tilesets_palette_test",
+   "path": "Tilesets/palette_test.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:tilesets_shallow_still_autotile",
+   "path": "Tilesets/shallow_still_autotile.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:tilesets_tree_interior_test",
+   "path": "Tilesets/tree_interior_test.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:trainer_sprites_mycologist",
+   "path": "Trainer Sprites/MYCOLOGIST.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:trainer_sprites_mycologist",
+   "path": "Trainer Sprites/MYCOLOGIST.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    160,
+    160
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    48,
+    8,
+    68,
+    150
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "portrait-combat",
+   "confidence": 0.6,
+   "status": "candidat",
+   "reason": "image de dresseur (vue de face, usage combat) : peu utile en vue de village",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:trainer_sprites_mycologist_wilbur",
+   "path": "Trainer Sprites/MYCOLOGIST_Wilbur.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:trainer_sprites_mycologist_wilbur",
+   "path": "Trainer Sprites/MYCOLOGIST_Wilbur.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    160,
+    160
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    48,
+    8,
+    68,
+    150
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "portrait-combat",
+   "confidence": 0.6,
+   "status": "candidat",
+   "reason": "image de dresseur (vue de face, usage combat) : peu utile en vue de village",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:trainer_sprites_magician_cyan",
+   "path": "Trainer Sprites/Magician_Cyan.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    160,
+    166
+   ],
+   "transparency": "aucune (fond opaque)",
+   "opaqueBBox": [
+    0,
+    0,
+    160,
+    166
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "portrait-combat",
+   "confidence": 0.6,
+   "status": "candidat",
+   "reason": "image de dresseur (vue de face, usage combat) : peu utile en vue de village",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:trainer_sprites_magician_green",
+   "path": "Trainer Sprites/Magician_Green.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    160,
+    166
+   ],
+   "transparency": "aucune (fond opaque)",
+   "opaqueBBox": [
+    0,
+    0,
+    160,
+    166
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "portrait-combat",
+   "confidence": 0.6,
+   "status": "candidat",
+   "reason": "image de dresseur (vue de face, usage combat) : peu utile en vue de village",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:trainer_sprites_magician_pink",
+   "path": "Trainer Sprites/Magician_Pink.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    160,
+    166
+   ],
+   "transparency": "aucune (fond opaque)",
+   "opaqueBBox": [
+    0,
+    0,
+    160,
+    166
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "portrait-combat",
+   "confidence": 0.6,
+   "status": "candidat",
+   "reason": "image de dresseur (vue de face, usage combat) : peu utile en vue de village",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:trainer_sprites_magician_purple",
+   "path": "Trainer Sprites/Magician_Purple.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    160,
+    166
+   ],
+   "transparency": "aucune (fond opaque)",
+   "opaqueBBox": [
+    0,
+    0,
+    160,
+    166
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "portrait-combat",
+   "confidence": 0.6,
+   "status": "candidat",
+   "reason": "image de dresseur (vue de face, usage combat) : peu utile en vue de village",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:trainer_sprites_magician_red",
+   "path": "Trainer Sprites/Magician_Red.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    160,
+    166
+   ],
+   "transparency": "aucune (fond opaque)",
+   "opaqueBBox": [
+    0,
+    0,
+    160,
+    166
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "portrait-combat",
+   "confidence": 0.6,
+   "status": "candidat",
+   "reason": "image de dresseur (vue de face, usage combat) : peu utile en vue de village",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:trainer_sprites_magician_yellow",
+   "path": "Trainer Sprites/Magician_Yellow.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    160,
+    166
+   ],
+   "transparency": "aucune (fond opaque)",
+   "opaqueBBox": [
+    0,
+    0,
+    160,
+    166
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "portrait-combat",
+   "confidence": 0.6,
+   "status": "candidat",
+   "reason": "image de dresseur (vue de face, usage combat) : peu utile en vue de village",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:trainer_sprites_youngster_f",
+   "path": "Trainer Sprites/YOUNGSTER_F.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:trainer_sprites_youngster_f",
+   "path": "Trainer Sprites/YOUNGSTER_F.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    160,
+    160
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    34,
+    48,
+    88,
+    110
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "portrait-combat",
+   "confidence": 0.6,
+   "status": "candidat",
+   "reason": "image de dresseur (vue de face, usage combat) : peu utile en vue de village",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:trainer_sprites_youngster_m",
+   "path": "Trainer Sprites/YOUNGSTER_M.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:trainer_sprites_youngster_m",
+   "path": "Trainer Sprites/YOUNGSTER_M.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    160,
+    160
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    32,
+    46,
+    94,
+    112
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "portrait-combat",
+   "confidence": 0.6,
+   "status": "candidat",
+   "reason": "image de dresseur (vue de face, usage combat) : peu utile en vue de village",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:trainer_sprites_trainer_mycologist",
+   "path": "Trainer Sprites/trainer_MYCOLOGIST.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:trainer_sprites_trainer_mycologist",
+   "path": "Trainer Sprites/trainer_MYCOLOGIST.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    192
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    2,
+    8,
+    126,
+    184
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "personnage-grille-atypique",
+   "confidence": 0.6,
+   "status": "candidat",
+   "reason": "image de dresseur (vue de face, usage combat) : peu utile en vue de village",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:trainer_sprites_trainer_youngster_f",
+   "path": "Trainer Sprites/trainer_YOUNGSTER_F.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:trainer_sprites_trainer_youngster_m",
+   "path": "Trainer Sprites/trainer_YOUNGSTER_M.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:ui_objects_bg_design_wood",
+   "path": "UI Objects/BG_design_wood.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:ui_objects_button_toggle_rustic_off",
+   "path": "UI Objects/Button_toggle_rustic_off.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:ui_objects_button_toggle_rustic_on",
+   "path": "UI Objects/Button_toggle_rustic_on.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:ui_objects_button_toggle_rustic_setof4",
+   "path": "UI Objects/Button_toggle_rustic_setof4.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:ui_objects_lorebook_bg",
+   "path": "UI Objects/Lorebook_bg.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:ui_objects_lorebook_bg",
+   "path": "UI Objects/Lorebook_bg.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    512,
+    384
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    0,
+    0,
+    506,
+    384
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "interface",
+   "confidence": 0.7,
+   "status": "candidat",
+   "reason": "élément d'interface 2D",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:ui_objects_menuitem_off",
+   "path": "UI Objects/MenuItem_off.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    32
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    2,
+    2,
+    124,
+    28
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "interface",
+   "confidence": 0.7,
+   "status": "candidat",
+   "reason": "élément d'interface 2D",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:ui_objects_menuitem_select",
+   "path": "UI Objects/MenuItem_select.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    32
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    0,
+    0,
+    128,
+    32
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "interface",
+   "confidence": 0.7,
+   "status": "candidat",
+   "reason": "élément d'interface 2D",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:ui_objects_menu_item_off",
+   "path": "UI Objects/Menu_Item_Off.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:ui_objects_menu_item_selection",
+   "path": "UI Objects/Menu_Item_selection.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:ui_objects_button_off_1",
+   "path": "UI Objects/button_off_1.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    32,
+    32
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    6,
+    6,
+    20,
+    20
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "interface",
+   "confidence": 0.7,
+   "status": "candidat",
+   "reason": "élément d'interface 2D",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:ui_objects_button_off_4",
+   "path": "UI Objects/button_off_4.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    128,
+    32
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    6,
+    6,
+    118,
+    20
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "interface",
+   "confidence": 0.7,
+   "status": "candidat",
+   "reason": "élément d'interface 2D",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:ui_objects_button_on_1",
+   "path": "UI Objects/button_on_1.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    32,
+    32
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    6,
+    6,
+    20,
+    20
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "interface",
+   "confidence": 0.7,
+   "status": "candidat",
+   "reason": "élément d'interface 2D",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:ui_objects_fasttravel_test",
+   "path": "UI Objects/fastTravel_test.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:ui_objects_generalui_bg_menu",
+   "path": "UI Objects/generalUI/bg_menu.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    256,
+    192
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    0,
+    116,
+    256,
+    76
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "interface",
+   "confidence": 0.7,
+   "status": "candidat",
+   "reason": "élément d'interface 2D",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:ui_objects_picture_overlay_sepia",
+   "path": "UI Objects/picture_Overlay_sepia.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:ui_objects_picture_overlay_sepia",
+   "path": "UI Objects/picture_Overlay_sepia.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    88,
+    88
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    0,
+    0,
+    88,
+    88
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "interface",
+   "confidence": 0.7,
+   "status": "candidat",
+   "reason": "élément d'interface 2D",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:ui_objects_picture_background_forest",
+   "path": "UI Objects/picture_background_forest.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:ui_objects_picture_background_forest",
+   "path": "UI Objects/picture_background_forest.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    88,
+    88
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    4,
+    4,
+    80,
+    80
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "interface",
+   "confidence": 0.7,
+   "status": "candidat",
+   "reason": "élément d'interface 2D",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:ui_objects_speech_hgss_19_export",
+   "path": "UI Objects/speech hgss 19-export.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    96,
+    48
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    2,
+    2,
+    92,
+    44
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "interface",
+   "confidence": 0.7,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon ; élément d'interface 2D",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:ui_objects_speech_hgss_2",
+   "path": "UI Objects/speech hgss 2.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    96,
+    48
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    4,
+    2,
+    88,
+    44
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "interface",
+   "confidence": 0.7,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon ; élément d'interface 2D",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:ui_objects_trainer_image_hilda",
+   "path": "UI Objects/trainer_image_hilda.aseprite",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".aseprite",
+   "type": "source-editeur",
+   "category": "aseprite",
+   "confidence": 1,
+   "status": "ignoré",
+   "reason": "fichier source Aseprite (non chargeable par le navigateur)"
+  },
+  {
+   "id": "icy:ui_objects_trainer_image_hilda",
+   "path": "UI Objects/trainer_image_hilda.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    88,
+    88
+   ],
+   "transparency": "alpha",
+   "opaqueBBox": [
+    26,
+    7,
+    40,
+    74
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "interface",
+   "confidence": 0.7,
+   "status": "exclu",
+   "reason": "contenu probablement issu des jeux / créatures Pokémon ; élément d'interface 2D",
+   "perspective": "n/a"
+  },
+  {
+   "id": "icy:ui_objects_woodgrain_bg",
+   "path": "UI Objects/woodgrain_bg.png",
+   "source": "icyethics/PokemonAssets",
+   "ext": ".png",
+   "type": "image",
+   "dimensions": [
+    512,
+    384
+   ],
+   "transparency": "aucune (fond opaque)",
+   "opaqueBBox": [
+    0,
+    0,
+    512,
+    384
+   ],
+   "frames": null,
+   "directions": null,
+   "states": null,
+   "slicing": null,
+   "category": "interface",
+   "confidence": 0.7,
+   "status": "candidat",
+   "reason": "élément d'interface 2D",
+   "perspective": "n/a"
+  }
+ ],
+ "groupes": [
+  {
+   "dir": "sprites/pokemon/versions/generation-v",
+   "files": 11654,
+   "ext": {
+    "png": 7343,
+    "gif": 4311
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/pokemon/versions/generation-iv",
+   "files": 7774,
+   "ext": {
+    "png": 7774
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/pokemon/other/showdown",
+   "files": 6300,
+   "ext": {
+    "gif": 6300
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/pokemon/versions/generation-ii",
+   "files": 5434,
+   "ext": {
+    "png": 4882,
+    "gif": 552
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/pokemon/versions/generation-iii",
+   "files": 4059,
+   "ext": {
+    "png": 4059
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/pokemon/versions/generation-vi",
+   "files": 3966,
+   "ext": {
+    "png": 3966
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/pokemon/versions/generation-vii",
+   "files": 3460,
+   "ext": {
+    "png": 3460
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/pokemon/other/home",
+   "files": 3260,
+   "ext": {
+    "png": 3260
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/pokemon/other/official-artwork",
+   "files": 2666,
+   "ext": {
+    "png": 2666
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/pokemon/versions/generation-i",
+   "files": 2265,
+   "ext": {
+    "png": 2265
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/pokemon/versions/generation-viii",
+   "files": 1873,
+   "ext": {
+    "png": 1873
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/pokemon/back/shiny",
+   "files": 1566,
+   "ext": {
+    "png": 1566
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/pokemon",
+   "files": 1532,
+   "ext": {
+    "png": 1532
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/pokemon/shiny",
+   "files": 1532,
+   "ext": {
+    "png": 1532
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/pokemon/back",
+   "files": 1508,
+   "ext": {
+    "png": 1508
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/pokemon/versions/generation-ix",
+   "files": 1252,
+   "ext": {
+    "png": 1252
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/pokemon/other/dream-world",
+   "files": 1146,
+   "ext": {
+    "svg": 1146
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/items",
+   "files": 898,
+   "ext": {
+    "png": 898
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/items/gen5",
+   "files": 583,
+   "ext": {
+    "png": 583
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/items/dream-world",
+   "files": 336,
+   "ext": {
+    "png": 336
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/pokemon/female",
+   "files": 103,
+   "ext": {
+    "png": 103
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/pokemon/shiny/female",
+   "files": 101,
+   "ext": {
+    "png": 101
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/pokemon/back/female",
+   "files": 93,
+   "ext": {
+    "png": 93
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/items/underground",
+   "files": 85,
+   "ext": {
+    "png": 85
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/badges",
+   "files": 77,
+   "ext": {
+    "png": 77
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/types/generation-ix/scarlet-violet",
+   "files": 74,
+   "ext": {
+    "png": 74
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/items/berries",
+   "files": 64,
+   "ext": {
+    "png": 64
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/items/gen9",
+   "files": 56,
+   "ext": {
+    "png": 56
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/types/generation-viii/legends-arceus",
+   "files": 36,
+   "ext": {
+    "png": 36
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/types/generation-viii/sword-shield",
+   "files": 36,
+   "ext": {
+    "png": 36
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/types/generation-viii/brilliant-diamond-shining-pearl",
+   "files": 36,
+   "ext": {
+    "png": 36
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/types/generation-vii/lets-go-pikachu-lets-go-eevee",
+   "files": 36,
+   "ext": {
+    "png": 36
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/types/generation-iii/xd",
+   "files": 18,
+   "ext": {
+    "png": 18
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/types/generation-iii/ruby-sapphire",
+   "files": 18,
+   "ext": {
+    "png": 18
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/types/generation-iii/firered-leafgreen",
+   "files": 18,
+   "ext": {
+    "png": 18
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/types/generation-iii/emerald",
+   "files": 18,
+   "ext": {
+    "png": 18
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/types/generation-iii/colosseum",
+   "files": 18,
+   "ext": {
+    "png": 18
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/types/generation-vii/ultra-sun-ultra-moon",
+   "files": 18,
+   "ext": {
+    "png": 18
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/types/generation-vii/sun-moon",
+   "files": 18,
+   "ext": {
+    "png": 18
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/types/generation-vi/x-y",
+   "files": 18,
+   "ext": {
+    "png": 18
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/types/generation-vi/omega-ruby-alpha-sapphire",
+   "files": 18,
+   "ext": {
+    "png": 18
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/types/generation-iv/heartgold-soulsilver",
+   "files": 18,
+   "ext": {
+    "png": 18
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/types/generation-iv/platinum",
+   "files": 18,
+   "ext": {
+    "png": 18
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/types/generation-iv/diamond-pearl",
+   "files": 18,
+   "ext": {
+    "png": 18
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/types/generation-v/black-white",
+   "files": 17,
+   "ext": {
+    "png": 17
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/types/generation-v/black-2-white-2",
+   "files": 17,
+   "ext": {
+    "png": 17
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/items/gen8",
+   "files": 8,
+   "ext": {
+    "png": 8
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  },
+  {
+   "dir": "sprites/items/gen3",
+   "files": 5,
+   "ext": {
+    "png": 5
+   },
+   "type": "creatures-pokemon",
+   "category": "sprites-creatures",
+   "status": "exclu",
+   "confidence": 0.99,
+   "reason": "sprites de créatures Pokémon (© The Pokémon Company, licence du dépôt : « All image contents within are Copyright The Pokémon Company ») — sans objet pour un village d'agents"
+  }
+ ]
+}

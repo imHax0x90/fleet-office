@@ -9,7 +9,8 @@
   "scripts": {
     "start": "node server.js",
     "start:safe": "FLEET_ALLOW_UNSAFE_PERMS=0 node server.js",
-    "assets:blender": "blender --background --python tools/blender/generate_fleet_office_assets.py"
+    "assets:blender": "blender --background --python tools/blender/generate_fleet_office_assets.py",
+    "test:world3d": "node --test tools/world3d/test/*.test.mjs && node tools/world3d/validate.mjs"
   },
   "engines": {
     "node": ">=18"
