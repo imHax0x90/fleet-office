@@ -40,11 +40,15 @@ function convert(root) {
     o.castShadow = true; o.receiveShadow = true; });
   return root;
 }
+async function spriteProto(e) { // sprite 2D vertical (plan texturé, pied à l'origine, face +Z vers la caméra)
+  const tex = await loadTex(e.file), w = e.dimensions.w, h = e.dimensions.h, m = new THREE.Mesh(new THREE.PlaneGeometry(w, h).translate(0, h / 2, 0), new THREE.MeshLambertMaterial({ map: tex, alphaTest: 0.5, side: THREE.DoubleSide }));
+  m.castShadow = true; m.receiveShadow = false; const root = new THREE.Group(); root.add(m); return root;
+}
 function loadModel(id) {
   if (protos.has(id)) return protos.get(id);
   const p = (async () => {
     const e = reg.get(id); S.assets.total++;
-    try { if (!e) throw new Error("absent du registre"); const g = await gltf.loadAsync(BASE + e.file); S.assets.loaded++; return convert(g.scene); }
+    try { if (!e) throw new Error("absent du registre"); if (e.sprite) { const r = await spriteProto(e); S.assets.loaded++; return r; } const g = await gltf.loadAsync(BASE + e.file); S.assets.loaded++; return convert(g.scene); }
     catch (err) { S.assets.failed.push({ id, error: String(err.message || err) }); return fallbackProto(e || { dimensions: { w: 1, h: 1, d: 1 } }); }
   })(); protos.set(id, p); return p;
 }
@@ -73,7 +77,7 @@ function blocked(x, z, r = 0.3) {
 }
 const NT = 12; // tuiles dans l'atlas de sol
 function quadsMesh(list, tex, y, name) {
-  const pos = [], uv = [], idx = [], inset = 0.4 / (16 * NT); let n = 0;
+  const pos = [], uv = [], idx = [], inset = 0.4 / (32 * NT); let n = 0;
   for (const [x, z, t, hs] of list) { const u0 = t / NT + inset, u1 = (t + 1) / NT - inset, h = hs || [0, 0, 0, 0]; pos.push(x, y + h[0], z + 1, x + 1, y + h[1], z + 1, x + 1, y + h[2], z, x, y + h[3], z); uv.push(u0, 0, u1, 0, u1, 1, u0, 1); idx.push(n, n + 1, n + 2, n, n + 2, n + 3); n += 4; }
   const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2)); g.setIndex(idx); g.computeVertexNormals();
   const mesh = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ map: tex })); mesh.receiveShadow = true; mesh.name = name; return mesh;
@@ -120,7 +124,7 @@ async function instanced(objs, tag) {
     const proto = await loadModel(arr[0].asset); proto.updateMatrixWorld(true); const e = reg.get(arr[0].asset), meshes = []; proto.traverse((o) => { if (o.isMesh) meshes.push(o); });
     for (const src of meshes) {
       const im = new THREE.InstancedMesh(src.geometry, src.material, arr.length), m = new THREE.Matrix4(), q = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0);
-      arr.forEach((o, i) => { q.setFromAxisAngle(up, o.rot || 0); m.compose(new THREE.Vector3(o.x, heightAt(o.x, o.y), o.y), q, new THREE.Vector3(1, 1, 1)).multiply(src.matrixWorld); im.setMatrixAt(i, m); });
+      arr.forEach((o, i) => { q.setFromAxisAngle(up, e && e.sprite ? 0 : (o.rot || 0)); m.compose(new THREE.Vector3(o.x, heightAt(o.x, o.y), o.y), q, new THREE.Vector3(1, 1, 1)).multiply(src.matrixWorld); im.setMatrixAt(i, m); });
       im.castShadow = true; im.receiveShadow = true; im.instanceMatrix.needsUpdate = true; if (im.computeBoundingSphere) im.computeBoundingSphere(); im.userData.tag = tag; scene.add(im); made.push(im); instStats.meshes++;
     }
     instStats.instances += arr.length; const col = e && e.collision;
@@ -234,12 +238,12 @@ function applyTime(force) {
 function lightWindows(b) { b.group.traverse((o) => { if (o.isMesh && /^window/.test(o.material.name || "")) { o.material.emissiveMap = o.material.map; o.material.emissive.setScalar(nightK * 0.9); o.userData.base.copy(o.material.emissive); } }); }
 function buildHalos() { // lueur additive au sommet de chaque lampadaire (visible la nuit)
   const c = document.createElement("canvas"); c.width = c.height = 64; const x = c.getContext("2d"), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, "rgba(255,240,170,1)"); gr.addColorStop(0.35, "rgba(255,210,110,.55)"); gr.addColorStop(1, "rgba(255,200,100,0)"); x.fillStyle = gr; x.fillRect(0, 0, 64, 64);
-  const lamps = MAP.objects.filter((o) => o.asset === "lamp"), g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(lamps.flatMap((o) => [o.x, 2.7 + heightAt(o.x, o.y), o.y]), 3));
+  const lamps = MAP.objects.filter((o) => o.asset === "lamp"), g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(lamps.flatMap((o) => [o.x, (reg.get("lamp").dimensions.h * 0.92) + heightAt(o.x, o.y), o.y]), 3));
   halos.pts = new THREE.Points(g, new THREE.PointsMaterial({ map: new THREE.CanvasTexture(c), size: 4.2, sizeAttenuation: true, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0, color: 0xfff0b0 })); halos.pts.frustumCulled = false; halos.pts.visible = false; scene.add(halos.pts);
 }
 
 // ---------------------------------------------------------------------------------------------- caméra & entrée
-let yaw = +Q.get("yaw") || 0, yawT = yaw, dist = +Q.get("zoom") || 22, distT = dist; const ELEV = THREE.MathUtils.degToRad(+Q.get("pitch") || 52);
+let yaw = 0, yawT = 0, dist = +Q.get("zoom") || 22, distT = dist; const ELEV = THREE.MathUtils.degToRad(+Q.get("pitch") || 52);
 const camTarget = new THREE.Vector3(), keys = new Set(); let player = null, goal = null, drag = null;
 function placeCamera() {
   const ce = Math.cos(ELEV), se = Math.sin(ELEV); camera.position.set(camTarget.x + Math.sin(yaw) * ce * dist, camTarget.y + se * dist, camTarget.z + Math.cos(yaw) * ce * dist); camera.lookAt(camTarget);
@@ -247,7 +251,7 @@ function placeCamera() {
 }
 addEventListener("keydown", (e) => { if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return; const k = e.key.toLowerCase(); if (["arrowup", "arrowdown", "arrowleft", "arrowright", " "].includes(k)) e.preventDefault();
   if (!$("ov").hidden && k !== "escape") return; if (!$("hero").hidden) { if (k === "c" || k === "escape") closeHeroPicker(); return; } if (mapOpen) { if (k === "m" || k === "escape") closeMap(); return; }
-  if (k === "p") { $("perf").hidden = !$("perf").hidden; } else if (k === "m") openMap(); else if (k === "f") { S.followed = true; } else if (k === "c") { $("hero").hidden ? openHeroPicker() : closeHeroPicker(); } else if (k === "n") { nightMode = nightMode === "auto" || nightMode === "fix" ? "night" : nightMode === "night" ? "day" : "auto"; applyTime(true); } else if (k === "a") yawT -= Math.PI / 4; else if (k === "e") yawT += Math.PI / 4; else if (k === "escape") { if (!$("ov").hidden) closeConsole(); else select(null); } else { keys.add(k); S.followed = true; goal = null; } });
+  if (k === "p") { $("perf").hidden = !$("perf").hidden; } else if (k === "m") openMap(); else if (k === "f") { S.followed = true; } else if (k === "c") { $("hero").hidden ? openHeroPicker() : closeHeroPicker(); } else if (k === "n") { nightMode = nightMode === "auto" || nightMode === "fix" ? "night" : nightMode === "night" ? "day" : "auto"; applyTime(true); } else if (k === "escape") { if (!$("ov").hidden) closeConsole(); else select(null); } else { keys.add(k); S.followed = true; goal = null; } });
 addEventListener("keyup", (e) => keys.delete(e.key.toLowerCase())); addEventListener("blur", () => keys.clear());
 canvas.addEventListener("wheel", (e) => { e.preventDefault(); distT = clamp(distT * Math.exp(e.deltaY * 0.0012), 9, 90); }, { passive: false });
 canvas.addEventListener("contextmenu", (e) => e.preventDefault());
@@ -303,7 +307,7 @@ function outfitFor(a) { const r = String(a.role || "").toLowerCase(); for (const
 const hq = () => buildings.find((b) => b.id === "hq");
 function homeFor(a) {
   const h = houseOfAgent.get(a.id), o = h && houseObjs.get(h.key);
-  if (o) { const n = h.agentIds.length, i = h.agentIds.indexOf(a.id), r = o.b.rot, off = (i - (n - 1) / 2) * 1.15; return { x: o.b.x + Math.sin(r) * 4.3 + Math.cos(r) * off, z: o.b.z + Math.cos(r) * 4.3 - Math.sin(r) * off, house: h }; }
+  if (o) { const n = h.agentIds.length, i = h.agentIds.indexOf(a.id), r = o.b.rot, off = (i - (n - 1) / 2) * 1.15; return { x: o.b.x + Math.sin(r) * 2.4 + Math.cos(r) * off, z: o.b.z + Math.cos(r) * 2.4 - Math.sin(r) * off, house: h }; }
   const q = hq() || { x: MAP.spawn.x, z: MAP.spawn.y - 18 }, i = [...agentsById.keys()].indexOf(a.id); return { x: q.x + ((i % 6) - 2.5) * 1.3, z: q.z + 6.2 + Math.floor(i / 6) * 1.2, house: null };
 }
 async function applyAgents() {
@@ -470,11 +474,9 @@ const dbgState = () => ({ ready: S.ready, map: mapOpen, player: player && { h: +
     const r = await (await fetch(BASE + "registry.json", { cache: "no-cache" })).json(); for (const a of r.assets) reg.set(a.id, a);
     cat = new AssetCatalog(r.assets, { base: BASE }); window.__w3d_cat = cat;
     MAP = await (await fetch(BASE + "maps/pilot.json", { cache: "no-cache" })).json(); rows = MAP.rows;
-    buildRelief(); cliffMat = new THREE.MeshLambertMaterial({ map: await cliffTex(), side: THREE.DoubleSide }); const atlas = await loadTex("tex/ground.png"); const gm = groundMesh(atlas); groundObj = gm.children[0]; scene.add(gm); const nk = await kerbs();
+    buildRelief(); cliffMat = new THREE.MeshLambertMaterial({ map: await cliffTex(), side: THREE.DoubleSide }); const atlas = await loadTex("tex/ground.png"); const gm = groundMesh(atlas); groundObj = gm.children[0]; scene.add(gm); const nk = 0;
     // décor de la carte (arbres, buissons, fleurs, mobilier) + forêt de bordure
-    const rnd = ((s) => () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296))(7), border = [];
-    for (let i = 0; i < 520; i++) { const side = i % 4, t = rnd(), d = 1 + rnd() * 28, W = MAP.size.w, H = MAP.size.h; const x = side === 0 ? -d : side === 1 ? W + d : t * (W + 60) - 30, z = side === 2 ? -d : side === 3 ? H + d : t * (H + 60) - 30; border.push({ asset: ["tree_pine", "tree_round", "tree_pine", "tree_autumn"][(rnd() * 4) | 0], x, y: z, rot: rnd() * 6.28 }); }
-    await instanced(MAP.objects, "decor"); await instanced(border, "border");
+    await instanced(MAP.objects, "decor");
     for (const z of MAP.zones) await placeBuilding("zone", z.id, z.asset, z.x, z.y, z.rot, z);
     for (const a of MAP.animated || []) { const pr = await loadModel(a.asset), inner = pr.clone(true), P = new THREE.Group(); P.add(inner); P.position.set(a.x, a.h + heightAt(a.x, a.y), a.y); P.rotation.y = a.rot || 0; scene.add(P); spinners.push({ node: inner, speed: a.speed || 0.5 }); }
     buildHalos(); applyTime(true);

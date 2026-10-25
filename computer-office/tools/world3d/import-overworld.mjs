@@ -19,12 +19,5 @@ for (const n of CHARS) {
     animations: [{ name: "idle", frames: [0], fps: 1 }, { name: "walk", frames: [0, 1, 2, 3], fps: 6 }, { name: "run", frames: [0, 1, 2, 3], fps: 10 }], fallback: { shape: "capsule", color: "#8a6a4a" } });
   console.log("✓ " + id);
 }
-// arbres (64×96) découpés dans la planche de tuiles 32 px : rectangles vérifiés visuellement
-const tileSrc = "Tilesets/padded_mycorTown.png", sheet = decodePNG(fs.readFileSync(path.join(root, tileSrc))); fs.copyFileSync(path.join(root, tileSrc), path.join(DST, tileSrc));
-for (const [id, rect, label] of [["ow_tree_green", [0, 928, 64, 96], "arbre vert"], ["ow_tree_autumn", [0, 1088, 64, 96], "arbre jaune"]]) {
-  const out = new Img(rect[2], rect[3]); out.blit(sheet, rect[0], rect[1], rect[2], rect[3], 0, 0); const rel = "derived/" + id + ".png"; fs.writeFileSync(path.join(DST, rel), out.png());
-  put({ id, inventoryId: "icy:tilesets_padded_mycortown", category: "vegetation", tags: ["arbre", "billboard", "3/4"], file: "sources/icyethics_pokemonassets/" + rel, format: "png", source: { ...SRC(tileSrc), derived: true, crop: rect, note: label }, ...LIC, dimensions: { w: 3.2, h: 4.8, d: 0 }, anchor: "bottom-center", scale: 1, materials: ["alphaTest 0.5, nearest"], occlusion: { mode: "none" }, collision: { type: "circle", r: 0.4 }, animations: [], fallback: { shape: "box", color: "#4e9b62" } });
-  console.log("✓ " + id + " (découpe " + rect.join(",") + ")");
-}
 fs.copyFileSync(path.join(root, "README.md"), path.join(DST, "README.md"));
 fs.writeFileSync(regPath, JSON.stringify(reg, null, 1)); fs.writeFileSync(path.join(ASSETS, "inventory.json"), JSON.stringify(inv, null, 1));

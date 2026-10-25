@@ -1,60 +1,64 @@
 {
- "version": 1,
- "unit": "1 unité = 1 tuile = 16 px de texture ; Y vers le haut ; face avant des modèles = +Z",
+ "version": 2,
+ "unit": "1 unité = 1 tuile ; Y vers le haut ; sprites 2D verticaux face à la caméra (échelle pxPerUnit)",
  "generated": "2026-10-25",
  "assets": [
   {
    "id": "house_0",
    "category": "building",
-   "file": "models/house_0.glb",
-   "format": "glb",
+   "tags": [
+    "sprite",
+    "2d"
+   ],
+   "file": "tex/sp_house_0.png",
+   "format": "png-sprite",
    "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 5.34,
-    "h": 4.75,
-    "d": 4.7
-   },
-   "bbox": {
-    "min": [
-     -2.67,
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets (Tilesets/padded_mycorTown.png)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "IcyEthics",
+    "original": "Tilesets/padded_mycorTown.png",
+    "derived": true,
+    "crop": [
      0,
-     -2.25
+     5374,
+     162,
+     170
     ],
-    "max": [
-     2.67,
-     4.75,
-     2.45
-    ]
+    "note": "cottage toit rouge"
    },
-   "triangles": 96,
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "README : usage non commercial, dérivés libres, crédit IcyEthics",
+   "dimensions": {
+    "w": 6.23,
+    "h": 6.23,
+    "d": 0
+   },
+   "sprite": {
+    "px": [
+     162,
+     162
+    ],
+    "pxPerUnit": 26,
+    "anchor": "bottom-center"
+   },
    "anchor": "bottom-center",
    "scale": 1,
    "front": "+z",
    "materials": [
-    "stone",
-    "wall_cream",
-    "roof_red",
-    "door",
-    "window",
-    "wood",
-    "wall_brick"
+    "alphaTest 0.5, nearest"
    ],
    "occlusion": {
-    "mode": "fade",
-    "note": "estompé quand il masque le personnage"
+    "mode": "fade"
    },
    "collision": {
     "type": "box",
-    "w": 4.6,
-    "d": 3.8
+    "w": 5.6,
+    "d": 2.6
    },
    "instanced": false,
-   "emitsLight": false,
    "animations": [],
    "fallback": {
     "shape": "box",
@@ -64,54 +68,59 @@
   {
    "id": "house_1",
    "category": "building",
-   "file": "models/house_1.glb",
-   "format": "glb",
+   "tags": [
+    "sprite",
+    "2d"
+   ],
+   "file": "tex/sp_house_1.png",
+   "format": "png-sprite",
    "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 5.34,
-    "h": 6.2,
-    "d": 4.7
-   },
-   "bbox": {
-    "min": [
-     -2.67,
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets (Tilesets/padded_mycorTown.png)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "IcyEthics",
+    "original": "Tilesets/padded_mycorTown.png",
+    "derived": true,
+    "crop": [
      0,
-     -2.25
+     5706,
+     162,
+     184
     ],
-    "max": [
-     2.67,
-     6.2,
-     2.45
-    ]
+    "note": "maison à pignon brique"
    },
-   "triangles": 112,
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "README : usage non commercial, dérivés libres, crédit IcyEthics",
+   "dimensions": {
+    "w": 6.23,
+    "h": 7.08,
+    "d": 0
+   },
+   "sprite": {
+    "px": [
+     162,
+     184
+    ],
+    "pxPerUnit": 26,
+    "anchor": "bottom-center"
+   },
    "anchor": "bottom-center",
    "scale": 1,
    "front": "+z",
    "materials": [
-    "stone",
-    "wall_blue",
-    "roof_blue",
-    "door",
-    "window",
-    "wood"
+    "alphaTest 0.5, nearest"
    ],
    "occlusion": {
-    "mode": "fade",
-    "note": "estompé quand il masque le personnage"
+    "mode": "fade"
    },
    "collision": {
     "type": "box",
-    "w": 4.6,
-    "d": 3.8
+    "w": 5.6,
+    "d": 2.6
    },
    "instanced": false,
-   "emitsLight": false,
    "animations": [],
    "fallback": {
     "shape": "box",
@@ -121,55 +130,59 @@
   {
    "id": "house_2",
    "category": "building",
-   "file": "models/house_2.glb",
-   "format": "glb",
+   "tags": [
+    "sprite",
+    "2d"
+   ],
+   "file": "tex/sp_house_2.png",
+   "format": "png-sprite",
    "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 5.34,
-    "h": 4.75,
-    "d": 4.7
-   },
-   "bbox": {
-    "min": [
-     -2.67,
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets (Tilesets/padded_mycorTown.png)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "IcyEthics",
+    "original": "Tilesets/padded_mycorTown.png",
+    "derived": true,
+    "crop": [
      0,
-     -2.25
+     5897,
+     162,
+     93
     ],
-    "max": [
-     2.67,
-     4.75,
-     2.45
-    ]
+    "note": "maison à pignon pierre"
    },
-   "triangles": 96,
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "README : usage non commercial, dérivés libres, crédit IcyEthics",
+   "dimensions": {
+    "w": 6.23,
+    "h": 3.58,
+    "d": 0
+   },
+   "sprite": {
+    "px": [
+     162,
+     93
+    ],
+    "pxPerUnit": 26,
+    "anchor": "bottom-center"
+   },
    "anchor": "bottom-center",
    "scale": 1,
    "front": "+z",
    "materials": [
-    "stone",
-    "wall_mint",
-    "roof_green",
-    "door",
-    "window",
-    "wood",
-    "wall_brick"
+    "alphaTest 0.5, nearest"
    ],
    "occlusion": {
-    "mode": "fade",
-    "note": "estompé quand il masque le personnage"
+    "mode": "fade"
    },
    "collision": {
     "type": "box",
-    "w": 4.6,
-    "d": 3.8
+    "w": 5.6,
+    "d": 2.6
    },
    "instanced": false,
-   "emitsLight": false,
    "animations": [],
    "fallback": {
     "shape": "box",
@@ -179,54 +192,59 @@
   {
    "id": "house_3",
    "category": "building",
-   "file": "models/house_3.glb",
-   "format": "glb",
+   "tags": [
+    "sprite",
+    "2d"
+   ],
+   "file": "tex/sp_house_3.png",
+   "format": "png-sprite",
    "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 5.34,
-    "h": 6.2,
-    "d": 4.7
-   },
-   "bbox": {
-    "min": [
-     -2.67,
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets (Tilesets/padded_mycorTown.png)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "IcyEthics",
+    "original": "Tilesets/padded_mycorTown.png",
+    "derived": true,
+    "crop": [
      0,
-     -2.25
+     6276,
+     162,
+     130
     ],
-    "max": [
-     2.67,
-     6.2,
-     2.45
-    ]
+    "note": "chaumière"
    },
-   "triangles": 112,
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "README : usage non commercial, dérivés libres, crédit IcyEthics",
+   "dimensions": {
+    "w": 6.23,
+    "h": 4.69,
+    "d": 0
+   },
+   "sprite": {
+    "px": [
+     162,
+     122
+    ],
+    "pxPerUnit": 26,
+    "anchor": "bottom-center"
+   },
    "anchor": "bottom-center",
    "scale": 1,
    "front": "+z",
    "materials": [
-    "stone",
-    "wall_sand",
-    "roof_orange",
-    "door",
-    "window",
-    "wood"
+    "alphaTest 0.5, nearest"
    ],
    "occlusion": {
-    "mode": "fade",
-    "note": "estompé quand il masque le personnage"
+    "mode": "fade"
    },
    "collision": {
     "type": "box",
-    "w": 4.6,
-    "d": 3.8
+    "w": 5.6,
+    "d": 2.6
    },
    "instanced": false,
-   "emitsLight": false,
    "animations": [],
    "fallback": {
     "shape": "box",
@@ -236,55 +254,59 @@
   {
    "id": "house_4",
    "category": "building",
-   "file": "models/house_4.glb",
-   "format": "glb",
+   "tags": [
+    "sprite",
+    "2d"
+   ],
+   "file": "tex/sp_house_4.png",
+   "format": "png-sprite",
    "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 5.34,
-    "h": 4.75,
-    "d": 4.7
-   },
-   "bbox": {
-    "min": [
-     -2.67,
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets (Tilesets/padded_mycorTown.png)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "IcyEthics",
+    "original": "Tilesets/padded_mycorTown.png",
+    "derived": true,
+    "crop": [
      0,
-     -2.25
+     4862,
+     160,
+     162
     ],
-    "max": [
-     2.67,
-     4.75,
-     2.45
-    ]
+    "note": "maison blanche toit rouge"
    },
-   "triangles": 96,
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "README : usage non commercial, dérivés libres, crédit IcyEthics",
+   "dimensions": {
+    "w": 6.15,
+    "h": 5.69,
+    "d": 0
+   },
+   "sprite": {
+    "px": [
+     160,
+     148
+    ],
+    "pxPerUnit": 26,
+    "anchor": "bottom-center"
+   },
    "anchor": "bottom-center",
    "scale": 1,
    "front": "+z",
    "materials": [
-    "stone",
-    "wall_rose",
-    "roof_slate",
-    "door",
-    "window",
-    "wood",
-    "wall_brick"
+    "alphaTest 0.5, nearest"
    ],
    "occlusion": {
-    "mode": "fade",
-    "note": "estompé quand il masque le personnage"
+    "mode": "fade"
    },
    "collision": {
     "type": "box",
-    "w": 4.6,
-    "d": 3.8
+    "w": 5.6,
+    "d": 2.6
    },
    "instanced": false,
-   "emitsLight": false,
    "animations": [],
    "fallback": {
     "shape": "box",
@@ -294,54 +316,59 @@
   {
    "id": "house_5",
    "category": "building",
-   "file": "models/house_5.glb",
-   "format": "glb",
+   "tags": [
+    "sprite",
+    "2d"
+   ],
+   "file": "tex/sp_house_5.png",
+   "format": "png-sprite",
    "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 5.34,
-    "h": 6.2,
-    "d": 4.7
-   },
-   "bbox": {
-    "min": [
-     -2.67,
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets (Tilesets/padded_mycorTown.png)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "IcyEthics",
+    "original": "Tilesets/padded_mycorTown.png",
+    "derived": true,
+    "crop": [
      0,
-     -2.25
+     4458,
+     240,
+     150
     ],
-    "max": [
-     2.67,
-     6.2,
-     2.45
-    ]
+    "note": "maison à porte arquée"
    },
-   "triangles": 112,
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "README : usage non commercial, dérivés libres, crédit IcyEthics",
+   "dimensions": {
+    "w": 6.61,
+    "h": 4.11,
+    "d": 0
+   },
+   "sprite": {
+    "px": [
+     238,
+     148
+    ],
+    "pxPerUnit": 36,
+    "anchor": "bottom-center"
+   },
    "anchor": "bottom-center",
    "scale": 1,
    "front": "+z",
    "materials": [
-    "stone",
-    "wall_timber",
-    "roof_crimson",
-    "door",
-    "window",
-    "wood"
+    "alphaTest 0.5, nearest"
    ],
    "occlusion": {
-    "mode": "fade",
-    "note": "estompé quand il masque le personnage"
+    "mode": "fade"
    },
    "collision": {
     "type": "box",
-    "w": 4.6,
-    "d": 3.8
+    "w": 6.2,
+    "d": 2.6
    },
    "instanced": false,
-   "emitsLight": false,
    "animations": [],
    "fallback": {
     "shape": "box",
@@ -351,57 +378,59 @@
   {
    "id": "hq",
    "category": "building",
-   "file": "models/hq.glb",
-   "format": "glb",
+   "tags": [
+    "sprite",
+    "2d"
+   ],
+   "file": "tex/sp_hq.png",
+   "format": "png-sprite",
    "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 9.1,
-    "h": 9.4,
-    "d": 6.95
-   },
-   "bbox": {
-    "min": [
-     -4.55,
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets (Tilesets/padded_mycorTown.png)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "IcyEthics",
+    "original": "Tilesets/padded_mycorTown.png",
+    "derived": true,
+    "crop": [
      0,
-     -3.05
+     8374,
+     226,
+     364
     ],
-    "max": [
-     4.55,
-     9.4,
-     3.9
-    ]
+    "note": "église / Quartier général"
    },
-   "triangles": 304,
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "README : usage non commercial, dérivés libres, crédit IcyEthics",
+   "dimensions": {
+    "w": 8,
+    "h": 12.86,
+    "d": 0
+   },
+   "sprite": {
+    "px": [
+     224,
+     360
+    ],
+    "pxPerUnit": 28,
+    "anchor": "bottom-center"
+   },
    "anchor": "bottom-center",
    "scale": 1,
    "front": "+z",
    "materials": [
-    "stone",
-    "wall_cream",
-    "roof_blue",
-    "window",
-    "metal",
-    "flag",
-    "door",
-    "signboard",
-    "wood"
+    "alphaTest 0.5, nearest"
    ],
    "occlusion": {
-    "mode": "fade",
-    "note": "estompé quand il masque le personnage"
+    "mode": "fade"
    },
    "collision": {
     "type": "box",
-    "w": 8.4,
-    "d": 6.4
+    "w": 7.4,
+    "d": 3.4
    },
    "instanced": false,
-   "emitsLight": false,
    "animations": [],
    "fallback": {
     "shape": "box",
@@ -411,58 +440,59 @@
   {
    "id": "ai_lab",
    "category": "building",
-   "file": "models/ai_lab.glb",
-   "format": "glb",
+   "tags": [
+    "sprite",
+    "2d"
+   ],
+   "file": "tex/sp_ai_lab.png",
+   "format": "png-sprite",
    "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 8.65,
-    "h": 7.75,
-    "d": 6.3
-   },
-   "bbox": {
-    "min": [
-     -3.15,
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets (Tilesets/padded_mycorTown.png)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "IcyEthics",
+    "original": "Tilesets/padded_mycorTown.png",
+    "derived": true,
+    "crop": [
      0,
-     -3.15
+     6928,
+     256,
+     146
     ],
-    "max": [
-     5.5,
-     7.75,
-     3.15
-    ]
+    "note": "bâtiment à colombages / Laboratoire IA"
    },
-   "triangles": 212,
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "README : usage non commercial, dérivés libres, crédit IcyEthics",
+   "dimensions": {
+    "w": 9.14,
+    "h": 5.07,
+    "d": 0
+   },
+   "sprite": {
+    "px": [
+     256,
+     142
+    ],
+    "pxPerUnit": 28,
+    "anchor": "bottom-center"
+   },
    "anchor": "bottom-center",
    "scale": 1,
    "front": "+z",
    "materials": [
-    "stone",
-    "wall_lab",
-    "roof_teal",
-    "metal",
-    "lamp_glass (émissif)",
-    "window_tech",
-    "door_glass",
-    "signboard",
-    "roof_flat"
+    "alphaTest 0.5, nearest"
    ],
    "occlusion": {
-    "mode": "fade",
-    "note": "estompé quand il masque le personnage"
+    "mode": "fade"
    },
    "collision": {
     "type": "box",
-    "w": 11,
-    "d": 6.2,
-    "cx": 1.2
+    "w": 8.4,
+    "d": 3
    },
    "instanced": false,
-   "emitsLight": false,
    "animations": [],
    "fallback": {
     "shape": "box",
@@ -472,58 +502,59 @@
   {
    "id": "ops_center",
    "category": "building",
-   "file": "models/ops_center.glb",
-   "format": "glb",
+   "tags": [
+    "sprite",
+    "2d"
+   ],
+   "file": "tex/sp_ops_center.png",
+   "format": "png-sprite",
    "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 11.4,
-    "h": 7.5,
-    "d": 5.2
-   },
-   "bbox": {
-    "min": [
-     -5.1,
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets (Tilesets/padded_mycorTown.png)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "IcyEthics",
+    "original": "Tilesets/padded_mycorTown.png",
+    "derived": true,
+    "crop": [
      0,
-     -2.6
+     8016,
+     194,
+     338
     ],
-    "max": [
-     6.3,
-     7.5,
-     2.6
-    ]
+    "note": "entrepôt / Centre d'opérations"
    },
-   "triangles": 178,
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "README : usage non commercial, dérivés libres, crédit IcyEthics",
+   "dimensions": {
+    "w": 6.4,
+    "h": 11.13,
+    "d": 0
+   },
+   "sprite": {
+    "px": [
+     192,
+     334
+    ],
+    "pxPerUnit": 30,
+    "anchor": "bottom-center"
+   },
    "anchor": "bottom-center",
    "scale": 1,
    "front": "+z",
    "materials": [
-    "stone",
-    "wall_panel",
-    "roof_flat",
-    "window_tech",
-    "door_glass",
-    "signboard",
-    "metal",
-    "metal",
-    "lamp_glass (émissif)"
+    "alphaTest 0.5, nearest"
    ],
    "occlusion": {
-    "mode": "fade",
-    "note": "estompé quand il masque le personnage"
+    "mode": "fade"
    },
    "collision": {
     "type": "box",
-    "w": 12.6,
-    "d": 5.2,
-    "cx": 0.6
+    "w": 6,
+    "d": 3.2
    },
    "instanced": false,
-   "emitsLight": false,
    "animations": [],
    "fallback": {
     "shape": "box",
@@ -533,58 +564,59 @@
   {
    "id": "dev_workshop",
    "category": "building",
-   "file": "models/dev_workshop.glb",
-   "format": "glb",
+   "tags": [
+    "sprite",
+    "2d"
+   ],
+   "file": "tex/sp_dev_workshop.png",
+   "format": "png-sprite",
    "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 9.42,
-    "h": 5.5,
-    "d": 6.58
-   },
-   "bbox": {
-    "min": [
-     -3.92,
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets (Tilesets/padded_mycorTown.png)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "IcyEthics",
+    "original": "Tilesets/padded_mycorTown.png",
+    "derived": true,
+    "crop": [
      0,
-     -2.9
+     6668,
+     256,
+     222
     ],
-    "max": [
-     5.5,
-     5.5,
-     3.67
-    ]
+    "note": "grand chalet / Atelier dev"
    },
-   "triangles": 170,
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "README : usage non commercial, dérivés libres, crédit IcyEthics",
+   "dimensions": {
+    "w": 8.53,
+    "h": 7.2,
+    "d": 0
+   },
+   "sprite": {
+    "px": [
+     256,
+     216
+    ],
+    "pxPerUnit": 30,
+    "anchor": "bottom-center"
+   },
    "anchor": "bottom-center",
    "scale": 1,
    "front": "+z",
    "materials": [
-    "stone",
-    "wall_brick",
-    "roof_orange",
-    "door",
-    "window",
-    "wood",
-    "signboard",
-    "roof_slate",
-    "metal"
+    "alphaTest 0.5, nearest"
    ],
    "occlusion": {
-    "mode": "fade",
-    "note": "estompé quand il masque le personnage"
+    "mode": "fade"
    },
    "collision": {
     "type": "box",
-    "w": 10.6,
-    "d": 6,
-    "cx": 1
+    "w": 8,
+    "d": 3.2
    },
    "instanced": false,
-   "emitsLight": false,
    "animations": [],
    "fallback": {
     "shape": "box",
@@ -594,59 +626,59 @@
   {
    "id": "supervision",
    "category": "building",
-   "file": "models/supervision.glb",
-   "format": "glb",
+   "tags": [
+    "sprite",
+    "2d"
+   ],
+   "file": "tex/sp_supervision.png",
+   "format": "png-sprite",
    "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 6.8,
-    "h": 9.35,
-    "d": 5.2
-   },
-   "bbox": {
-    "min": [
-     -2.6,
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets (Tilesets/padded_mycorTown.png)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "IcyEthics",
+    "original": "Tilesets/padded_mycorTown.png",
+    "derived": true,
+    "crop": [
      0,
-     -2.6
+     6434,
+     226,
+     224
     ],
-    "max": [
-     4.2,
-     9.35,
-     2.6
-    ]
+    "note": "porte fortifiée / Centre de supervision"
    },
-   "triangles": 164,
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "README : usage non commercial, dérivés libres, crédit IcyEthics",
+   "dimensions": {
+    "w": 7.47,
+    "h": 7.33,
+    "d": 0
+   },
+   "sprite": {
+    "px": [
+     224,
+     220
+    ],
+    "pxPerUnit": 30,
+    "anchor": "bottom-center"
+   },
    "anchor": "bottom-center",
    "scale": 1,
    "front": "+z",
    "materials": [
-    "stone",
-    "wall_stone",
-    "wall_panel",
-    "window_tech",
-    "roof_crimson",
-    "metal",
-    "lamp_glass (émissif)",
-    "door_glass",
-    "signboard",
-    "roof_flat"
+    "alphaTest 0.5, nearest"
    ],
    "occlusion": {
-    "mode": "fade",
-    "note": "estompé quand il masque le personnage"
+    "mode": "fade"
    },
    "collision": {
     "type": "box",
-    "w": 8.8,
-    "d": 5.2,
-    "cx": 0.8
+    "w": 7,
+    "d": 3
    },
    "instanced": false,
-   "emitsLight": false,
    "animations": [],
    "fallback": {
     "shape": "box",
@@ -654,102 +686,666 @@
    }
   },
   {
-   "id": "tree_round",
-   "category": "vegetation",
-   "file": "models/tree_round.glb",
-   "format": "glb",
+   "id": "well",
+   "category": "furniture",
+   "tags": [
+    "sprite",
+    "2d"
+   ],
+   "file": "tex/sp_well.png",
+   "format": "png-sprite",
    "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 2.35,
-    "h": 2.85,
-    "d": 2.3
-   },
-   "bbox": {
-    "min": [
-     -1.15,
-     -0.15,
-     -1.15
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets (Tilesets/padded_mycorTown.png)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "IcyEthics",
+    "original": "Tilesets/padded_mycorTown.png",
+    "derived": true,
+    "crop": [
+     2,
+     3764,
+     92,
+     108
     ],
-    "max": [
-     1.2,
-     2.7,
-     1.15
-    ]
+    "note": "puits"
    },
-   "triangles": 190,
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "README : usage non commercial, dérivés libres, crédit IcyEthics",
+   "dimensions": {
+    "w": 2.93,
+    "h": 3.53,
+    "d": 0
+   },
+   "sprite": {
+    "px": [
+     88,
+     106
+    ],
+    "pxPerUnit": 30,
+    "anchor": "bottom-center"
+   },
    "anchor": "bottom-center",
    "scale": 1,
    "front": "+z",
    "materials": [
-    "bark",
-    "leaf",
-    "leaf_dark"
+    "alphaTest 0.5, nearest"
    ],
    "occlusion": {
     "mode": "none"
    },
    "collision": {
     "type": "circle",
-    "r": 0.35
+    "r": 1.3
    },
    "instanced": true,
-   "emitsLight": false,
    "animations": [],
    "fallback": {
     "shape": "box",
-    "color": "#4e9b62"
+    "color": "#c9a46a"
    }
   },
   {
-   "id": "tree_pine",
-   "category": "vegetation",
-   "file": "models/tree_pine.glb",
-   "format": "glb",
+   "id": "hay",
+   "category": "furniture",
+   "tags": [
+    "sprite",
+    "2d"
+   ],
+   "file": "tex/sp_hay.png",
+   "format": "png-sprite",
    "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 1.9,
-    "h": 3.4,
-    "d": 1.9
-   },
-   "bbox": {
-    "min": [
-     -0.95,
-     0,
-     -0.95
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets (Tilesets/padded_mycorTown.png)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "IcyEthics",
+    "original": "Tilesets/padded_mycorTown.png",
+    "derived": true,
+    "crop": [
+     100,
+     3458,
+     60,
+     110
     ],
-    "max": [
-     0.95,
-     3.4,
-     0.95
-    ]
+    "note": "botte de foin"
    },
-   "triangles": 42,
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "README : usage non commercial, dérivés libres, crédit IcyEthics",
+   "dimensions": {
+    "w": 2,
+    "h": 3.13,
+    "d": 0
+   },
+   "sprite": {
+    "px": [
+     60,
+     94
+    ],
+    "pxPerUnit": 30,
+    "anchor": "bottom-center"
+   },
    "anchor": "bottom-center",
    "scale": 1,
    "front": "+z",
    "materials": [
-    "bark",
-    "leaf_dark"
+    "alphaTest 0.5, nearest"
    ],
    "occlusion": {
     "mode": "none"
    },
    "collision": {
     "type": "circle",
-    "r": 0.3
+    "r": 0.8
    },
    "instanced": true,
-   "emitsLight": false,
+   "animations": [],
+   "fallback": {
+    "shape": "box",
+    "color": "#c9a46a"
+   }
+  },
+  {
+   "id": "crate",
+   "category": "furniture",
+   "tags": [
+    "sprite",
+    "2d"
+   ],
+   "file": "tex/sp_crate.png",
+   "format": "png-sprite",
+   "source": {
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets (Tilesets/padded_mycorTown.png)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "IcyEthics",
+    "original": "Tilesets/padded_mycorTown.png",
+    "derived": true,
+    "crop": [
+     0,
+     3680,
+     96,
+     66
+    ],
+    "note": "caisses"
+   },
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "README : usage non commercial, dérivés libres, crédit IcyEthics",
+   "dimensions": {
+    "w": 3.2,
+    "h": 2.13,
+    "d": 0
+   },
+   "sprite": {
+    "px": [
+     96,
+     64
+    ],
+    "pxPerUnit": 30,
+    "anchor": "bottom-center"
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "front": "+z",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "box",
+    "w": 3,
+    "d": 1.2
+   },
+   "instanced": true,
+   "animations": [],
+   "fallback": {
+    "shape": "box",
+    "color": "#c9a46a"
+   }
+  },
+  {
+   "id": "fence",
+   "category": "furniture",
+   "tags": [
+    "sprite",
+    "2d"
+   ],
+   "file": "tex/sp_fence.png",
+   "format": "png-sprite",
+   "source": {
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets (Tilesets/padded_mycorTown.png)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "IcyEthics",
+    "original": "Tilesets/padded_mycorTown.png",
+    "derived": true,
+    "crop": [
+     66,
+     3656,
+     60,
+     24
+    ],
+    "note": "clôture blanche"
+   },
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "README : usage non commercial, dérivés libres, crédit IcyEthics",
+   "dimensions": {
+    "w": 2.31,
+    "h": 0.92,
+    "d": 0
+   },
+   "sprite": {
+    "px": [
+     60,
+     24
+    ],
+    "pxPerUnit": 26,
+    "anchor": "bottom-center"
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "front": "+z",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "box",
+    "w": 2.2,
+    "d": 0.3
+   },
+   "instanced": true,
+   "animations": [],
+   "fallback": {
+    "shape": "box",
+    "color": "#c9a46a"
+   }
+  },
+  {
+   "id": "flowerbed",
+   "category": "vegetation",
+   "tags": [
+    "sprite",
+    "2d"
+   ],
+   "file": "tex/sp_flowerbed.png",
+   "format": "png-sprite",
+   "source": {
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets (Tilesets/padded_mycorTown.png)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "IcyEthics",
+    "original": "Tilesets/padded_mycorTown.png",
+    "derived": true,
+    "crop": [
+     160,
+     4462,
+     80,
+     36
+    ],
+    "note": "jardinière fleurie"
+   },
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "README : usage non commercial, dérivés libres, crédit IcyEthics",
+   "dimensions": {
+    "w": 1.95,
+    "h": 0.85,
+    "d": 0
+   },
+   "sprite": {
+    "px": [
+     78,
+     34
+    ],
+    "pxPerUnit": 40,
+    "anchor": "bottom-center"
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "front": "+z",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": null,
+   "instanced": true,
+   "animations": [],
+   "fallback": {
+    "shape": "box",
+    "color": "#e0a02f"
+   }
+  },
+  {
+   "id": "bush_0",
+   "category": "vegetation",
+   "tags": [
+    "sprite",
+    "2d"
+   ],
+   "file": "tex/sp_bush_0.png",
+   "format": "png-sprite",
+   "source": {
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets (Tilesets/padded_mycorTown.png)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "IcyEthics",
+    "original": "Tilesets/padded_mycorTown.png",
+    "derived": true,
+    "crop": [
+     0,
+     128,
+     32,
+     32
+    ],
+    "note": "buisson"
+   },
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "README : usage non commercial, dérivés libres, crédit IcyEthics",
+   "dimensions": {
+    "w": 0.93,
+    "h": 0.93,
+    "d": 0
+   },
+   "sprite": {
+    "px": [
+     28,
+     28
+    ],
+    "pxPerUnit": 30,
+    "anchor": "bottom-center"
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "front": "+z",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.45
+   },
+   "instanced": true,
+   "animations": [],
+   "fallback": {
+    "shape": "box",
+    "color": "#c9a46a"
+   }
+  },
+  {
+   "id": "bush_1",
+   "category": "vegetation",
+   "tags": [
+    "sprite",
+    "2d"
+   ],
+   "file": "tex/sp_bush_1.png",
+   "format": "png-sprite",
+   "source": {
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets (Tilesets/padded_mycorTown.png)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "IcyEthics",
+    "original": "Tilesets/padded_mycorTown.png",
+    "derived": true,
+    "crop": [
+     64,
+     128,
+     32,
+     32
+    ],
+    "note": "buisson"
+   },
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "README : usage non commercial, dérivés libres, crédit IcyEthics",
+   "dimensions": {
+    "w": 1.07,
+    "h": 1.07,
+    "d": 0
+   },
+   "sprite": {
+    "px": [
+     32,
+     32
+    ],
+    "pxPerUnit": 30,
+    "anchor": "bottom-center"
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "front": "+z",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.45
+   },
+   "instanced": true,
+   "animations": [],
+   "fallback": {
+    "shape": "box",
+    "color": "#c9a46a"
+   }
+  },
+  {
+   "id": "bush_big",
+   "category": "vegetation",
+   "tags": [
+    "sprite",
+    "2d"
+   ],
+   "file": "tex/sp_bush_big.png",
+   "format": "png-sprite",
+   "source": {
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets (Tilesets/padded_mycorTown.png)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "IcyEthics",
+    "original": "Tilesets/padded_mycorTown.png",
+    "derived": true,
+    "crop": [
+     192,
+     160,
+     64,
+     64
+    ],
+    "note": "gros buisson"
+   },
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "README : usage non commercial, dérivés libres, crédit IcyEthics",
+   "dimensions": {
+    "w": 2.07,
+    "h": 2.07,
+    "d": 0
+   },
+   "sprite": {
+    "px": [
+     62,
+     62
+    ],
+    "pxPerUnit": 30,
+    "anchor": "bottom-center"
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "front": "+z",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.9
+   },
+   "instanced": true,
+   "animations": [],
+   "fallback": {
+    "shape": "box",
+    "color": "#c9a46a"
+   }
+  },
+  {
+   "id": "rock",
+   "category": "vegetation",
+   "tags": [
+    "sprite",
+    "2d"
+   ],
+   "file": "tex/sp_rock.png",
+   "format": "png-sprite",
+   "source": {
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets (Tilesets/padded_mycorTown.png)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "IcyEthics",
+    "original": "Tilesets/padded_mycorTown.png",
+    "derived": true,
+    "crop": [
+     64,
+     160,
+     64,
+     32
+    ],
+    "note": "rochers"
+   },
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "README : usage non commercial, dérivés libres, crédit IcyEthics",
+   "dimensions": {
+    "w": 2.13,
+    "h": 1.07,
+    "d": 0
+   },
+   "sprite": {
+    "px": [
+     64,
+     32
+    ],
+    "pxPerUnit": 30,
+    "anchor": "bottom-center"
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "front": "+z",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.6
+   },
+   "instanced": true,
+   "animations": [],
+   "fallback": {
+    "shape": "box",
+    "color": "#c9a46a"
+   }
+  },
+  {
+   "id": "tallgrass",
+   "category": "vegetation",
+   "tags": [
+    "sprite",
+    "2d"
+   ],
+   "file": "tex/sp_tallgrass.png",
+   "format": "png-sprite",
+   "source": {
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets (Tilesets/padded_mycorTown.png)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "IcyEthics",
+    "original": "Tilesets/padded_mycorTown.png",
+    "derived": true,
+    "crop": [
+     176,
+     224,
+     64,
+     90
+    ],
+    "note": "hautes herbes"
+   },
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "README : usage non commercial, dérivés libres, crédit IcyEthics",
+   "dimensions": {
+    "w": 1.07,
+    "h": 1.4,
+    "d": 0
+   },
+   "sprite": {
+    "px": [
+     64,
+     84
+    ],
+    "pxPerUnit": 60,
+    "anchor": "bottom-center"
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "front": "+z",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": null,
+   "instanced": true,
+   "animations": [],
+   "fallback": {
+    "shape": "box",
+    "color": "#4aa63f"
+   }
+  },
+  {
+   "id": "tree_green",
+   "category": "vegetation",
+   "tags": [
+    "sprite",
+    "2d"
+   ],
+   "file": "tex/sp_tree_green.png",
+   "format": "png-sprite",
+   "source": {
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets (Tilesets/padded_mycorTown.png)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "IcyEthics",
+    "original": "Tilesets/padded_mycorTown.png",
+    "derived": true,
+    "crop": [
+     0,
+     928,
+     64,
+     96
+    ],
+    "note": "arbre vert"
+   },
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "README : usage non commercial, dérivés libres, crédit IcyEthics",
+   "dimensions": {
+    "w": 2.31,
+    "h": 3.54,
+    "d": 0
+   },
+   "sprite": {
+    "px": [
+     60,
+     92
+    ],
+    "pxPerUnit": 26,
+    "anchor": "bottom-center"
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "front": "+z",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.5
+   },
+   "instanced": true,
    "animations": [],
    "fallback": {
     "shape": "box",
@@ -759,197 +1355,114 @@
   {
    "id": "tree_autumn",
    "category": "vegetation",
-   "file": "models/tree_autumn.glb",
-   "format": "glb",
-   "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 2.1,
-    "h": 2.5,
-    "d": 2.1
-   },
-   "bbox": {
-    "min": [
-     -1.05,
-     -0.05,
-     -1.05
-    ],
-    "max": [
-     1.05,
-     2.45,
-     1.05
-    ]
-   },
-   "triangles": 148,
-   "anchor": "bottom-center",
-   "scale": 1,
-   "front": "+z",
-   "materials": [
-    "bark",
-    "leaf_autumn"
+   "tags": [
+    "sprite",
+    "2d"
    ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 0.35
-   },
-   "instanced": true,
-   "emitsLight": false,
-   "animations": [],
-   "fallback": {
-    "shape": "box",
-    "color": "#4e9b62"
-   }
-  },
-  {
-   "id": "bush",
-   "category": "vegetation",
-   "file": "models/bush.glb",
-   "format": "glb",
+   "file": "tex/sp_tree_autumn.png",
+   "format": "png-sprite",
    "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 1.14,
-    "h": 1,
-    "d": 0.95
-   },
-   "bbox": {
-    "min": [
-     -0.49,
-     -0.25,
-     -0.45
-    ],
-    "max": [
-     0.65,
-     0.75,
-     0.5
-    ]
-   },
-   "triangles": 91,
-   "anchor": "bottom-center",
-   "scale": 1,
-   "front": "+z",
-   "materials": [
-    "leaf",
-    "leaf_dark"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 0.4
-   },
-   "instanced": true,
-   "emitsLight": false,
-   "animations": [],
-   "fallback": {
-    "shape": "box",
-    "color": "#4e9b62"
-   }
-  },
-  {
-   "id": "flowers",
-   "category": "vegetation",
-   "file": "models/flowers.glb",
-   "format": "glb",
-   "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 1,
-    "h": 0.55,
-    "d": 1
-   },
-   "bbox": {
-    "min": [
-     -0.5,
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets (Tilesets/padded_mycorTown.png)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "IcyEthics",
+    "original": "Tilesets/padded_mycorTown.png",
+    "derived": true,
+    "crop": [
      0,
-     -0.5
+     1088,
+     64,
+     96
     ],
-    "max": [
-     0.5,
-     0.55,
-     0.5
-    ]
+    "note": "arbre jaune"
    },
-   "triangles": 4,
-   "anchor": "bottom-center",
-   "scale": 1,
-   "front": "+z",
-   "materials": [
-    "flowers (découpe)"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": null,
-   "instanced": true,
-   "emitsLight": false,
-   "animations": [],
-   "fallback": {
-    "shape": "box",
-    "color": "#4e9b62"
-   }
-  },
-  {
-   "id": "lamp",
-   "category": "furniture",
-   "file": "models/lamp.glb",
-   "format": "glb",
-   "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "README : usage non commercial, dérivés libres, crédit IcyEthics",
    "dimensions": {
-    "w": 0.48,
-    "h": 3.02,
-    "d": 0.48
+    "w": 2.31,
+    "h": 3.54,
+    "d": 0
    },
-   "bbox": {
-    "min": [
-     -0.24,
-     0,
-     -0.24
+   "sprite": {
+    "px": [
+     60,
+     92
     ],
-    "max": [
-     0.24,
-     3.02,
-     0.24
-    ]
+    "pxPerUnit": 26,
+    "anchor": "bottom-center"
    },
-   "triangles": 56,
    "anchor": "bottom-center",
    "scale": 1,
    "front": "+z",
    "materials": [
-    "metal",
-    "lamp_glass (émissif)"
+    "alphaTest 0.5, nearest"
    ],
    "occlusion": {
     "mode": "none"
    },
    "collision": {
     "type": "circle",
-    "r": 0.15
+    "r": 0.5
    },
    "instanced": true,
-   "emitsLight": true,
+   "animations": [],
+   "fallback": {
+    "shape": "box",
+    "color": "#d9b400"
+   }
+  },
+  {
+   "id": "tree_user",
+   "category": "vegetation",
+   "tags": [
+    "sprite",
+    "2d",
+    "arbre"
+   ],
+   "file": "tex/sp_tree_user.png",
+   "format": "png-sprite",
+   "source": {
+    "kind": "imported",
+    "from": "persos_pixel_art_pack.zip (script de l'utilisateur)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "utilisateur",
+    "original": "decor/arbre.png",
+    "derived": false,
+    "note": "arbre du pack"
+   },
+   "licence": "oeuvre-utilisateur",
+   "licenceUrl": null,
+   "licenceVerified": true,
+   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
+   "dimensions": {
+    "w": 2,
+    "h": 2.45,
+    "d": 0
+   },
+   "sprite": {
+    "px": [
+     40,
+     49
+    ],
+    "pxPerUnit": 20,
+    "anchor": "bottom-center"
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "front": "+z",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.45
+   },
+   "instanced": true,
    "animations": [],
    "fallback": {
     "shape": "box",
@@ -959,1163 +1472,151 @@
   {
    "id": "bench",
    "category": "furniture",
-   "file": "models/bench.glb",
-   "format": "glb",
+   "tags": [
+    "sprite",
+    "2d"
+   ],
+   "file": "tex/sp_bench.png",
+   "format": "png-sprite",
    "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
+    "kind": "imported",
+    "from": "persos_pixel_art_pack.zip (script de l'utilisateur)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "utilisateur",
+    "original": "decor/banc.png",
+    "derived": false,
+    "note": "banc du pack"
    },
-   "licence": "CC0-1.0",
+   "licence": "oeuvre-utilisateur",
+   "licenceUrl": null,
+   "licenceVerified": true,
+   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
    "dimensions": {
-    "w": 1.4,
-    "h": 1,
-    "d": 0.46
+    "w": 1.33,
+    "h": 0.88,
+    "d": 0
    },
-   "bbox": {
-    "min": [
-     -0.7,
-     0,
-     -0.24
+   "sprite": {
+    "px": [
+     32,
+     21
     ],
-    "max": [
-     0.7,
-     1,
-     0.22
-    ]
+    "pxPerUnit": 24,
+    "anchor": "bottom-center"
    },
-   "triangles": 40,
    "anchor": "bottom-center",
    "scale": 1,
    "front": "+z",
    "materials": [
-    "wood",
-    "metal"
+    "alphaTest 0.5, nearest"
    ],
    "occlusion": {
     "mode": "none"
    },
    "collision": {
     "type": "box",
-    "w": 1.5,
+    "w": 1.9,
     "d": 0.5
    },
    "instanced": true,
-   "emitsLight": false,
    "animations": [],
    "fallback": {
     "shape": "box",
-    "color": "#4e9b62"
+    "color": "#c9a46a"
    }
   },
   {
-   "id": "signpost",
+   "id": "lamp",
    "category": "furniture",
-   "file": "models/signpost.glb",
-   "format": "glb",
+   "tags": [
+    "sprite",
+    "2d",
+    "lumiere"
+   ],
+   "file": "tex/sp_lamp.png",
+   "format": "png-sprite",
    "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
+    "kind": "imported",
+    "from": "persos_pixel_art_pack.zip (script de l'utilisateur)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "utilisateur",
+    "original": "decor/lampadaire.png",
+    "derived": false,
+    "note": "lampadaire du pack"
    },
-   "licence": "CC0-1.0",
+   "licence": "oeuvre-utilisateur",
+   "licenceUrl": null,
+   "licenceVerified": true,
+   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
    "dimensions": {
-    "w": 1.1,
-    "h": 1.55,
-    "d": 0.21
+    "w": 0.64,
+    "h": 1.95,
+    "d": 0
    },
-   "bbox": {
-    "min": [
-     -0.55,
-     0,
-     -0.06
+   "sprite": {
+    "px": [
+     14,
+     43
     ],
-    "max": [
-     0.55,
-     1.55,
-     0.15
-    ]
+    "pxPerUnit": 22,
+    "anchor": "bottom-center"
    },
-   "triangles": 28,
    "anchor": "bottom-center",
    "scale": 1,
    "front": "+z",
    "materials": [
-    "wood",
-    "signboard"
+    "alphaTest 0.5, nearest"
    ],
    "occlusion": {
     "mode": "none"
    },
    "collision": {
     "type": "circle",
-    "r": 0.12
+    "r": 0.2
    },
    "instanced": true,
-   "emitsLight": false,
    "animations": [],
    "fallback": {
     "shape": "box",
-    "color": "#4e9b62"
-   }
-  },
-  {
-   "id": "fountain",
-   "category": "furniture",
-   "file": "models/fountain.glb",
-   "format": "glb",
-   "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 3.4,
-    "h": 2.35,
-    "d": 3.4
-   },
-   "bbox": {
-    "min": [
-     -1.7,
-     0,
-     -1.7
-    ],
-    "max": [
-     1.7,
-     2.35,
-     1.7
-    ]
-   },
-   "triangles": 130,
-   "anchor": "bottom-center",
-   "scale": 1,
-   "front": "+z",
-   "materials": [
-    "stone",
-    "ground"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 1.7
-   },
-   "instanced": true,
-   "emitsLight": false,
-   "animations": [],
-   "fallback": {
-    "shape": "box",
-    "color": "#4e9b62"
-   }
-  },
-  {
-   "id": "fence",
-   "category": "furniture",
-   "file": "models/fence.glb",
-   "format": "glb",
-   "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 1,
-    "h": 0.55,
-    "d": 0.08
-   },
-   "bbox": {
-    "min": [
-     -0.5,
-     0,
-     -0.04
-    ],
-    "max": [
-     0.5,
-     0.55,
-     0.04
-    ]
-   },
-   "triangles": 70,
-   "anchor": "bottom-center",
-   "scale": 1,
-   "front": "+z",
-   "materials": [
-    "wood",
-    "stone"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "box",
-    "w": 1,
-    "d": 0.2
-   },
-   "instanced": true,
-   "emitsLight": false,
-   "animations": [],
-   "fallback": {
-    "shape": "box",
-    "color": "#4e9b62"
-   }
-  },
-  {
-   "id": "hedge",
-   "category": "vegetation",
-   "file": "models/hedge.glb",
-   "format": "glb",
-   "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 1,
-    "h": 0.75,
-    "d": 0.6
-   },
-   "bbox": {
-    "min": [
-     -0.5,
-     0,
-     -0.3
-    ],
-    "max": [
-     0.5,
-     0.75,
-     0.3
-    ]
-   },
-   "triangles": 10,
-   "anchor": "bottom-center",
-   "scale": 1,
-   "front": "+z",
-   "materials": [
-    "leaf_dark",
-    "leaf"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "box",
-    "w": 1,
-    "d": 0.6
-   },
-   "instanced": true,
-   "emitsLight": false,
-   "animations": [],
-   "fallback": {
-    "shape": "box",
-    "color": "#4e9b62"
-   }
-  },
-  {
-   "id": "mailbox",
-   "category": "furniture",
-   "file": "models/mailbox.glb",
-   "format": "glb",
-   "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 0.32,
-    "h": 1,
-    "d": 0.2
-   },
-   "bbox": {
-    "min": [
-     -0.16,
-     0,
-     -0.1
-    ],
-    "max": [
-     0.16,
-     1,
-     0.1
-    ]
-   },
-   "triangles": 25,
-   "anchor": "bottom-center",
-   "scale": 1,
-   "front": "+z",
-   "materials": [
-    "wood",
-    "roof_red"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 0.12
-   },
-   "instanced": true,
-   "emitsLight": false,
-   "animations": [],
-   "fallback": {
-    "shape": "box",
-    "color": "#4e9b62"
-   }
-  },
-  {
-   "id": "flowerbed",
-   "category": "vegetation",
-   "file": "models/flowerbed.glb",
-   "format": "glb",
-   "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 1,
-    "h": 0.6,
-    "d": 0.5
-   },
-   "bbox": {
-    "min": [
-     -0.5,
-     0,
-     -0.25
-    ],
-    "max": [
-     0.5,
-     0.6,
-     0.25
-    ]
-   },
-   "triangles": 14,
-   "anchor": "bottom-center",
-   "scale": 1,
-   "front": "+z",
-   "materials": [
-    "wood",
-    "bark",
-    "flowers (découpe)"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": null,
-   "instanced": true,
-   "emitsLight": false,
-   "animations": [],
-   "fallback": {
-    "shape": "box",
-    "color": "#4e9b62"
-   }
-  },
-  {
-   "id": "tallgrass",
-   "category": "vegetation",
-   "file": "models/tallgrass.glb",
-   "format": "glb",
-   "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 1.1,
-    "h": 0.8,
-    "d": 0.95
-   },
-   "bbox": {
-    "min": [
-     -0.55,
-     0,
-     -0.48
-    ],
-    "max": [
-     0.55,
-     0.8,
-     0.48
-    ]
-   },
-   "triangles": 6,
-   "anchor": "bottom-center",
-   "scale": 1,
-   "front": "+z",
-   "materials": [
-    "tallgrass (découpe)"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": null,
-   "instanced": true,
-   "emitsLight": false,
-   "animations": [],
-   "fallback": {
-    "shape": "box",
-    "color": "#4e9b62"
-   }
-  },
-  {
-   "id": "windmill",
-   "category": "scenery",
-   "file": "models/windmill.glb",
-   "format": "glb",
-   "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 4.6,
-    "h": 7.8,
-    "d": 4.6
-   },
-   "bbox": {
-    "min": [
-     -2.3,
-     0,
-     -2.3
-    ],
-    "max": [
-     2.3,
-     7.8,
-     2.3
-    ]
-   },
-   "triangles": 106,
-   "anchor": "bottom-center",
-   "scale": 1,
-   "front": "+z",
-   "materials": [
-    "stone",
-    "wall_cream",
-    "roof_red",
-    "door",
-    "window",
-    "wood"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "box",
-    "w": 4.4,
-    "d": 4.4
-   },
-   "instanced": true,
-   "emitsLight": false,
-   "animations": [],
-   "fallback": {
-    "shape": "box",
-    "color": "#4e9b62"
-   }
-  },
-  {
-   "id": "windmill_sails",
-   "category": "scenery",
-   "file": "models/windmill_sails.glb",
-   "format": "glb",
-   "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 8.4,
-    "h": 8.4,
-    "d": 0.4
-   },
-   "bbox": {
-    "min": [
-     -4.2,
-     -4.2,
-     -0.1
-    ],
-    "max": [
-     4.2,
-     4.2,
-     0.3
-    ]
-   },
-   "triangles": 26,
-   "anchor": "bottom-center",
-   "scale": 1,
-   "front": "+z",
-   "materials": [
-    "wood",
-    "sail"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": null,
-   "instanced": true,
-   "emitsLight": false,
-   "animations": [
-    {
-     "name": "spin",
-     "axis": "z",
-     "note": "rotation continue pilotée par le moteur (props animés de la carte)"
-    }
-   ],
-   "fallback": {
-    "shape": "box",
-    "color": "#4e9b62"
-   }
-  },
-  {
-   "id": "clock_tower",
-   "category": "scenery",
-   "file": "models/clock_tower.glb",
-   "format": "glb",
-   "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 3.8,
-    "h": 12.6,
-    "d": 3.8
-   },
-   "bbox": {
-    "min": [
-     -1.9,
-     0,
-     -1.9
-    ],
-    "max": [
-     1.9,
-     12.6,
-     1.9
-    ]
-   },
-   "triangles": 80,
-   "anchor": "bottom-center",
-   "scale": 1,
-   "front": "+z",
-   "materials": [
-    "stone",
-    "wall_brick",
-    "wall_cream",
-    "roof_blue",
-    "clock",
-    "door",
-    "window",
-    "metal"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "box",
-    "w": 3.6,
-    "d": 3.6
-   },
-   "instanced": true,
-   "emitsLight": false,
-   "animations": [],
-   "fallback": {
-    "shape": "box",
-    "color": "#4e9b62"
-   }
-  },
-  {
-   "id": "gate",
-   "category": "scenery",
-   "file": "models/gate.glb",
-   "format": "glb",
-   "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 5.8,
-    "h": 4,
-    "d": 1
-   },
-   "bbox": {
-    "min": [
-     -2.9,
-     0,
-     -0.5
-    ],
-    "max": [
-     2.9,
-     4,
-     0.5
-    ]
-   },
-   "triangles": 80,
-   "anchor": "bottom-center",
-   "scale": 1,
-   "front": "+z",
-   "materials": [
-    "stone",
-    "wall_stone",
-    "signboard"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": null,
-   "instanced": true,
-   "emitsLight": false,
-   "animations": [],
-   "fallback": {
-    "shape": "box",
-    "color": "#4e9b62"
-   }
-  },
-  {
-   "id": "pier",
-   "category": "scenery",
-   "file": "models/pier.glb",
-   "format": "glb",
-   "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 5.2,
-    "h": 1.2,
-    "d": 2.2
-   },
-   "bbox": {
-    "min": [
-     -2.6,
-     -0.4,
-     -1.1
-    ],
-    "max": [
-     2.6,
-     0.8,
-     1.1
-    ]
-   },
-   "triangles": 90,
-   "anchor": "bottom-center",
-   "scale": 1,
-   "front": "+z",
-   "materials": [
-    "wood",
-    "bark"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": null,
-   "instanced": true,
-   "emitsLight": false,
-   "animations": [],
-   "fallback": {
-    "shape": "box",
-    "color": "#4e9b62"
-   }
-  },
-  {
-   "id": "bridge",
-   "category": "scenery",
-   "file": "models/bridge.glb",
-   "format": "glb",
-   "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 4.6,
-    "h": 0.95,
-    "d": 2.46
-   },
-   "bbox": {
-    "min": [
-     -2.3,
-     0,
-     -1.23
-    ],
-    "max": [
-     2.3,
-     0.95,
-     1.23
-    ]
-   },
-   "triangles": 110,
-   "anchor": "bottom-center",
-   "scale": 1,
-   "front": "+z",
-   "materials": [
-    "wood",
-    "bark"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": null,
-   "instanced": true,
-   "emitsLight": false,
-   "animations": [],
-   "fallback": {
-    "shape": "box",
-    "color": "#4e9b62"
-   }
-  },
-  {
-   "id": "tree_sprite",
-   "category": "vegetation",
-   "file": "models/tree_sprite.glb",
-   "format": "glb",
-   "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 3,
-    "h": 3.5,
-    "d": 3
-   },
-   "bbox": {
-    "min": [
-     -1.5,
-     0,
-     -1.5
-    ],
-    "max": [
-     1.5,
-     3.5,
-     1.5
-    ]
-   },
-   "triangles": 4,
-   "anchor": "bottom-center",
-   "scale": 1,
-   "front": "+z",
-   "materials": [
-    "tree_sprite (découpe)"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 0.4
-   },
-   "instanced": true,
-   "emitsLight": false,
-   "animations": [],
-   "fallback": {
-    "shape": "box",
-    "color": "#4e9b62"
-   }
-  },
-  {
-   "id": "sign_hq",
-   "category": "furniture",
-   "file": "models/sign_hq.glb",
-   "format": "glb",
-   "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 1.6,
-    "h": 2.3,
-    "d": 0.14
-   },
-   "bbox": {
-    "min": [
-     -0.8,
-     0,
-     -0.07
-    ],
-    "max": [
-     0.8,
-     2.3,
-     0.07
-    ]
-   },
-   "triangles": 50,
-   "anchor": "bottom-center",
-   "scale": 1,
-   "front": "+z",
-   "materials": [
-    "wood",
-    "signboard",
-    "emblem_hq (découpe)"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "box",
-    "w": 1.8,
-    "d": 0.3
-   },
-   "instanced": true,
-   "emitsLight": false,
-   "animations": [],
-   "fallback": {
-    "shape": "box",
-    "color": "#4e9b62"
-   }
-  },
-  {
-   "id": "sign_ops",
-   "category": "furniture",
-   "file": "models/sign_ops.glb",
-   "format": "glb",
-   "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 1.6,
-    "h": 2.3,
-    "d": 0.14
-   },
-   "bbox": {
-    "min": [
-     -0.8,
-     0,
-     -0.07
-    ],
-    "max": [
-     0.8,
-     2.3,
-     0.07
-    ]
-   },
-   "triangles": 50,
-   "anchor": "bottom-center",
-   "scale": 1,
-   "front": "+z",
-   "materials": [
-    "wood",
-    "signboard",
-    "emblem_ops (découpe)"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "box",
-    "w": 1.8,
-    "d": 0.3
-   },
-   "instanced": true,
-   "emitsLight": false,
-   "animations": [],
-   "fallback": {
-    "shape": "box",
-    "color": "#4e9b62"
-   }
-  },
-  {
-   "id": "sign_lab",
-   "category": "furniture",
-   "file": "models/sign_lab.glb",
-   "format": "glb",
-   "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 1.6,
-    "h": 2.3,
-    "d": 0.14
-   },
-   "bbox": {
-    "min": [
-     -0.8,
-     0,
-     -0.07
-    ],
-    "max": [
-     0.8,
-     2.3,
-     0.07
-    ]
-   },
-   "triangles": 50,
-   "anchor": "bottom-center",
-   "scale": 1,
-   "front": "+z",
-   "materials": [
-    "wood",
-    "signboard",
-    "emblem_lab (découpe)"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "box",
-    "w": 1.8,
-    "d": 0.3
-   },
-   "instanced": true,
-   "emitsLight": false,
-   "animations": [],
-   "fallback": {
-    "shape": "box",
-    "color": "#4e9b62"
-   }
-  },
-  {
-   "id": "sign_workshop",
-   "category": "furniture",
-   "file": "models/sign_workshop.glb",
-   "format": "glb",
-   "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 1.6,
-    "h": 2.3,
-    "d": 0.14
-   },
-   "bbox": {
-    "min": [
-     -0.8,
-     0,
-     -0.07
-    ],
-    "max": [
-     0.8,
-     2.3,
-     0.07
-    ]
-   },
-   "triangles": 50,
-   "anchor": "bottom-center",
-   "scale": 1,
-   "front": "+z",
-   "materials": [
-    "wood",
-    "signboard",
-    "emblem_workshop (découpe)"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "box",
-    "w": 1.8,
-    "d": 0.3
-   },
-   "instanced": true,
-   "emitsLight": false,
-   "animations": [],
-   "fallback": {
-    "shape": "box",
-    "color": "#4e9b62"
-   }
-  },
-  {
-   "id": "tree_ow_green",
-   "category": "vegetation",
-   "file": "models/tree_ow_green.glb",
-   "format": "glb",
-   "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 2.6,
-    "h": 3.9,
-    "d": 2.6
-   },
-   "bbox": {
-    "min": [
-     -1.3,
-     0,
-     -1.3
-    ],
-    "max": [
-     1.3,
-     3.9,
-     1.3
-    ]
-   },
-   "triangles": 4,
-   "anchor": "bottom-center",
-   "scale": 1,
-   "front": "+z",
-   "materials": [
-    "ow_tree_green (découpe)"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 0.45
-   },
-   "instanced": true,
-   "emitsLight": false,
-   "animations": [],
-   "fallback": {
-    "shape": "box",
-    "color": "#4e9b62"
-   }
-  },
-  {
-   "id": "tree_ow_autumn",
-   "category": "vegetation",
-   "file": "models/tree_ow_autumn.glb",
-   "format": "glb",
-   "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 2.6,
-    "h": 3.9,
-    "d": 2.6
-   },
-   "bbox": {
-    "min": [
-     -1.3,
-     0,
-     -1.3
-    ],
-    "max": [
-     1.3,
-     3.9,
-     1.3
-    ]
-   },
-   "triangles": 4,
-   "anchor": "bottom-center",
-   "scale": 1,
-   "front": "+z",
-   "materials": [
-    "ow_tree_autumn (découpe)"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 0.45
-   },
-   "instanced": true,
-   "emitsLight": false,
-   "animations": [],
-   "fallback": {
-    "shape": "box",
-    "color": "#4e9b62"
-   }
-  },
-  {
-   "id": "crate",
-   "category": "furniture",
-   "file": "models/crate.glb",
-   "format": "glb",
-   "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
-   },
-   "licence": "CC0-1.0",
-   "dimensions": {
-    "w": 0.7,
-    "h": 0.7,
-    "d": 0.7
-   },
-   "bbox": {
-    "min": [
-     -0.35,
-     0,
-     -0.35
-    ],
-    "max": [
-     0.35,
-     0.7,
-     0.35
-    ]
-   },
-   "triangles": 10,
-   "anchor": "bottom-center",
-   "scale": 1,
-   "front": "+z",
-   "materials": [
-    "wood"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "box",
-    "w": 0.7,
-    "d": 0.7
-   },
-   "instanced": true,
-   "emitsLight": false,
-   "animations": [],
-   "fallback": {
-    "shape": "box",
-    "color": "#4e9b62"
+    "color": "#c9a46a"
    }
   },
   {
    "id": "ground_atlas",
    "category": "terrain",
+   "tags": [
+    "sol",
+    "tuiles"
+   ],
    "file": "tex/ground.png",
    "format": "png-atlas",
    "source": {
-    "kind": "generated",
-    "tool": "tools/world3d/build-models.mjs",
-    "note": "dessiné par code, aucune donnée tierce"
+    "kind": "imported",
+    "from": "IcyEthics (herbe, sable, gravier, pierre) + pack utilisateur (pavés, eau, sable)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "note": "atlas de sol 12 tuiles de 32 px"
    },
-   "licence": "CC0-1.0",
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": null,
+   "licenceVerified": false,
    "dimensions": {
-    "w": 192,
-    "h": 16,
+    "w": 384,
+    "h": 32,
     "d": 0
    },
    "atlas": {
-    "tile": 16,
+    "tile": 32,
     "tiles": [
      "grass_a",
      "grass_b",
      "grass_flowers",
      "cobble",
-     "cobble_edge",
+     "stone_b",
      "plaza_stone",
      "dirt",
      "water",
      "sand",
-     "tall_grass",
+     "grass_c",
      "water_b",
      "flower_field"
     ]
@@ -2133,6 +1634,53 @@
    "fallback": {
     "shape": "plane",
     "color": "#5fae45"
+   }
+  },
+  {
+   "id": "cliff_rock",
+   "category": "terrain",
+   "tags": [
+    "falaise"
+   ],
+   "file": "tex/cliff.png",
+   "format": "png",
+   "source": {
+    "kind": "imported",
+    "from": "https://github.com/icyethics/PokemonAssets (Tilesets/padded_mycorTown.png)",
+    "importer": "tools/world3d/build-sprites.mjs",
+    "author": "IcyEthics",
+    "original": "Tilesets/padded_mycorTown.png",
+    "derived": true,
+    "crop": [
+     0,
+     2456,
+     32,
+     32
+    ],
+    "note": "roche de falaise"
+   },
+   "licence": "icyethics-noncommercial",
+   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
+   "licenceVerified": false,
+   "licenceNote": "README : usage non commercial, dérivés libres, crédit IcyEthics",
+   "dimensions": {
+    "w": 1,
+    "h": 1,
+    "d": 0
+   },
+   "anchor": "tile",
+   "scale": 1,
+   "materials": [
+    "nearest, repeat"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": null,
+   "animations": [],
+   "fallback": {
+    "shape": "plane",
+    "color": "#9a8a76"
    }
   },
   {
@@ -4129,112 +3677,6 @@
    "fallback": {
     "shape": "capsule",
     "color": "#8a6a4a"
-   }
-  },
-  {
-   "id": "ow_tree_green",
-   "inventoryId": "icy:tilesets_padded_mycortown",
-   "category": "vegetation",
-   "tags": [
-    "arbre",
-    "billboard",
-    "3/4"
-   ],
-   "file": "sources/icyethics_pokemonassets/derived/ow_tree_green.png",
-   "format": "png",
-   "source": {
-    "kind": "imported",
-    "from": "https://github.com/icyethics/PokemonAssets (fichier : Tilesets/padded_mycorTown.png)",
-    "importer": "tools/world3d/import-overworld.mjs",
-    "author": "IcyEthics",
-    "original": "Tilesets/padded_mycorTown.png",
-    "derived": true,
-    "crop": [
-     0,
-     928,
-     64,
-     96
-    ],
-    "note": "arbre vert"
-   },
-   "licence": "icyethics-noncommercial",
-   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
-   "licenceVerified": false,
-   "licenceNote": "texte du README : usage non commercial, dérivés libres, crédit IcyEthics",
-   "dimensions": {
-    "w": 3.2,
-    "h": 4.8,
-    "d": 0
-   },
-   "anchor": "bottom-center",
-   "scale": 1,
-   "materials": [
-    "alphaTest 0.5, nearest"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 0.4
-   },
-   "animations": [],
-   "fallback": {
-    "shape": "box",
-    "color": "#4e9b62"
-   }
-  },
-  {
-   "id": "ow_tree_autumn",
-   "inventoryId": "icy:tilesets_padded_mycortown",
-   "category": "vegetation",
-   "tags": [
-    "arbre",
-    "billboard",
-    "3/4"
-   ],
-   "file": "sources/icyethics_pokemonassets/derived/ow_tree_autumn.png",
-   "format": "png",
-   "source": {
-    "kind": "imported",
-    "from": "https://github.com/icyethics/PokemonAssets (fichier : Tilesets/padded_mycorTown.png)",
-    "importer": "tools/world3d/import-overworld.mjs",
-    "author": "IcyEthics",
-    "original": "Tilesets/padded_mycorTown.png",
-    "derived": true,
-    "crop": [
-     0,
-     1088,
-     64,
-     96
-    ],
-    "note": "arbre jaune"
-   },
-   "licence": "icyethics-noncommercial",
-   "licenceUrl": "https://github.com/icyethics/PokemonAssets",
-   "licenceVerified": false,
-   "licenceNote": "texte du README : usage non commercial, dérivés libres, crédit IcyEthics",
-   "dimensions": {
-    "w": 3.2,
-    "h": 4.8,
-    "d": 0
-   },
-   "anchor": "bottom-center",
-   "scale": 1,
-   "materials": [
-    "alphaTest 0.5, nearest"
-   ],
-   "occlusion": {
-    "mode": "none"
-   },
-   "collision": {
-    "type": "circle",
-    "r": 0.4
-   },
-   "animations": [],
-   "fallback": {
-    "shape": "box",
-    "color": "#4e9b62"
    }
   }
  ]
