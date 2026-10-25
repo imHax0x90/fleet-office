@@ -16,8 +16,8 @@ WALL.forEach((w, i) => def("house_" + i, "building", (m) => {
   const two = i % 2 === 1, H = two ? 4.6 : 2.7, X0 = -2.3, X1 = 2.3, Z0 = -1.9, Z1 = 1.9;
   box(m, X0, 0, Z0, X1, .35, Z1, "stone"); box(m, X0 + .02, .35, Z0 + .02, X1 - .02, H, Z1 - .02, { side: w, top: w });
   gable(m, X0, Z0, X1, Z1, H, 1.5, .35, ROOF[i], w);
-  door(m, i % 3 === 0 ? -1 : 0.6, 1.1, 1.65, "door", Z1 - .02); box(m, (i % 3 === 0 ? -1 : .6) - .9, 0, Z1, (i % 3 === 0 ? -1 : .6) + .9, .12, Z1 + .55, "stone");
-  win(m, i % 3 === 0 ? 1.25 : -1.25, 1.0, .9, .9, Z1 - .02); if (!two) win(m, 1.7, 1.0, .9, .9, Z1 - .02); else { win(m, -1.3, 3.0, .9, .9, Z1 - .02); win(m, 0.6, 3.0, .9, .9, Z1 - .02); win(m, 1.8, 3.0, .9, .9, Z1 - .02); win(m, 1.5, 1.0, .9, .9, Z1 - .02); }
+  door(m, 0, 1.1, 1.65, "door", Z1 - .02); box(m, -.9, 0, Z1, .9, .12, Z1 + .55, "stone");
+  win(m, -1.5, 1.0, .9, .9, Z1 - .02); win(m, 1.5, 1.0, .9, .9, Z1 - .02); if (two) { for (const x of [-1.5, 0, 1.5]) win(m, x, 3.0, .9, .9, Z1 - .02); }
   if (i % 2 === 0) box(m, 1.2, H, -.5, 1.8, H + 1.9, .1, "wall_brick"), box(m, 1.15, H + 1.9, -.55, 1.85, H + 2.05, .15, "stone");
 }, { collide: { type: "box", w: 4.6, d: 3.8 } }));
 
@@ -76,6 +76,10 @@ def("lamp", "furniture", (m) => { prism(m, 0, 0, .14, 0, .25, 6, "metal"); prism
 def("bench", "furniture", (m) => { box(m, -.7, .4, -.22, .7, .5, .22, "wood"); box(m, -.7, .5, -.24, .7, 1.0, -.16, "wood"); for (const x of [-.6, .6]) box(m, x - .05, 0, -.2, x + .05, .4, .2, "metal"); }, { collide: { type: "box", w: 1.5, d: .5 } });
 def("signpost", "furniture", (m) => { prism(m, 0, 0, .06, 0, 1.5, 6, "wood"); box(m, -.55, 1.1, .05, .55, 1.55, .15, { side: "signboard", top: "signboard" }); }, { collide: { type: "circle", r: .12 } });
 def("fountain", "furniture", (m) => { prism(m, 0, 0, 1.7, 0, .55, 12, { side: "stone", top: "stone" }); m.quad("ground", [[-1.45, .56, 1.45], [1.45, .56, 1.45], [1.45, .56, -1.45], [-1.45, .56, -1.45]], [[.875, 1], [1, 1], [1, 0], [.875, 0]], { noOrient: true }); prism(m, 0, 0, .25, .55, 1.6, 8, "stone"); prism(m, 0, 0, .75, 1.6, 1.8, 10, "stone"); dome(m, 0, 1.8, 0, .55, 2, 8, "ground_w", {}); }, { collide: { type: "circle", r: 1.7 } });
+def("fence", "furniture", (m) => { box(m, -.5, .12, -.03, .5, .2, .03, "wood"); box(m, -.5, .4, -.03, .5, .48, .03, "wood"); for (let i = 0; i < 5; i++) { const x = -.4 + i * .2; box(m, x - .05, 0, -.04, x + .05, .55, .04, { side: "stone", top: "stone" }); } }, { collide: { type: "box", w: 1, d: .2 } });
+def("hedge", "vegetation", (m) => { box(m, -.5, 0, -.3, .5, .75, .3, { side: "leaf_dark", top: "leaf" }); }, { collide: { type: "box", w: 1, d: .6 } });
+def("mailbox", "furniture", (m) => { prism(m, 0, 0, .04, 0, .8, 5, "wood"); box(m, -.16, .8, -.1, .16, 1.0, .1, "roof_red"); }, { collide: { type: "circle", r: .12 } });
+def("flowerbed", "vegetation", (m) => { box(m, -.5, 0, -.25, .5, .15, .25, { side: "wood", top: "bark" }); for (const a of [0, Math.PI / 2]) { const c = Math.cos(a) * .5, s2 = Math.sin(a) * .25; m.quad("flowers", [[-c, .12, -s2], [c, .12, s2], [c, .6, s2], [-c, .12 + .48, -s2]], [[0, 1], [1, 1], [1, 0], [0, 0]], { double: true, mask: true }); } }, { collide: null });
 def("crate", "furniture", (m) => { box(m, -.35, 0, -.35, .35, .7, .35, { side: "wood", top: "wood" }); }, { collide: { type: "box", w: .7, d: .7 } });
 
 // ---- build ----------------------------------------------------------------------------------------------------

@@ -11,9 +11,9 @@ URL : `http://fleetoffice/world3d/` (même chemin sur n'importe quel hôte). Lie
 | Moteur Three.js (zéro dépendance ajoutée : Three + GLTFLoader déjà vendorisés) | `public/world3d/index.html`, `world3d.js`, `world3d.css` |
 | Registre d'assets (id stable, catégorie, source, dimensions, ancre, échelle, matériaux, occlusion, collision, licence, animations, visuel de secours) | `public/world3d/assets/registry.json` |
 | Registre de licences | `assets/licences.json`, `assets/LICENCES.md` |
-| Textures originales (sol 8 tuiles, murs, toits, fenêtres, portes, feuillage, 6 feuilles de personnages 4 dir × 4 frames) | `assets/tex/*.png` ← `tools/world3d/gen-textures.mjs` |
+| Textures originales (sol 8 tuiles, murs, toits, fenêtres, portes, feuillage, 8 feuilles de personnages (grosse tête, contour, casquette/bonnet/capuche, sac, jupe) 4 dir × 4 frames) | `assets/tex/*.png` ← `tools/world3d/gen-textures.mjs` |
 | Modèles GLB originaux (5 bâtiments fonctionnels, 6 maisons, 3 arbres, buisson, fleurs, lampadaire, banc, panneau, fontaine, caisse) | `assets/models/*.glb` ← `tools/world3d/build-models.mjs` |
-| Carte pilote 84×70 (plaza, 3 rues + avenue en croix → intersections, pavés avec bordures, sentiers, 2 mares, 502 objets, 30 lots) | `assets/maps/pilot.json` ← `tools/world3d/gen-pilot-map.mjs` |
+| Carte pilote 64×80 en plan de petite ville (place centrale, avenue vers le QG, rues de lotissement avec maisons face à face, clôtures, parterres, boîtes aux lettres, ceinture d'arbres, 2 mares, 32 lots) | `assets/maps/pilot.json` ← `tools/world3d/gen-pilot-map.mjs` |
 | Import OBJ/MTL → GLB avec garde-fou de licence | `tools/world3d/import-obj.mjs` |
 | Validation (registre, GLB binaire, licences, carte) | `tools/world3d/validate.mjs` |
 
@@ -22,7 +22,7 @@ Tout régénérer + valider : `tools/world3d/build-all.sh`. Déployer : `./deplo
 ## Données réelles, rien de simulé
 
 * `GET /api/world` → maisons (une par dossier de projet) et quartiers ; `GET /api/agents` → agents et statuts. Rafraîchi toutes les 4 s.
-* Chaque maison est posée sur un **lot** de la carte (`lots[]`, regroupés par quartier : 3 quartiers au sud, 1 à l'ouest, 1 à l'est = 30 lots). Au-delà, les maisons
+* Chaque maison est posée sur un **lot** de la carte (`lots[]`, regroupés par quartier : 2 rues de lotissement × 2 côtés de l'avenue = 4 quartiers de 8 lots = 32 lots). Au-delà, les maisons
   débordent sur les lots libres (compteur « hors quartier » dans le HUD). Les agents d'un dossier sans maison se rassemblent devant le Quartier général.
 * Les agents marchent autour de leur maison quand ils travaillent, restent en place sinon ; pastille au-dessus de la tête : au travail / bloqué / en échec.
 * Bâtiments fonctionnels (`zones[]` de la carte) — panneau + bouton qui ouvre la vue de la console en surimpression :

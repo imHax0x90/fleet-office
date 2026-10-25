@@ -1111,6 +1111,210 @@
    }
   },
   {
+   "id": "fence",
+   "category": "furniture",
+   "file": "models/fence.glb",
+   "format": "glb",
+   "source": {
+    "kind": "generated",
+    "tool": "tools/world3d/build-models.mjs",
+    "note": "dessiné par code, aucune donnée tierce"
+   },
+   "licence": "CC0-1.0",
+   "dimensions": {
+    "w": 1,
+    "h": 0.55,
+    "d": 0.08
+   },
+   "bbox": {
+    "min": [
+     -0.5,
+     0,
+     -0.04
+    ],
+    "max": [
+     0.5,
+     0.55,
+     0.04
+    ]
+   },
+   "triangles": 70,
+   "anchor": "bottom-center",
+   "scale": 1,
+   "front": "+z",
+   "materials": [
+    "wood",
+    "stone"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "box",
+    "w": 1,
+    "d": 0.2
+   },
+   "instanced": true,
+   "emitsLight": false,
+   "animations": [],
+   "fallback": {
+    "shape": "box",
+    "color": "#4e9b62"
+   }
+  },
+  {
+   "id": "hedge",
+   "category": "vegetation",
+   "file": "models/hedge.glb",
+   "format": "glb",
+   "source": {
+    "kind": "generated",
+    "tool": "tools/world3d/build-models.mjs",
+    "note": "dessiné par code, aucune donnée tierce"
+   },
+   "licence": "CC0-1.0",
+   "dimensions": {
+    "w": 1,
+    "h": 0.75,
+    "d": 0.6
+   },
+   "bbox": {
+    "min": [
+     -0.5,
+     0,
+     -0.3
+    ],
+    "max": [
+     0.5,
+     0.75,
+     0.3
+    ]
+   },
+   "triangles": 10,
+   "anchor": "bottom-center",
+   "scale": 1,
+   "front": "+z",
+   "materials": [
+    "leaf_dark",
+    "leaf"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "box",
+    "w": 1,
+    "d": 0.6
+   },
+   "instanced": true,
+   "emitsLight": false,
+   "animations": [],
+   "fallback": {
+    "shape": "box",
+    "color": "#4e9b62"
+   }
+  },
+  {
+   "id": "mailbox",
+   "category": "furniture",
+   "file": "models/mailbox.glb",
+   "format": "glb",
+   "source": {
+    "kind": "generated",
+    "tool": "tools/world3d/build-models.mjs",
+    "note": "dessiné par code, aucune donnée tierce"
+   },
+   "licence": "CC0-1.0",
+   "dimensions": {
+    "w": 0.32,
+    "h": 1,
+    "d": 0.2
+   },
+   "bbox": {
+    "min": [
+     -0.16,
+     0,
+     -0.1
+    ],
+    "max": [
+     0.16,
+     1,
+     0.1
+    ]
+   },
+   "triangles": 25,
+   "anchor": "bottom-center",
+   "scale": 1,
+   "front": "+z",
+   "materials": [
+    "wood",
+    "roof_red"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.12
+   },
+   "instanced": true,
+   "emitsLight": false,
+   "animations": [],
+   "fallback": {
+    "shape": "box",
+    "color": "#4e9b62"
+   }
+  },
+  {
+   "id": "flowerbed",
+   "category": "vegetation",
+   "file": "models/flowerbed.glb",
+   "format": "glb",
+   "source": {
+    "kind": "generated",
+    "tool": "tools/world3d/build-models.mjs",
+    "note": "dessiné par code, aucune donnée tierce"
+   },
+   "licence": "CC0-1.0",
+   "dimensions": {
+    "w": 1,
+    "h": 0.6,
+    "d": 0.5
+   },
+   "bbox": {
+    "min": [
+     -0.5,
+     0,
+     -0.25
+    ],
+    "max": [
+     0.5,
+     0.6,
+     0.25
+    ]
+   },
+   "triangles": 14,
+   "anchor": "bottom-center",
+   "scale": 1,
+   "front": "+z",
+   "materials": [
+    "wood",
+    "bark",
+    "flowers (découpe)"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": null,
+   "instanced": true,
+   "emitsLight": false,
+   "animations": [],
+   "fallback": {
+    "shape": "box",
+    "color": "#4e9b62"
+   }
+  },
+  {
    "id": "crate",
    "category": "furniture",
    "file": "models/crate.glb",
@@ -1525,6 +1729,150 @@
    "id": "char_5",
    "category": "character",
    "file": "tex/char_5.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "generated",
+    "tool": "tools/world3d/build-models.mjs",
+    "note": "dessiné par code, aucune donnée tierce"
+   },
+   "licence": "CC0-1.0",
+   "dimensions": {
+    "w": 1,
+    "h": 1.5,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     64,
+     96
+    ],
+    "cell": [
+     16,
+     24
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ]
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0,
+      2
+     ],
+     "fps": 1.5
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 7
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#2f9aa0"
+   }
+  },
+  {
+   "id": "char_6",
+   "category": "character",
+   "file": "tex/char_6.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "generated",
+    "tool": "tools/world3d/build-models.mjs",
+    "note": "dessiné par code, aucune donnée tierce"
+   },
+   "licence": "CC0-1.0",
+   "dimensions": {
+    "w": 1,
+    "h": 1.5,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     64,
+     96
+    ],
+    "cell": [
+     16,
+     24
+    ],
+    "cols": 4,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ]
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0,
+      2
+     ],
+     "fps": 1.5
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "fps": 7
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#2f9aa0"
+   }
+  },
+  {
+   "id": "char_7",
+   "category": "character",
+   "file": "tex/char_7.png",
    "format": "png-spritesheet",
    "source": {
     "kind": "generated",

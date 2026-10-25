@@ -115,13 +115,13 @@ function highlight(b, on) { b.group.traverse((o) => { if (o.isMesh) { o.material
 
 // ---------------------------------------------------------------------------------------------- personnages (billboards)
 const sheets = new Map(), badgeTex = new Map();
-async function sheet(i) { const k = "tex/char_" + (i % 6) + ".png"; return loadTex(k); }
+async function sheet(i) { const k = "tex/char_" + (i % 8) + ".png"; return loadTex(k); }
 function badge(kind) { if (badgeTex.has(kind)) return badgeTex.get(kind); const c = document.createElement("canvas"); c.width = c.height = 32; const x = c.getContext("2d"); const col = { working: "#3ddc84", blocked: "#ffb020", failed: "#ff4d4d", queued: "#9fb0d0" }[kind] || "#9fb0d0"; x.fillStyle = "#0e1322"; x.beginPath(); x.arc(16, 16, 14, 0, 7); x.fill(); x.fillStyle = col; x.beginPath(); x.arc(16, 16, 11, 0, 7); x.fill(); x.fillStyle = "#0e1322"; x.font = "bold 17px sans-serif"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(kind === "working" ? "…" : kind === "blocked" ? "!" : kind === "failed" ? "✕" : "z", 16, 17); const t = new THREE.CanvasTexture(c); nearest(t); badgeTex.set(kind, t); return t; }
 const shadowGeo = new THREE.CircleGeometry(0.34, 14).rotateX(-Math.PI / 2), shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.28, depthWrite: false });
 class Actor {
   constructor(tex, o = {}) {
     this.id = o.id; this.name = o.name || ""; this.kind = o.kind || "npc"; this.tex = tex.clone(); this.tex.needsUpdate = true; this.tex.repeat.set(0.25, 0.25);
-    this.mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1.5).translate(0, 0.75, 0), new THREE.MeshBasicMaterial({ map: this.tex, alphaTest: 0.5, side: THREE.DoubleSide, fog: true }));
+    this.mesh = new THREE.Mesh(new THREE.PlaneGeometry(1.25, 1.875).translate(0, 0.94, 0), new THREE.MeshBasicMaterial({ map: this.tex, alphaTest: 0.5, side: THREE.DoubleSide, fog: true }));
     this.sh = new THREE.Mesh(shadowGeo, shadowMat); this.sh.position.y = 0.03; this.mesh.userData.actor = this; this.root = new THREE.Group(); this.root.add(this.mesh); scene.add(this.root, this.sh);
     this.x = o.x || 0; this.z = o.z || 0; this.dir = 0; this.moving = false; this.t = Math.random() * 10; this.status = "idle"; this.home = { x: this.x, z: this.z }; this.target = null; this.wait = Math.random() * 3; this.run = false;
     this.badge = null; this.agent = null; this.house = null; this.setFrame(0, 0);
@@ -136,13 +136,13 @@ class Actor {
   update(dt, bob = true) {
     this.t += dt; const f = this.moving ? [0, 1, 2, 3][Math.floor(this.t * (this.run ? 11 : 7)) % 4] : (Math.floor(this.t * 1.5) % 2 ? 2 : 0);
     this.setFrame(this.dir, f); this.root.position.set(this.x, 0, this.z); this.mesh.rotation.y = yaw; this.sh.position.set(this.x, 0.03, this.z);
-    if (this.badge) { this.badge.position.set(0, 1.95 + Math.sin(this.t * 3) * 0.06, 0); }
+    if (this.badge) { this.badge.position.set(0, 2.3 + Math.sin(this.t * 3) * 0.06, 0); }
   }
   dispose() { scene.remove(this.root, this.sh); this.tex.dispose(); this.mesh.geometry.dispose(); this.mesh.material.dispose(); }
 }
 
 // ---------------------------------------------------------------------------------------------- caméra & entrée
-let yaw = +Q.get("yaw") || 0, yawT = yaw, dist = +Q.get("zoom") || 38, distT = dist; const ELEV = THREE.MathUtils.degToRad(+Q.get("pitch") || 52);
+let yaw = +Q.get("yaw") || 0, yawT = yaw, dist = +Q.get("zoom") || 22, distT = dist; const ELEV = THREE.MathUtils.degToRad(+Q.get("pitch") || 52);
 const camTarget = new THREE.Vector3(), keys = new Set(); let player = null, goal = null, drag = null;
 function placeCamera() {
   const ce = Math.cos(ELEV), se = Math.sin(ELEV); camera.position.set(camTarget.x + Math.sin(yaw) * ce * dist, camTarget.y + se * dist, camTarget.z + Math.cos(yaw) * ce * dist); camera.lookAt(camTarget);
@@ -152,14 +152,14 @@ addEventListener("keydown", (e) => { if (e.target && /INPUT|TEXTAREA/.test(e.tar
   if (!$("ov").hidden && k !== "escape") return; if (mapOpen) { if (k === "m" || k === "escape") closeMap(); return; }
   if (k === "p") { $("perf").hidden = !$("perf").hidden; } else if (k === "m") openMap(); else if (k === "f") { S.followed = true; } else if (k === "a") yawT -= Math.PI / 4; else if (k === "e") yawT += Math.PI / 4; else if (k === "escape") { if (!$("ov").hidden) closeConsole(); else select(null); } else { keys.add(k); S.followed = true; goal = null; } });
 addEventListener("keyup", (e) => keys.delete(e.key.toLowerCase())); addEventListener("blur", () => keys.clear());
-canvas.addEventListener("wheel", (e) => { e.preventDefault(); distT = clamp(distT * Math.exp(e.deltaY * 0.0012), 14, 90); }, { passive: false });
+canvas.addEventListener("wheel", (e) => { e.preventDefault(); distT = clamp(distT * Math.exp(e.deltaY * 0.0012), 9, 90); }, { passive: false });
 canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 const pts = new Map(); let pinch = 0;
 canvas.addEventListener("pointerdown", (e) => { canvas.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); drag = { id: e.pointerId, sx: e.clientX, sy: e.clientY, moved: false, btn: e.button }; if (pts.size === 2) pinch = 0; });
 canvas.addEventListener("pointermove", (e) => {
   const p = pts.get(e.pointerId); if (!p) { hover(e.clientX, e.clientY); return; }
   const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
-  if (pts.size === 2) { const [a, b] = [...pts.values()], d = Math.hypot(a.x - b.x, a.y - b.y); if (pinch) distT = clamp(distT * (pinch / d), 14, 90); pinch = d; if (drag) drag.moved = true; return; }
+  if (pts.size === 2) { const [a, b] = [...pts.values()], d = Math.hypot(a.x - b.x, a.y - b.y); if (pinch) distT = clamp(distT * (pinch / d), 9, 90); pinch = d; if (drag) drag.moved = true; return; }
   if (!drag || drag.id !== e.pointerId) return; if (Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 6) drag.moved = true;
   if (drag.moved) { const k = (2 * dist * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) / innerHeight, sx = Math.cos(yaw), sz = -Math.sin(yaw), fx = -Math.sin(yaw), fz = -Math.cos(yaw);
     camTarget.x = clamp(camTarget.x - (dx * sx - dy * fx / Math.sin(ELEV)) * k, 0, MAP.size.w); camTarget.z = clamp(camTarget.z - (dx * sz - dy * fz / Math.sin(ELEV)) * k, 0, MAP.size.h); S.followed = false; }
@@ -204,13 +204,13 @@ async function applyWorld() {
 const hq = () => buildings.find((b) => b.id === "hq");
 function homeFor(a) {
   const h = houseOfAgent.get(a.id), o = h && houseObjs.get(h.key);
-  if (o) { const n = h.agentIds.length, i = h.agentIds.indexOf(a.id); return { x: o.b.x + (i - (n - 1) / 2) * 1.15, z: o.b.z + 3.7, house: h }; }
+  if (o) { const n = h.agentIds.length, i = h.agentIds.indexOf(a.id), r = o.b.rot, off = (i - (n - 1) / 2) * 1.15; return { x: o.b.x + Math.sin(r) * 4.3 + Math.cos(r) * off, z: o.b.z + Math.cos(r) * 4.3 - Math.sin(r) * off, house: h }; }
   const q = hq() || { x: MAP.spawn.x, z: MAP.spawn.y - 18 }, i = [...agentsById.keys()].indexOf(a.id); return { x: q.x + ((i % 6) - 2.5) * 1.3, z: q.z + 6.2 + Math.floor(i / 6) * 1.2, house: null };
 }
 async function applyAgents() {
   if (!adata) return; const list = (adata.agents || []).filter((a) => !a.internal); agentsById = new Map(list.map((a) => [a.id, a]));
   for (const a of list) {
-    let ac = actors.get(a.id); if (!ac) { ac = new Actor(await sheet(1 + (hashStr(a.id) % 5)), { id: a.id, name: a.name, kind: "agent" }); const hm = homeFor(a); ac.x = hm.x; ac.z = hm.z; actors.set(a.id, ac); }
+    let ac = actors.get(a.id); if (!ac) { ac = new Actor(await sheet(1 + (hashStr(a.id) % 7)), { id: a.id, name: a.name, kind: "agent" }); const hm = homeFor(a); ac.x = hm.x; ac.z = hm.z; actors.set(a.id, ac); }
     const hm = homeFor(a); ac.home = hm; ac.house = hm.house; ac.agent = a; ac.name = a.name; ac.setStatus(a.status);
   }
   for (const [id, ac] of [...actors]) if (!agentsById.has(id)) { ac.dispose(); actors.delete(id); }
@@ -293,7 +293,7 @@ function updateLabels() {
     const l = label(b.kind + b.id); const html = `<span class="n">${esc(name)}</span>${extra}`; if (l.dataset.h !== html) { l.innerHTML = html; l.dataset.h = html; l.title = name; } l.classList.toggle("sel", !!sel);
     place(l, b.x, b.height + 0.6, b.z + (b.kind === "house" ? 0 : 0)); }
   if (wdata) wdata.districts.forEach((d, i) => { const ls = MAP.lots.filter((l) => l.district === i); if (!ls.length || !wdata.houses.some((h) => h.district === d.name && lotsAssign.has(h.key) && MAP.lots[lotsAssign.get(h.key)].district === i)) return; const cx = ls.reduce((s, l) => s + l.x, 0) / ls.length, cz = Math.min(...ls.map((l) => l.y)) - 3.4; const l = label("d" + i, "dist"); if (l.dataset.h !== d.name) { l.textContent = d.name; l.dataset.h = d.name; } place(l, cx, 0.2, cz); });
-  const showA = new Set([hoverA, S.sel && S.sel.type === "actor" ? S.sel.actor : null].filter(Boolean)); for (const a of showA) { const l = label("a" + a.id, "ag"); const t = a.name + (a.agent ? " · " + (STATUS_FR[a.agent.status] || a.agent.status) : ""); if (l.dataset.h !== t) { l.textContent = t; l.dataset.h = t; } place(l, a.x, 2.3, a.z); }
+  const showA = new Set([hoverA, S.sel && S.sel.type === "actor" ? S.sel.actor : null].filter(Boolean)); for (const a of showA) { const l = label("a" + a.id, "ag"); const t = a.name + (a.agent ? " · " + (STATUS_FR[a.agent.status] || a.agent.status) : ""); if (l.dataset.h !== t) { l.textContent = t; l.dataset.h = t; } place(l, a.x, 2.6, a.z); }
   for (const [k, l] of [...labels]) if (!l.dataset.used) { l.remove(); labels.delete(k); }
 }
 function refreshHud() {
@@ -343,7 +343,7 @@ function loop(now) {
   for (const ac of [...actors.values(), ...npcs]) {
     const st = ac.status; ac.run = false;
     if (ac.target) { const dx = ac.target.x - ac.x, dz = ac.target.z - ac.z, d = Math.hypot(dx, dz); if (d < 0.15) { ac.target = null; ac.moving = false; ac.wait = 1.5 + Math.random() * 3; } else { const mv = ac.step(dt, (dx / d) * 1.25, (dz / d) * 1.25); if (!mv) { ac.target = null; ac.moving = false; } } }
-    else { ac.moving = false; ac.wait -= dt; if (ac.wait <= 0) { const active = st === "working" || (st === "idle" && Math.random() < 0.35); if (active) { for (let k = 0; k < 6; k++) { const t = { x: ac.home.x + (Math.random() - 0.5) * 3.2, z: ac.home.z + (Math.random() - 0.3) * 2.2 }; if (!blocked(t.x, t.z, 0.35)) { ac.target = t; break; } } } ac.wait = 1.5 + Math.random() * 3; if (!ac.target && (st === "blocked" || st === "failed")) ac.dir = 0; } }
+    else { ac.moving = false; ac.wait -= dt; if (ac.wait <= 0) { const active = st === "working" || (st === "idle" && Math.random() < 0.35); if (active) { for (let k = 0; k < 6; k++) { const t = { x: ac.home.x + (Math.random() - 0.5) * 2.4, z: ac.home.z + (Math.random() - 0.5) * 1.2 }; if (!blocked(t.x, t.z, 0.35)) { ac.target = t; break; } } } ac.wait = 1.5 + Math.random() * 3; if (!ac.target && (st === "blocked" || st === "failed")) ac.dir = 0; } }
     ac.update(dt);
   }
   if (S.followed && player) { camTarget.x = lerp(camTarget.x, player.x, 1 - Math.exp(-dt * 6)); camTarget.z = lerp(camTarget.z, player.z, 1 - Math.exp(-dt * 6)); }

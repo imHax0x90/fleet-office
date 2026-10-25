@@ -90,35 +90,47 @@ roof("roof_orange", "#dd8a3a", 205); roof("roof_teal", "#2f9aa0", 206); roof("ro
   const img = new Img(16, 8); img.rect(0, 0, 16, 8, "#d9483a"); img.rect(0, 3, 16, 2, "#fbfbff"); save("flag", img);
 }
 
-// ---- personnages : feuille 4 colonnes (idle, marche A, idle bis, marche B) × 4 lignes (bas, gauche, droite, haut), cellule 16×24
-const PAL = [ // { coat, pants, hair, skin, accent }
-  { coat: "#2f9aa0", pants: "#2b3a55", hair: "#4a2f1d", skin: "#f1c6a0", acc: "#ff9a3a" }, // 0 joueur : manteau sarcelle, écharpe orange
-  { coat: "#d9483a", pants: "#3a3347", hair: "#1f1a18", skin: "#e0ac84", acc: "#ffe27a" },
-  { coat: "#4a6fb8", pants: "#2e3340", hair: "#8a5a2b", skin: "#f1c6a0", acc: "#ffffff" },
-  { coat: "#4e9b62", pants: "#40382c", hair: "#d8c27a", skin: "#c58a62", acc: "#ffe27a" },
-  { coat: "#b48cff", pants: "#2b2f44", hair: "#2a1d3a", skin: "#f1c6a0", acc: "#ffd24a" },
-  { coat: "#e0a02f", pants: "#3b3b3b", hair: "#6b3a1f", skin: "#8c5a3c", acc: "#fbfbff" },
+// ---- personnages : proportions « overworld » (grosse tête, petit corps), contour sombre, 4 directions × 4 frames, cellule 16×24
+// feuille : colonnes = idle, marche A, idle bis, marche B ; lignes = bas, gauche, droite, haut. Six à huit tenues originales (aucun personnage existant).
+const PAL = [ // coat, pants, hair, skin, acc (écharpe/col), head: 0 cheveux / 1 casquette / 2 bonnet / 3 capuche, bag, skirt
+  { coat: "#2f9aa0", pants: "#2b3a55", hair: "#4a2f1d", skin: "#f1c6a0", acc: "#ff9a3a", head: 1, hat: "#d9483a", bag: true }, // 0 joueur
+  { coat: "#d9483a", pants: "#3a3347", hair: "#1f1a18", skin: "#e0ac84", acc: "#ffe27a", head: 0 },
+  { coat: "#4a6fb8", pants: "#2e3340", hair: "#8a5a2b", skin: "#f1c6a0", acc: "#ffffff", head: 2, hat: "#ffd24a" },
+  { coat: "#4e9b62", pants: "#40382c", hair: "#d8c27a", skin: "#c58a62", acc: "#ffe27a", head: 0, bag: true },
+  { coat: "#b48cff", pants: "#6b4a8a", hair: "#2a1d3a", skin: "#f1c6a0", acc: "#ffd24a", head: 0, skirt: true },
+  { coat: "#e0a02f", pants: "#3b3b3b", hair: "#6b3a1f", skin: "#8c5a3c", acc: "#fbfbff", head: 1, hat: "#2f9aa0" },
+  { coat: "#e8e8f0", pants: "#4a5878", hair: "#7a5a3a", skin: "#f1c6a0", acc: "#d9483a", head: 3, hat: "#e8e8f0" },
+  { coat: "#e86a9a", pants: "#8a3a5a", hair: "#3a2418", skin: "#e0ac84", acc: "#ffffff", head: 0, skirt: true, bag: true },
 ];
-const drawChar = (img, ox, oy, p, dir, frame) => {
-  const walk = frame === 1 || frame === 3, step = frame === 1 ? 1 : -1, bob = frame === 2 ? 1 : 0, o = "#1d1a24";
-  const R = (x, y, w, h, c) => img.rect(ox + x, oy + y + bob * 0, w, h, c);
-  const by = bob ? 1 : 0; // petit rebond « respiration »
-  // ombre portée (le moteur ajoute aussi un disque d'ombre)
-  // jambes
-  const lx = dir >= 1 && dir <= 2 ? 5 : 4;
-  if (dir === 1 || dir === 2) { R(6, 18, 4, 5 - (walk ? 0 : 0), p.pants); if (walk) { R(6 + step * 2, 20, 3, 3, p.pants); } R(5, 22, 6, 2, o); }
-  else { R(4, 18, 3, 5 + (walk && step > 0 ? -1 : 0), p.pants); R(9, 18, 3, 5 + (walk && step < 0 ? -1 : 0), p.pants); R(4, 22 + (walk && step > 0 ? -1 : 0), 3, 2, o); R(9, 22 + (walk && step < 0 ? -1 : 0), 3, 2, o); }
-  // torse + bras
-  R(3, 10 + by, 10, 9, p.coat); R(3, 10 + by, 10, 1, shade(hex(p.coat), 1.25)); R(3, 17 + by, 10, 2, shade(hex(p.coat), .78));
-  if (dir === 1 || dir === 2) { const ax = dir === 1 ? 4 : 9; R(ax, 11 + by, 3, 6, shade(hex(p.coat), .88)); if (walk) R(ax, 11 + by + (step > 0 ? 1 : 0), 3, 6, shade(hex(p.coat), .88)); R(ax, 16 + by, 3, 2, p.skin); }
-  else { R(1, 11 + by, 3, 6, shade(hex(p.coat), .88)); R(12, 11 + by, 3, 6, shade(hex(p.coat), .88)); R(1, 16 + by + (walk && step > 0 ? 1 : 0), 3, 2, p.skin); R(12, 16 + by + (walk && step < 0 ? 1 : 0), 3, 2, p.skin); }
-  R(4, 10 + by, 8, 2, p.acc); // écharpe
-  // tête
-  R(4, 2 + by, 8, 8, p.skin);
-  if (dir === 0) { R(5, 6 + by, 2, 2, o); R(9, 6 + by, 2, 2, o); R(5, 5 + by, 6, 0, o); R(4, 1 + by, 8, 3, p.hair); R(3, 2 + by, 1, 3, p.hair); R(12, 2 + by, 1, 3, p.hair); }
-  else if (dir === 3) { R(4, 1 + by, 8, 7, p.hair); R(3, 3 + by, 1, 4, p.hair); R(12, 3 + by, 1, 4, p.hair); }
-  else { R(4, 1 + by, 8, 3, p.hair); R(dir === 1 ? 9 : 3, 2 + by, 4, 6, p.hair); R(dir === 1 ? 5 : 9, 6 + by, 2, 2, o); }
-  // contour sombre simple (tête)
-  for (let x = 4; x < 12; x++) img.px(ox + x, oy + 1 + by - 1, o);
+const LINE = [29, 26, 36, 255];
+const drawChar = (img, ox, oy, p, dir, f) => {
+  const C = (h) => hex(h), walk = f === 1 || f === 3, stepL = f === 1, by = f === 2 ? 1 : 0, coat = C(p.coat), hair = C(p.hair), skin = C(p.skin), pants = C(p.pants), acc = C(p.acc);
+  const R = (x, y, w, h, c) => img.rect(ox + x, oy + y, w, h, c);
+  // jambes (3 px de haut), pieds sombres
+  const legTop = p.skirt ? 17 : 16;
+  if (dir === 1 || dir === 2) { R(5, legTop + by, 6, 22 - legTop - by - 1, pants); if (walk) { R(stepL ? 4 : 7, 20, 4, 2, pants); } R(5, 21, 6, 1, [60, 52, 60, 255]); }
+  else { const lh = (l) => (walk && l === (stepL ? 0 : 1) ? 1 : 0); R(5, legTop + by, 3, 21 - legTop - by - lh(0), pants); R(8, legTop + by, 3, 21 - legTop - by - lh(1), pants); R(5, 21 - lh(0), 3, 1, [60, 52, 60, 255]); R(8, 21 - lh(1), 3, 1, [60, 52, 60, 255]); }
+  if (p.skirt) R(4, 15 + by, 8, 3, shade(coat, .9));
+  // corps + bras
+  R(4, 10 + by, 8, 7 - (p.skirt ? 1 : 0), coat); R(4, 10 + by, 8, 1, shade(coat, 1.25)); R(4, 15 + by, 8, 1, shade(coat, .8)); R(4, 10 + by, 8, 1, acc);
+  if (dir === 1 || dir === 2) { const ax = dir === 1 ? 5 : 8; R(ax, 11 + by, 3, 4, shade(coat, .85)); R(ax, 15 + by + (walk ? (stepL ? 0 : 1) : 0), 3, 1, skin); }
+  else { R(3, 11 + by, 2, 4, shade(coat, .85)); R(11, 11 + by, 2, 4, shade(coat, .85)); R(3, 15 + by + (walk && stepL ? 1 : 0), 2, 1, skin); R(11, 15 + by + (walk && !stepL ? 1 : 0), 2, 1, skin); }
+  if (p.bag) { if (dir === 3) R(5, 11 + by, 6, 5, shade(C("#c9a46a"), .95)); else if (dir === 1) R(10, 11 + by, 2, 4, C("#c9a46a")); else if (dir === 2) R(4, 11 + by, 2, 4, C("#c9a46a")); }
+  // tête (10 × 9)
+  R(3, 2 + by, 10, 8, skin);
+  const eye = (x, y) => { R(x, y, 2, 2, LINE); R(x, y, 1, 1, [255, 255, 255, 255]); };
+  if (dir === 0) { eye(5, 6 + by); eye(9, 6 + by); R(7, 8 + by, 2, 1, shade(skin, .8)); }
+  if (dir === 1) { eye(4, 6 + by); } if (dir === 2) { eye(10, 6 + by); }
+  // cheveux / couvre-chef
+  const hat = p.hat && C(p.hat);
+  if (p.head === 3) { R(2, 1 + by, 12, 5, hat); R(2, 4 + by, 2, 6, hat); R(12, 4 + by, 2, 6, hat); if (dir === 3) R(3, 5 + by, 10, 5, hat); if (dir === 0) { R(4, 4 + by, 8, 1, shade(hat, .85)); } }
+  else { // cheveux
+    if (dir === 0) { R(3, 1 + by, 10, 3, hair); R(3, 4 + by, 2, 2, hair); R(11, 4 + by, 2, 2, hair); }
+    else if (dir === 3) { R(3, 1 + by, 10, 8, hair); }
+    else { R(3, 1 + by, 10, 3, hair); R(dir === 1 ? 8 : 3, 3 + by, 5, 6, hair); }
+    if (p.head === 1) { R(3, 0 + by, 10, 3, hat); if (dir === 0) R(3, 3 + by, 10, 1, shade(hat, .75)); if (dir === 1) R(0, 2 + by, 5, 1, shade(hat, .75)); if (dir === 2) R(11, 2 + by, 5, 1, shade(hat, .75)); }
+    if (p.head === 2) { R(3, 0 + by, 10, 4, hat); R(3, 3 + by, 10, 1, shade(hat, .8)); R(7, -1 + by, 2, 1, shade(hat, 1.2)); }
+  }
 };
-PAL.forEach((p, i) => { const img = new Img(64, 96); for (let d = 0; d < 4; d++) for (let f = 0; f < 4; f++) drawChar(img, f * 16, d * 24, p, d, f); save("char_" + i, img); });
+const outline = (img, ox, oy, w, h) => { const keep = []; for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { if (img.get(ox + x, oy + y)[3]) continue; let n = false; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const X = x + dx, Y = y + dy; if (X >= 0 && Y >= 0 && X < w && Y < h && img.get(ox + X, oy + Y)[3]) n = true; } if (n) keep.push([x, y]); } for (const [x, y] of keep) img.px(ox + x, oy + y, LINE); };
+PAL.forEach((p, i) => { const img = new Img(64, 96); for (let d = 0; d < 4; d++) for (let f = 0; f < 4; f++) { drawChar(img, f * 16, d * 24, p, d, f); outline(img, f * 16, d * 24, 16, 24); } save("char_" + i, img); });
