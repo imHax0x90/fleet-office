@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#1c2036">
+<title>Fleet Office · Ville 3D</title>
+<link rel="stylesheet" href="world3d.css">
+<script type="importmap">{"imports":{"three":"../vendor/three.module.js","three/addons/":"../vendor/addons/"}}</script>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div id="labels"></div>
+<div id="hud">
+  <div id="title"><b>Fleet Office</b> · Ville 3D <span class="tag">pilote</span><a href="../world/" class="lnk">↩ ville 2D</a></div>
+  <div id="assets"></div>
+  <div id="perf" hidden></div>
+</div>
+<div id="help">ZQSD / WASD / flèches : marcher · Maj : courir · molette : zoom · Q / E : pivoter · clic : sélectionner / aller · clic droit + glisser : déplacer la vue · F : recentrer · P : perfs</div>
+<aside id="panel" hidden><header><span id="p-title"></span><button id="p-x" aria-label="Fermer">✕</button></header><div id="p-body"></div></aside>
+<div id="ov" hidden><div id="ovf"><div id="ovh"><span id="ovt"></span><button id="ovx" aria-label="Fermer">✕</button></div><iframe id="ovi" title="console"></iframe></div></div>
+<div id="boot"><div id="boot-t">Chargement des assets…</div><pre id="boot-e"></pre></div>
+<pre id="dbg" hidden></pre>
+<script type="module" src="world3d.js"></script>
+</body>
+</html>

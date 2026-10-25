@@ -1599,6 +1599,7 @@ const MIME = {
   ".mjs": "text/javascript; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".json": "application/json; charset=utf-8",
+  ".glb": "model/gltf-binary",
   ".svg": "image/svg+xml",
   ".png": "image/png",
   ".ico": "image/x-icon",
@@ -1629,6 +1630,7 @@ function serveStatic(req, res, urlPath) {
   if (urlPath === "/3d" || urlPath === "/3d/") filePath = path.join(PUBLIC_DIR, "index.html");
   else if (urlPath === "/lite" || urlPath === "/lite/") filePath = path.join(PUBLIC_DIR, "lite.html");
   else if (urlPath === "/world" || urlPath === "/world/") filePath = path.join(PUBLIC_DIR, "world", "index.html"); // monde pixel-art
+  else if (urlPath === "/world3d" || urlPath === "/world3d/") filePath = path.join(PUBLIC_DIR, "world3d", "index.html"); // ville 3D (Three.js)
   else if (urlPath === "/" || urlPath === "") {
     const liteHost = reqHost.startsWith("fleetoffice") && !reqHost.startsWith("fleetoffice3d");
     filePath = path.join(PUBLIC_DIR, liteHost ? "lite.html" : "index.html");

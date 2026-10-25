@@ -54,6 +54,8 @@
   #ovt{flex:1;text-shadow:2px 2px 0 #1c2240}
   #ovx{width:44px;height:36px;border:3px solid #1c2240;background:#fbfbff;color:#20243a;font:700 20px/1 monospace;cursor:pointer;box-shadow:inset -3px -3px 0 #b4bcd6;touch-action:manipulation}
   #ovi{flex:1;border:0;background:#fff;width:100%}
+  #to3d{position:fixed;left:10px;top:calc(10px + env(safe-area-inset-top));z-index:15;background:rgba(40,60,110,.7);color:#fff;font:700 15px KP,monospace;text-decoration:none;border:3px solid #1c2240;border-radius:8px;padding:6px 10px;touch-action:manipulation}
+  body.typing #to3d{display:none}
   pre#dbg{position:fixed;left:0;top:0;margin:0;color:#0f0;font:10px monospace;display:none}
 </style>
 </head>
@@ -68,6 +70,7 @@
 <div id="say"><div id="say-name"></div><div class="row"><input id="say-in" maxlength="600" autocomplete="off" enterkeyhint="send"><button id="say-go">ENVOYER</button><button id="say-x">✕</button></div></div>
 <div id="panel"><div class="bar"><span id="panel-title"></span><button id="panel-x">✕ FERMER</button></div><iframe id="panel-f" referrerpolicy="no-referrer"></iframe></div>
 <div id="ov" hidden><div id="ovf"><div id="ovh"><span id="ovt"></span><button id="ovx" aria-label="Fermer">✕</button></div><iframe id="ovi" title="panneau"></iframe></div></div>
+<a id="to3d" href="../world3d/" title="Ville 3D (pilote)">3D</a>
 <pre id="dbg" hidden></pre>
 <script src="sprites.js"></script>
 <script src="interior.js"></script>

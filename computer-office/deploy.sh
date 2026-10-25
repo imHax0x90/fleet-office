@@ -11,6 +11,7 @@ $SSH $H "mkdir -p $R/public/fonts"
 for f in "${FILES[@]}"; do scp -q -o BatchMode=yes "$f" "$H:/tmp/$(basename "$f").new"; done
 scp -q -o BatchMode=yes public/fonts/* "$H:$R/public/fonts/"
 if [ -d public/world ]; then $SSH $H "mkdir -p $R/public/world"; scp -q -r -o BatchMode=yes public/world/. "$H:$R/public/world/"; fi
+if [ -d public/world3d ]; then $SSH $H "mkdir -p $R/public/world3d"; scp -q -r -o BatchMode=yes public/world3d/. "$H:$R/public/world3d/"; fi
 $SSH $H "cd $R/public && for f in ${FILES[*]##public/}; do [ -f \$f ] && cp \$f \$f.bak.$TS; mv /tmp/\$f.new \$f; done; ls -1 | head -0"
 if [[ "${1:-}" == server ]]; then
   node --check server.js; node --check automations.js; node --check skillsys.js; node --check worldsys.js; node --check reviews.js
