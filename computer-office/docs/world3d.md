@@ -111,9 +111,12 @@ asset cassé (fallback orange + HUD rouge) · asset importé (OBJ → GLB) charg
 * **Habitants décoratifs** : `npcs[]` de la carte (14 : meunier, pêcheur, jardinier, facteur en tournée, joggeur, enfants, ancien sur son banc, gardiens de porte…), en promenade, en patrouille ou statiques, avec quelques répliques. **Ils ne représentent aucun agent** : étiquette « · décor » au survol et bandeau d'avertissement dans leur panneau ; ils ne sont pas comptés avec les agents (HUD : « 14 habitants (décor) »).
 * Textures ajoutées : roche de falaise, 4 tenues d'habitants (ancien, pêcheur, jardinier, facteur).
 
-## Pack de sprites fourni (persos_pixel_art_pack.zip)
+## Pack de l'utilisateur (persos_pixel_art_pack.zip) — tout est utilisé
 
-* **Importés** : les 8 rôles `pnj/` (scientifique, ingénieur, analyste, opérateur, sécurité, livreur, étudiant, médecin), 4 directions × 3 états (statique / marche / course), PNG 64×64 → `tools/world3d/import-sprites.mjs` les assemble en feuilles `assets/tex/npc_<rôle>.png` (3 colonnes × 4 lignes) et les déclare au registre. Les agents et habitants portent la tenue de leur métier. La **vraie animation de course** est utilisée quand on court (Maj) ou que le joueur/PNJ patrouille vite.
-* **Provenance et licence** : pack généré par le script `generer_pack.py` fourni (copié dans `assets/sources/persos_pixel_art_pack/`) ; licence `oeuvre-utilisateur`, marquée *non vérifiée* → avertissement du validateur tant que l'auteur ne l'a pas confirmée.
-* **Non importés** : `principaux/` (noms de personnages d'une licence existante), tuiles 16×16, bâtiments et décor (images 2D de face : inutilisables dans une scène 3D, le sol et les modèles actuels sont plus riches).
-* `build-models.mjs` conserve désormais les entrées de registre importées lors d'une régénération.
+Le pack est généré par un script écrit par l'utilisateur (`assets/sources/persos_pixel_art_pack/`, licence `oeuvre-utilisateur`, vérifiée « déclarée par l'auteur »).
+
+* **Personnages** : 8 rôles `pnj/` (tenue des agents selon leur métier, habitants) et 5 héros `principaux/` (apparence du joueur, touche **C** pour changer, mémorisée ; `?hero=hero_red`). Feuilles de 64×64 × 3 états (statique / marche / course) : la vraie animation de course sert avec Maj et pour les joggeurs. Import : `tools/world3d/import-sprites.mjs`.
+* **Tuiles** : herbe, pavés, chemin de sable et eau (+ copie décalée pour l'animation) remplacent les tuiles correspondantes de l'atlas de sol (`gen-textures.mjs`).
+* **Bâtiments** : les 4 icônes deviennent les **enseignes illustrées** posées devant le QG, le labo IA, le centre d'opérations et l'atelier (`sign_*`).
+* **Décor** : l'arbre devient `tree_sprite` (deux plans croisés), mélangé aux arbres de la ceinture de la ville. Banc et lampadaire du pack n'ont pas été repris : les modèles 3D du projet les remplacent avec relief et ombres.
+* `build-models.mjs` conserve les entrées de registre importées lors d'une régénération.

@@ -145,8 +145,9 @@ function highlight(b, on) { b.group.traverse((o) => { if (o.isMesh) { o.material
 const sheets = new Map(), badgeTex = new Map();
 const ROLE_SHEETS = { 12: "scientifique", 13: "ingenieur", 14: "analyste", 15: "operateur", 16: "securite", 17: "livreur", 18: "etudiant", 19: "medecin" }; // feuilles importées (pack fourni) ; repli : tenues générées
 async function sheet(i) {
-  const role = ROLE_SHEETS[i % 20], e = role && reg.get("npc_" + role);
+  const role = typeof i === "string" ? null : ROLE_SHEETS[i % 20], e = typeof i === "string" ? reg.get(i) : role && reg.get("npc_" + role);
   if (e) { try { const m = e.sheet; return { tex: await loadTex(e.file), cols: m.cols, rows: m.rows, size: [e.dimensions.w, e.dimensions.h], foot: (m.footPx || 0) / m.cell[1] * e.dimensions.h, frames: { idle: [0], walk: [0, 1, 0, 1], run: [2, 1, 2, 1] } }; } catch (err) { S.assets.failed.push({ id: e.id, error: String(err.message || err) }); } }
+  if (typeof i === "string") i = 0;
   return { tex: await loadTex("tex/char_" + (i % 12 < 12 && i % 20 < 12 ? i % 20 : i % 12) + ".png"), cols: 4, rows: 4, size: [1.25, 1.875], foot: 0, frames: null };
 }
 function badge(kind) { if (badgeTex.has(kind)) return badgeTex.get(kind); const c = document.createElement("canvas"); c.width = c.height = 32; const x = c.getContext("2d"); const col = { working: "#3ddc84", blocked: "#ffb020", failed: "#ff4d4d", queued: "#9fb0d0" }[kind] || "#9fb0d0"; x.fillStyle = "#0e1322"; x.beginPath(); x.arc(16, 16, 14, 0, 7); x.fill(); x.fillStyle = col; x.beginPath(); x.arc(16, 16, 11, 0, 7); x.fill(); x.fillStyle = "#0e1322"; x.font = "bold 17px sans-serif"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(kind === "working" ? "…" : kind === "blocked" ? "!" : kind === "failed" ? "✕" : "z", 16, 17); const t = new THREE.CanvasTexture(c); nearest(t); badgeTex.set(kind, t); return t; }
@@ -173,6 +174,14 @@ class Actor {
     if (this.badge) { this.badge.position.set(0, this.hgt + 0.42 + Math.sin(this.t * 3) * 0.06, 0); }
   }
   dispose() { scene.remove(this.root, this.sh); this.tex.dispose(); this.mesh.geometry.dispose(); this.mesh.material.dispose(); }
+}
+
+// ---------------------------------------------------------------------------------------------- apparence du joueur (touche C) : feuilles du pack utilisateur ou tenue générée
+const HEROES = ["hero_peter", "hero_red", "hero_gold", "hero_cynthia", "hero_pierre_rochard", 0]; let heroIdx = 0;
+try { const w = Q.get("hero") || localStorage.getItem("w3d.hero"); const i = HEROES.findIndex((h) => h === w || (h === 0 && w === "generated")); if (i >= 0) heroIdx = i; } catch { /* stockage indisponible */ }
+async function setHero(i) {
+  heroIdx = (i + HEROES.length) % HEROES.length; try { localStorage.setItem("w3d.hero", HEROES[heroIdx] || "generated"); } catch { /* ignoré */ }
+  const info = await sheet(HEROES[heroIdx]), old = player; player = new Actor(info, { id: "player", name: "Vous", kind: "player", x: old ? old.x : MAP.spawn.x, z: old ? old.z : MAP.spawn.y }); player.dir = old ? old.dir : 0; if (old) old.dispose(); applyTime(true);
 }
 
 // ---------------------------------------------------------------------------------------------- habitants décoratifs (aucun lien avec les agents)
@@ -213,7 +222,7 @@ function placeCamera() {
 }
 addEventListener("keydown", (e) => { if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return; const k = e.key.toLowerCase(); if (["arrowup", "arrowdown", "arrowleft", "arrowright", " "].includes(k)) e.preventDefault();
   if (!$("ov").hidden && k !== "escape") return; if (mapOpen) { if (k === "m" || k === "escape") closeMap(); return; }
-  if (k === "p") { $("perf").hidden = !$("perf").hidden; } else if (k === "m") openMap(); else if (k === "f") { S.followed = true; } else if (k === "n") { nightMode = nightMode === "auto" || nightMode === "fix" ? "night" : nightMode === "night" ? "day" : "auto"; applyTime(true); } else if (k === "a") yawT -= Math.PI / 4; else if (k === "e") yawT += Math.PI / 4; else if (k === "escape") { if (!$("ov").hidden) closeConsole(); else select(null); } else { keys.add(k); S.followed = true; goal = null; } });
+  if (k === "p") { $("perf").hidden = !$("perf").hidden; } else if (k === "m") openMap(); else if (k === "f") { S.followed = true; } else if (k === "c") { setHero(heroIdx + 1); } else if (k === "n") { nightMode = nightMode === "auto" || nightMode === "fix" ? "night" : nightMode === "night" ? "day" : "auto"; applyTime(true); } else if (k === "a") yawT -= Math.PI / 4; else if (k === "e") yawT += Math.PI / 4; else if (k === "escape") { if (!$("ov").hidden) closeConsole(); else select(null); } else { keys.add(k); S.followed = true; goal = null; } });
 addEventListener("keyup", (e) => keys.delete(e.key.toLowerCase())); addEventListener("blur", () => keys.clear());
 canvas.addEventListener("wheel", (e) => { e.preventDefault(); distT = clamp(distT * Math.exp(e.deltaY * 0.0012), 9, 90); }, { passive: false });
 canvas.addEventListener("contextmenu", (e) => e.preventDefault());
@@ -444,7 +453,7 @@ const dbgState = () => ({ ready: S.ready, map: mapOpen, player: player && { h: +
     for (const a of MAP.animated || []) { const pr = await loadModel(a.asset), inner = pr.clone(true), P = new THREE.Group(); P.add(inner); P.position.set(a.x, a.h + heightAt(a.x, a.y), a.y); P.rotation.y = a.rot || 0; scene.add(P); spinners.push({ node: inner, speed: a.speed || 0.5 }); }
     buildHalos(); applyTime(true);
     // joueur
-    player = new Actor(await sheet(0), { id: "player", name: "Vous", kind: "player", x: +Q.get("px") || MAP.spawn.x, z: +Q.get("pz") || MAP.spawn.y }); player.setStatus("player");
+    await setHero(heroIdx); if (Q.get("px")) { player.x = +Q.get("px"); player.z = +Q.get("pz") || MAP.spawn.y; }
     camTarget.set(player.x, heightAt(player.x, player.z), player.z);
     await spawnNpcs(); S.ready = true; refreshHud(); $("boot").classList.add("done"); requestAnimationFrame(loop);
     poll().then(() => { const sel = Q.get("select"); if (sel) { const b = buildings.find((x) => x.id === sel || x.group.name === sel); if (b) select({ type: "building", b }); } }); setInterval(poll, 4000); pollSlow(); setInterval(pollSlow, 30000);

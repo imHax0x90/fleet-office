@@ -61,12 +61,13 @@ add("gate", CX, 1.8, 0); add("gate", CX, H - 1.8, 0); add("gate", 1.8, 25, Math.
 for (let x = 3; x < W - 1; x += 5.5) if (Math.abs(x - CX) > 9) { add("tree_round", x, 22.7, rnd() * 6); add("tree_round", x + 2.7, 27.5, rnd() * 6); }
 for (let y = 3; y < 18; y += 5) { add("tree_round", CX - 3.6, y + 1, rnd() * 6); add("tree_round", CX + 3.6, y + 3, rnd() * 6); }
 for (let y = 32; y < 39; y += 3.5) { add("tree_round", CX - 3.6, y, rnd() * 6); add("tree_round", CX + 3.6, y + 1.5, rnd() * 6); }
+for (const [id, e] of [["hq", "hq"], ["ai_lab", "lab"], ["ops_center", "ops"], ["dev_workshop", "workshop"]]) { const z = zones.find((q) => q.id === id); add("sign_" + e, z.x + 5.6, z.y + 4.4, 0); }
 add("crate", 18.3, 36.4, 0.3); add("crate", 19.2, 36.9, 0.6);
 const patches = []; for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (g[y][x] === "t") { for (let k = 0; k < 3; k++) add("tallgrass", x + .15 + rnd() * .7, y + .15 + rnd() * .7, rnd() * 3.14); }
 // --- ceinture d'arbres (sorties aux bouts des rues) puis arbres isolés
 const paved = (x, y) => { const c = (g[Math.floor(y)] || [])[Math.floor(x)]; return c === "c" || c === "p"; };
-for (let i = 0; i < 2; i++) { for (let x = 0.8; x < W; x += 1.5) for (const y of [0.9 + i * 1.5, H - 0.9 - i * 1.5]) if (Math.abs(x - CX) > 4.5 && !paved(x, y) && !paved(x, y < 5 ? 3 : H - 4)) add(rnd() < .7 ? "tree_pine" : "tree_round", x + (rnd() - .5) * .4, y, rnd() * 6.28);
-  for (let y = 2.4; y < H - 2; y += 1.5) for (const x of [0.9 + i * 1.5, W - 0.9 - i * 1.5]) if (Math.abs(y - 25) > 4.5 && !paved(x, y) && !paved(x < 5 ? 3 : W - 4, y)) add(rnd() < .7 ? "tree_pine" : "tree_round", x, y + (rnd() - .5) * .4, rnd() * 6.28); }
+for (let i = 0; i < 2; i++) { for (let x = 0.8; x < W; x += 1.5) for (const y of [0.9 + i * 1.5, H - 0.9 - i * 1.5]) if (Math.abs(x - CX) > 4.5 && !paved(x, y) && !paved(x, y < 5 ? 3 : H - 4)) add(rnd() < .3 ? "tree_sprite" : rnd() < .7 ? "tree_pine" : "tree_round", x + (rnd() - .5) * .4, y, rnd() * 6.28);
+  for (let y = 2.4; y < H - 2; y += 1.5) for (const x of [0.9 + i * 1.5, W - 0.9 - i * 1.5]) if (Math.abs(y - 25) > 4.5 && !paved(x, y) && !paved(x < 5 ? 3 : W - 4, y)) add(rnd() < .3 ? "tree_sprite" : rnd() < .7 ? "tree_pine" : "tree_round", x, y + (rnd() - .5) * .4, rnd() * 6.28); }
 for (const [x, y, t] of [[CX, 2.5, "Nord"], [CX, H - 3, "Sud"], [3, 25, "Ouest"], [W - 3, 25, "Est"]]) add("signpost", x + (t === "Nord" || t === "Sud" ? 2.4 : 0), y + (t === "Ouest" || t === "Est" ? 2.2 : 0), 0, { text: t });
 const solid = zones.map((z) => ({ x: z.x, y: z.y, rx: 7.5, ry: 5 })).concat(lots.map((l) => ({ x: l.x, y: l.y, rx: 4.4, ry: 4.4 })));
 for (const r of ramps) solid.push({ x: r.x + r.w / 2, y: r.y + r.h / 2, rx: r.w / 2 + 1, ry: r.h / 2 + 1 });
@@ -83,19 +84,19 @@ const npcs = [
   { id: "pecheur", name: "Pêcheur", sheet: 9, kind: "stand", x: 59.2, y: 31, dir: 2, lines: ["Chut… ça mord, peut-être.", "Le lac est calme ce soir."] },
   { id: "jardinier", name: "Jardinier", sheet: 10, kind: "wander", x: 32, y: 15, r: 3.5, lines: ["Les parterres sont fraîchement arrosés.", "Ne marchez pas sur les fleurs !"] },
   { id: "facteur", name: "Facteur", sheet: 17, kind: "route", speed: 1.9, route: [[3, 53.8], [26, 53.8], [37, 53.8], [60, 53.8], [37, 53.8], [26, 53.8]], lines: ["Courrier ! Il y a beaucoup de lettres pour les agents.", "Je fais ma tournée."] },
-  { id: "joggeur", name: "Joggeur", sheet: 5, kind: "route", speed: 2.6, route: [[22, 20], [42, 20], [42, 30], [22, 30]], lines: ["Un tour de place de plus !", "Pas le temps de parler…"] },
+  { id: "joggeur", name: "Joggeur", sheet: "hero_gold", kind: "route", speed: 2.6, route: [[22, 20], [42, 20], [42, 30], [22, 30]], lines: ["Un tour de place de plus !", "Pas le temps de parler…"] },
   { id: "enfant1", name: "Enfant", sheet: 3, scale: 0.8, kind: "wander", x: 28, y: 24, r: 4, lines: ["Tu veux jouer à chat ?", "J'ai vu le moulin tourner !"] },
   { id: "enfant2", name: "Enfant", sheet: 7, scale: 0.8, kind: "wander", x: 37, y: 27, r: 4, lines: ["La fontaine est trop belle.", "Mon papa dit que les agents travaillent dur."] },
   { id: "ancien", name: "Ancien", sheet: 8, kind: "stand", x: 22.2, y: 22.4, dir: 0, lines: ["De mon banc, je vois toute la place.", "De mon temps, il n'y avait pas d'agents IA."] },
-  { id: "promeneuse1", name: "Promeneuse", sheet: 4, kind: "route", speed: 1.1, route: [[6, 25], [22, 25], [6, 25]], lines: ["Quelle belle ville !", "Je profite des lampadaires."] },
-  { id: "promeneur2", name: "Promeneur", sheet: 2, kind: "route", speed: 1.0, route: [[44, 25], [60, 25], [44, 25]], lines: ["On respire bien, ici.", "Le lac est juste à côté."] },
+  { id: "promeneuse1", name: "Promeneuse", sheet: "hero_cynthia", kind: "route", speed: 1.1, route: [[6, 25], [22, 25], [6, 25]], lines: ["Quelle belle ville !", "Je profite des lampadaires."] },
+  { id: "promeneur2", name: "Promeneur", sheet: "hero_pierre_rochard", kind: "route", speed: 1.0, route: [[44, 25], [60, 25], [44, 25]], lines: ["On respire bien, ici.", "Le lac est juste à côté."] },
   { id: "gardien-n", name: "Gardien de porte", sheet: 16, kind: "stand", x: 29, y: 4.2, dir: 0, lines: ["Bienvenue à Fleet Office.", "Au nord : le Quartier général."] },
   { id: "gardien-e", name: "Gardien de porte", sheet: 16, kind: "stand", x: 60.5, y: 22.5, dir: 1, lines: ["La route de l'est mène au lac.", "Restez sur les pavés !"] },
   { id: "botaniste", name: "Botaniste", sheet: 12, kind: "wander", x: 4.5, y: 20, r: 2, lines: ["Ces hautes herbes sont magnifiques.", "Attention, on s'y perd facilement."] },
   { id: "scientifique", name: "Scientifique", sheet: 12, kind: "wander", x: 13, y: 19.5, r: 2.2, lines: ["Les métiers se forment ici, au laboratoire.", "Chaque skill est évalué avant d'être classé."] },
   { id: "ingenieur", name: "Ingénieur", sheet: 13, kind: "wander", x: 13, y: 39, r: 2, lines: ["L'atelier ne désemplit pas.", "Un bon agent, ça se règle comme une machine."] },
   { id: "operateur", name: "Opérateur", sheet: 15, kind: "wander", x: 51, y: 19.5, r: 2.2, lines: ["Tous les nœuds sont au vert, ou presque.", "Je surveille les machines."] },
-  { id: "etudiant", name: "Étudiant", sheet: 18, kind: "wander", x: 20, y: 20, r: 2.5, lines: ["J'apprends les skills du laboratoire.", "Un jour je serai un agent Senior !"] },
+  { id: "etudiant", name: "Étudiant", sheet: "hero_red", kind: "wander", x: 20, y: 20, r: 2.5, lines: ["J'apprends les skills du laboratoire.", "Un jour je serai un agent Senior !"] },
   { id: "fleuriste", name: "Fleuriste", sheet: 7, kind: "wander", x: 36, y: 31.5, r: 2.5, lines: ["Des fleurs fraîches pour vos agents ?", "Les parterres de la place, c'est moi."] },
 ];
 const rows = g.map((r) => r.join(""));

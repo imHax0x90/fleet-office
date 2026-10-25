@@ -2,7 +2,9 @@
 // Aucune donnée tierce : tout est écrit ici, licence CC0 (voir public/world3d/assets/LICENCES.md).
 // usage : node tools/world3d/gen-textures.mjs   → public/world3d/assets/tex/*.png
 import fs from "node:fs"; import path from "node:path"; import { fileURLToPath } from "node:url";
-import { Img, hex, rng, shade } from "./png.mjs";
+import { Img, hex, rng, shade, decodePNG } from "./png.mjs";
+const PACK = path.join(path.dirname(fileURLToPath(import.meta.url)), "../../public/world3d/assets/sources/persos_pixel_art_pack");
+const packPng = (f) => decodePNG(fs.readFileSync(path.join(PACK, f)));
 const OUT = path.join(path.dirname(fileURLToPath(import.meta.url)), "../../public/world3d/assets/tex"); fs.mkdirSync(OUT, { recursive: true });
 const save = (name, img) => { fs.writeFileSync(path.join(OUT, name + ".png"), img.png()); console.log("tex", name, img.w + "x" + img.h); };
 const speckle = (img, r, base, amt, n, x0 = 0, y0 = 0, w = img.w, h = img.h) => { for (let i = 0; i < n; i++) img.px(x0 + (r() * w | 0), y0 + (r() * h | 0), shade(base, 1 + (r() - .5) * amt)); };
@@ -28,6 +30,9 @@ const speckle = (img, r, base, amt, n, x0 = 0, y0 = 0, w = img.w, h = img.h) => 
   tile(9, (x) => { const base = hex("#3f8a35"), q = rng(82); img.rect(x, 0, T, T, base); speckle(img, q, base, .25, 70, x); for (let k = 0; k < 26; k++) { const px = x + (q() * 15 | 0), py = 2 + (q() * 13 | 0); img.px(px, py, "#79c457"); img.px(px, py - 1, "#79c457"); img.px(px + 1, py + 1, "#2b6b2a"); } });
   tile(10, (x) => { const base = hex("#3f86d8"); img.rect(x, 0, T, T, base); const q = rng(52); for (let k = 0; k < 8; k++) { const px = x + (q() * 12 | 0), py = q() * T | 0; img.rect(px, py, 3, 1, "#8dc4ff"); } for (let k = 0; k < 4; k++) img.px(x + (q() * 15 | 0), q() * 15 | 0, "#ffffff"); });
   tile(11, (x) => { grass(x, hex("#5fae45"), 91); const q = rng(92), cols = ["#fff6c8", "#ff7a8a", "#ffd24a", "#f4f4ff", "#b48cff"]; for (let k = 0; k < 22; k++) { const px = x + 1 + (q() * 14 | 0), py = 1 + (q() * 14 | 0), c = cols[k % 5]; img.px(px, py, c); img.px(px + 1, py, shade(hex(c), .85)); } });
+  // tuiles fournies par l'utilisateur (pack généré par son script) : herbe, pavés, chemin de sable, eau (+ copie décalée pour l'animation)
+  const put = (i, f, dx = 0) => { const t = packPng(f); for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) img.px(i * T + ((x + dx) % 16), y, t.get(x, y)); };
+  put(0, "tilesets/herbe.png"); put(3, "tilesets/pave_cobblestone.png"); put(6, "tilesets/chemin_sable.png"); put(7, "tilesets/eau.png"); put(10, "tilesets/eau.png", 8);
   save("ground", img);
 }
 
@@ -164,3 +169,6 @@ PAL.forEach((p, i) => { const img = new Img(64, 96); for (let d = 0; d < 4; d++)
   for (let k = 0; k < 5; k++) { const x = q() * 16 | 0, y = q() * 12 | 0; for (let j = 0; j < 4; j++) img.px(x + (j % 2), y + j, "#6a5c4c"); }
   img.rect(0, 0, 16, 2, "#5f9a45"); for (let x = 0; x < 16; x += 2) img.px(x, 2, "#4a8038"); save("cliff", img);
 }
+
+// ---- décor et emblèmes du pack utilisateur, copiés comme textures du moteur
+for (const [src, dst] of [["decor/arbre.png", "tree_sprite"], ["batiments/quartier_general.png", "emblem_hq"], ["batiments/centre_operations.png", "emblem_ops"], ["batiments/laboratoire.png", "emblem_lab"], ["batiments/atelier.png", "emblem_workshop"]]) { fs.copyFileSync(path.join(PACK, src), path.join(OUT, dst + ".png")); console.log("tex", dst, "(pack utilisateur)"); }

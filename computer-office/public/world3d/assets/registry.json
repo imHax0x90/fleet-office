@@ -1675,6 +1675,268 @@
    }
   },
   {
+   "id": "tree_sprite",
+   "category": "vegetation",
+   "file": "models/tree_sprite.glb",
+   "format": "glb",
+   "source": {
+    "kind": "generated",
+    "tool": "tools/world3d/build-models.mjs",
+    "note": "dessiné par code, aucune donnée tierce"
+   },
+   "licence": "CC0-1.0",
+   "dimensions": {
+    "w": 3,
+    "h": 3.5,
+    "d": 3
+   },
+   "bbox": {
+    "min": [
+     -1.5,
+     0,
+     -1.5
+    ],
+    "max": [
+     1.5,
+     3.5,
+     1.5
+    ]
+   },
+   "triangles": 4,
+   "anchor": "bottom-center",
+   "scale": 1,
+   "front": "+z",
+   "materials": [
+    "tree_sprite (découpe)"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.4
+   },
+   "instanced": true,
+   "emitsLight": false,
+   "animations": [],
+   "fallback": {
+    "shape": "box",
+    "color": "#4e9b62"
+   }
+  },
+  {
+   "id": "sign_hq",
+   "category": "furniture",
+   "file": "models/sign_hq.glb",
+   "format": "glb",
+   "source": {
+    "kind": "generated",
+    "tool": "tools/world3d/build-models.mjs",
+    "note": "dessiné par code, aucune donnée tierce"
+   },
+   "licence": "CC0-1.0",
+   "dimensions": {
+    "w": 1.6,
+    "h": 2.3,
+    "d": 0.14
+   },
+   "bbox": {
+    "min": [
+     -0.8,
+     0,
+     -0.07
+    ],
+    "max": [
+     0.8,
+     2.3,
+     0.07
+    ]
+   },
+   "triangles": 50,
+   "anchor": "bottom-center",
+   "scale": 1,
+   "front": "+z",
+   "materials": [
+    "wood",
+    "signboard",
+    "emblem_hq (découpe)"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "box",
+    "w": 1.8,
+    "d": 0.3
+   },
+   "instanced": true,
+   "emitsLight": false,
+   "animations": [],
+   "fallback": {
+    "shape": "box",
+    "color": "#4e9b62"
+   }
+  },
+  {
+   "id": "sign_ops",
+   "category": "furniture",
+   "file": "models/sign_ops.glb",
+   "format": "glb",
+   "source": {
+    "kind": "generated",
+    "tool": "tools/world3d/build-models.mjs",
+    "note": "dessiné par code, aucune donnée tierce"
+   },
+   "licence": "CC0-1.0",
+   "dimensions": {
+    "w": 1.6,
+    "h": 2.3,
+    "d": 0.14
+   },
+   "bbox": {
+    "min": [
+     -0.8,
+     0,
+     -0.07
+    ],
+    "max": [
+     0.8,
+     2.3,
+     0.07
+    ]
+   },
+   "triangles": 50,
+   "anchor": "bottom-center",
+   "scale": 1,
+   "front": "+z",
+   "materials": [
+    "wood",
+    "signboard",
+    "emblem_ops (découpe)"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "box",
+    "w": 1.8,
+    "d": 0.3
+   },
+   "instanced": true,
+   "emitsLight": false,
+   "animations": [],
+   "fallback": {
+    "shape": "box",
+    "color": "#4e9b62"
+   }
+  },
+  {
+   "id": "sign_lab",
+   "category": "furniture",
+   "file": "models/sign_lab.glb",
+   "format": "glb",
+   "source": {
+    "kind": "generated",
+    "tool": "tools/world3d/build-models.mjs",
+    "note": "dessiné par code, aucune donnée tierce"
+   },
+   "licence": "CC0-1.0",
+   "dimensions": {
+    "w": 1.6,
+    "h": 2.3,
+    "d": 0.14
+   },
+   "bbox": {
+    "min": [
+     -0.8,
+     0,
+     -0.07
+    ],
+    "max": [
+     0.8,
+     2.3,
+     0.07
+    ]
+   },
+   "triangles": 50,
+   "anchor": "bottom-center",
+   "scale": 1,
+   "front": "+z",
+   "materials": [
+    "wood",
+    "signboard",
+    "emblem_lab (découpe)"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "box",
+    "w": 1.8,
+    "d": 0.3
+   },
+   "instanced": true,
+   "emitsLight": false,
+   "animations": [],
+   "fallback": {
+    "shape": "box",
+    "color": "#4e9b62"
+   }
+  },
+  {
+   "id": "sign_workshop",
+   "category": "furniture",
+   "file": "models/sign_workshop.glb",
+   "format": "glb",
+   "source": {
+    "kind": "generated",
+    "tool": "tools/world3d/build-models.mjs",
+    "note": "dessiné par code, aucune donnée tierce"
+   },
+   "licence": "CC0-1.0",
+   "dimensions": {
+    "w": 1.6,
+    "h": 2.3,
+    "d": 0.14
+   },
+   "bbox": {
+    "min": [
+     -0.8,
+     0,
+     -0.07
+    ],
+    "max": [
+     0.8,
+     2.3,
+     0.07
+    ]
+   },
+   "triangles": 50,
+   "anchor": "bottom-center",
+   "scale": 1,
+   "front": "+z",
+   "materials": [
+    "wood",
+    "signboard",
+    "emblem_workshop (découpe)"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "box",
+    "w": 1.8,
+    "d": 0.3
+   },
+   "instanced": true,
+   "emitsLight": false,
+   "animations": [],
+   "fallback": {
+    "shape": "box",
+    "color": "#4e9b62"
+   }
+  },
+  {
    "id": "crate",
    "category": "furniture",
    "file": "models/crate.glb",
@@ -3220,14 +3482,15 @@
    "format": "png-spritesheet",
    "source": {
     "kind": "imported",
-    "from": "persos_pixel_art_pack.zip fourni par l'utilisateur (généré par son generer_pack.py, voir assets/sources/)",
+    "from": "persos_pixel_art_pack.zip (généré par le script de l'utilisateur, voir assets/sources/)",
     "importer": "tools/world3d/import-sprites.mjs",
     "author": "utilisateur",
     "original": "pnj/analyste"
    },
    "licence": "oeuvre-utilisateur",
    "licenceUrl": null,
-   "licenceVerified": false,
+   "licenceVerified": true,
+   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
    "dimensions": {
     "w": 2.4,
     "h": 2.4,
@@ -3311,14 +3574,15 @@
    "format": "png-spritesheet",
    "source": {
     "kind": "imported",
-    "from": "persos_pixel_art_pack.zip fourni par l'utilisateur (généré par son generer_pack.py, voir assets/sources/)",
+    "from": "persos_pixel_art_pack.zip (généré par le script de l'utilisateur, voir assets/sources/)",
     "importer": "tools/world3d/import-sprites.mjs",
     "author": "utilisateur",
     "original": "pnj/etudiant"
    },
    "licence": "oeuvre-utilisateur",
    "licenceUrl": null,
-   "licenceVerified": false,
+   "licenceVerified": true,
+   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
    "dimensions": {
     "w": 2.4,
     "h": 2.4,
@@ -3402,14 +3666,15 @@
    "format": "png-spritesheet",
    "source": {
     "kind": "imported",
-    "from": "persos_pixel_art_pack.zip fourni par l'utilisateur (généré par son generer_pack.py, voir assets/sources/)",
+    "from": "persos_pixel_art_pack.zip (généré par le script de l'utilisateur, voir assets/sources/)",
     "importer": "tools/world3d/import-sprites.mjs",
     "author": "utilisateur",
     "original": "pnj/ingenieur"
    },
    "licence": "oeuvre-utilisateur",
    "licenceUrl": null,
-   "licenceVerified": false,
+   "licenceVerified": true,
+   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
    "dimensions": {
     "w": 2.4,
     "h": 2.4,
@@ -3493,14 +3758,15 @@
    "format": "png-spritesheet",
    "source": {
     "kind": "imported",
-    "from": "persos_pixel_art_pack.zip fourni par l'utilisateur (généré par son generer_pack.py, voir assets/sources/)",
+    "from": "persos_pixel_art_pack.zip (généré par le script de l'utilisateur, voir assets/sources/)",
     "importer": "tools/world3d/import-sprites.mjs",
     "author": "utilisateur",
     "original": "pnj/livreur"
    },
    "licence": "oeuvre-utilisateur",
    "licenceUrl": null,
-   "licenceVerified": false,
+   "licenceVerified": true,
+   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
    "dimensions": {
     "w": 2.4,
     "h": 2.4,
@@ -3584,14 +3850,15 @@
    "format": "png-spritesheet",
    "source": {
     "kind": "imported",
-    "from": "persos_pixel_art_pack.zip fourni par l'utilisateur (généré par son generer_pack.py, voir assets/sources/)",
+    "from": "persos_pixel_art_pack.zip (généré par le script de l'utilisateur, voir assets/sources/)",
     "importer": "tools/world3d/import-sprites.mjs",
     "author": "utilisateur",
     "original": "pnj/medecin"
    },
    "licence": "oeuvre-utilisateur",
    "licenceUrl": null,
-   "licenceVerified": false,
+   "licenceVerified": true,
+   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
    "dimensions": {
     "w": 2.4,
     "h": 2.4,
@@ -3675,14 +3942,15 @@
    "format": "png-spritesheet",
    "source": {
     "kind": "imported",
-    "from": "persos_pixel_art_pack.zip fourni par l'utilisateur (généré par son generer_pack.py, voir assets/sources/)",
+    "from": "persos_pixel_art_pack.zip (généré par le script de l'utilisateur, voir assets/sources/)",
     "importer": "tools/world3d/import-sprites.mjs",
     "author": "utilisateur",
     "original": "pnj/operateur"
    },
    "licence": "oeuvre-utilisateur",
    "licenceUrl": null,
-   "licenceVerified": false,
+   "licenceVerified": true,
+   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
    "dimensions": {
     "w": 2.4,
     "h": 2.4,
@@ -3766,14 +4034,15 @@
    "format": "png-spritesheet",
    "source": {
     "kind": "imported",
-    "from": "persos_pixel_art_pack.zip fourni par l'utilisateur (généré par son generer_pack.py, voir assets/sources/)",
+    "from": "persos_pixel_art_pack.zip (généré par le script de l'utilisateur, voir assets/sources/)",
     "importer": "tools/world3d/import-sprites.mjs",
     "author": "utilisateur",
     "original": "pnj/scientifique"
    },
    "licence": "oeuvre-utilisateur",
    "licenceUrl": null,
-   "licenceVerified": false,
+   "licenceVerified": true,
+   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
    "dimensions": {
     "w": 2.4,
     "h": 2.4,
@@ -3857,14 +4126,475 @@
    "format": "png-spritesheet",
    "source": {
     "kind": "imported",
-    "from": "persos_pixel_art_pack.zip fourni par l'utilisateur (généré par son generer_pack.py, voir assets/sources/)",
+    "from": "persos_pixel_art_pack.zip (généré par le script de l'utilisateur, voir assets/sources/)",
     "importer": "tools/world3d/import-sprites.mjs",
     "author": "utilisateur",
     "original": "pnj/securite"
    },
    "licence": "oeuvre-utilisateur",
    "licenceUrl": null,
-   "licenceVerified": false,
+   "licenceVerified": true,
+   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
+   "dimensions": {
+    "w": 2.4,
+    "h": 2.4,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     192,
+     256
+    ],
+    "cell": [
+     64,
+     64
+    ],
+    "cols": 3,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche",
+     "course"
+    ],
+    "footPx": 10
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      0,
+      1
+     ],
+     "fps": 5
+    },
+    {
+     "name": "run",
+     "frames": [
+      2,
+      1,
+      2,
+      1
+     ],
+     "fps": 8
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#2f9aa0"
+   }
+  },
+  {
+   "id": "hero_cynthia",
+   "category": "character",
+   "file": "tex/hero_cynthia.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "imported",
+    "from": "persos_pixel_art_pack.zip (généré par le script de l'utilisateur, voir assets/sources/)",
+    "importer": "tools/world3d/import-sprites.mjs",
+    "author": "utilisateur",
+    "original": "principaux/cynthia"
+   },
+   "licence": "oeuvre-utilisateur",
+   "licenceUrl": null,
+   "licenceVerified": true,
+   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
+   "dimensions": {
+    "w": 2.4,
+    "h": 2.4,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     192,
+     256
+    ],
+    "cell": [
+     64,
+     64
+    ],
+    "cols": 3,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche",
+     "course"
+    ],
+    "footPx": 10
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      0,
+      1
+     ],
+     "fps": 5
+    },
+    {
+     "name": "run",
+     "frames": [
+      2,
+      1,
+      2,
+      1
+     ],
+     "fps": 8
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#2f9aa0"
+   }
+  },
+  {
+   "id": "hero_gold",
+   "category": "character",
+   "file": "tex/hero_gold.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "imported",
+    "from": "persos_pixel_art_pack.zip (généré par le script de l'utilisateur, voir assets/sources/)",
+    "importer": "tools/world3d/import-sprites.mjs",
+    "author": "utilisateur",
+    "original": "principaux/gold"
+   },
+   "licence": "oeuvre-utilisateur",
+   "licenceUrl": null,
+   "licenceVerified": true,
+   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
+   "dimensions": {
+    "w": 2.4,
+    "h": 2.4,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     192,
+     256
+    ],
+    "cell": [
+     64,
+     64
+    ],
+    "cols": 3,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche",
+     "course"
+    ],
+    "footPx": 10
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      0,
+      1
+     ],
+     "fps": 5
+    },
+    {
+     "name": "run",
+     "frames": [
+      2,
+      1,
+      2,
+      1
+     ],
+     "fps": 8
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#2f9aa0"
+   }
+  },
+  {
+   "id": "hero_peter",
+   "category": "character",
+   "file": "tex/hero_peter.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "imported",
+    "from": "persos_pixel_art_pack.zip (généré par le script de l'utilisateur, voir assets/sources/)",
+    "importer": "tools/world3d/import-sprites.mjs",
+    "author": "utilisateur",
+    "original": "principaux/peter"
+   },
+   "licence": "oeuvre-utilisateur",
+   "licenceUrl": null,
+   "licenceVerified": true,
+   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
+   "dimensions": {
+    "w": 2.4,
+    "h": 2.4,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     192,
+     256
+    ],
+    "cell": [
+     64,
+     64
+    ],
+    "cols": 3,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche",
+     "course"
+    ],
+    "footPx": 10
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      0,
+      1
+     ],
+     "fps": 5
+    },
+    {
+     "name": "run",
+     "frames": [
+      2,
+      1,
+      2,
+      1
+     ],
+     "fps": 8
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#2f9aa0"
+   }
+  },
+  {
+   "id": "hero_pierre_rochard",
+   "category": "character",
+   "file": "tex/hero_pierre_rochard.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "imported",
+    "from": "persos_pixel_art_pack.zip (généré par le script de l'utilisateur, voir assets/sources/)",
+    "importer": "tools/world3d/import-sprites.mjs",
+    "author": "utilisateur",
+    "original": "principaux/pierre_rochard"
+   },
+   "licence": "oeuvre-utilisateur",
+   "licenceUrl": null,
+   "licenceVerified": true,
+   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
+   "dimensions": {
+    "w": 2.4,
+    "h": 2.4,
+    "d": 0
+   },
+   "sheet": {
+    "px": [
+     192,
+     256
+    ],
+    "cell": [
+     64,
+     64
+    ],
+    "cols": 3,
+    "rows": 4,
+    "rowsOrder": [
+     "bas",
+     "gauche",
+     "droite",
+     "haut"
+    ],
+    "colsOrder": [
+     "statique",
+     "marche",
+     "course"
+    ],
+    "footPx": 10
+   },
+   "anchor": "bottom-center",
+   "scale": 1,
+   "billboard": "yaw",
+   "materials": [
+    "alphaTest 0.5, nearest"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "circle",
+    "r": 0.3
+   },
+   "animations": [
+    {
+     "name": "idle",
+     "frames": [
+      0
+     ],
+     "fps": 1
+    },
+    {
+     "name": "walk",
+     "frames": [
+      0,
+      1,
+      0,
+      1
+     ],
+     "fps": 5
+    },
+    {
+     "name": "run",
+     "frames": [
+      2,
+      1,
+      2,
+      1
+     ],
+     "fps": 8
+    }
+   ],
+   "fallback": {
+    "shape": "capsule",
+    "color": "#2f9aa0"
+   }
+  },
+  {
+   "id": "hero_red",
+   "category": "character",
+   "file": "tex/hero_red.png",
+   "format": "png-spritesheet",
+   "source": {
+    "kind": "imported",
+    "from": "persos_pixel_art_pack.zip (généré par le script de l'utilisateur, voir assets/sources/)",
+    "importer": "tools/world3d/import-sprites.mjs",
+    "author": "utilisateur",
+    "original": "principaux/red"
+   },
+   "licence": "oeuvre-utilisateur",
+   "licenceUrl": null,
+   "licenceVerified": true,
+   "licenceNote": "déclaré par l'auteur (l'utilisateur a écrit le code générateur)",
    "dimensions": {
     "w": 2.4,
     "h": 2.4,
