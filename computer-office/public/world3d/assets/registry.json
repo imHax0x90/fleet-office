@@ -1315,6 +1315,366 @@
    }
   },
   {
+   "id": "tallgrass",
+   "category": "vegetation",
+   "file": "models/tallgrass.glb",
+   "format": "glb",
+   "source": {
+    "kind": "generated",
+    "tool": "tools/world3d/build-models.mjs",
+    "note": "dessiné par code, aucune donnée tierce"
+   },
+   "licence": "CC0-1.0",
+   "dimensions": {
+    "w": 1.1,
+    "h": 0.8,
+    "d": 0.95
+   },
+   "bbox": {
+    "min": [
+     -0.55,
+     0,
+     -0.48
+    ],
+    "max": [
+     0.55,
+     0.8,
+     0.48
+    ]
+   },
+   "triangles": 6,
+   "anchor": "bottom-center",
+   "scale": 1,
+   "front": "+z",
+   "materials": [
+    "tallgrass (découpe)"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": null,
+   "instanced": true,
+   "emitsLight": false,
+   "animations": [],
+   "fallback": {
+    "shape": "box",
+    "color": "#4e9b62"
+   }
+  },
+  {
+   "id": "windmill",
+   "category": "scenery",
+   "file": "models/windmill.glb",
+   "format": "glb",
+   "source": {
+    "kind": "generated",
+    "tool": "tools/world3d/build-models.mjs",
+    "note": "dessiné par code, aucune donnée tierce"
+   },
+   "licence": "CC0-1.0",
+   "dimensions": {
+    "w": 4.6,
+    "h": 7.8,
+    "d": 4.6
+   },
+   "bbox": {
+    "min": [
+     -2.3,
+     0,
+     -2.3
+    ],
+    "max": [
+     2.3,
+     7.8,
+     2.3
+    ]
+   },
+   "triangles": 106,
+   "anchor": "bottom-center",
+   "scale": 1,
+   "front": "+z",
+   "materials": [
+    "stone",
+    "wall_cream",
+    "roof_red",
+    "door",
+    "window",
+    "wood"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "box",
+    "w": 4.4,
+    "d": 4.4
+   },
+   "instanced": true,
+   "emitsLight": false,
+   "animations": [],
+   "fallback": {
+    "shape": "box",
+    "color": "#4e9b62"
+   }
+  },
+  {
+   "id": "windmill_sails",
+   "category": "scenery",
+   "file": "models/windmill_sails.glb",
+   "format": "glb",
+   "source": {
+    "kind": "generated",
+    "tool": "tools/world3d/build-models.mjs",
+    "note": "dessiné par code, aucune donnée tierce"
+   },
+   "licence": "CC0-1.0",
+   "dimensions": {
+    "w": 8.4,
+    "h": 8.4,
+    "d": 0.4
+   },
+   "bbox": {
+    "min": [
+     -4.2,
+     -4.2,
+     -0.1
+    ],
+    "max": [
+     4.2,
+     4.2,
+     0.3
+    ]
+   },
+   "triangles": 26,
+   "anchor": "bottom-center",
+   "scale": 1,
+   "front": "+z",
+   "materials": [
+    "wood",
+    "sail"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": null,
+   "instanced": true,
+   "emitsLight": false,
+   "animations": [
+    {
+     "name": "spin",
+     "axis": "z",
+     "note": "rotation continue pilotée par le moteur (props animés de la carte)"
+    }
+   ],
+   "fallback": {
+    "shape": "box",
+    "color": "#4e9b62"
+   }
+  },
+  {
+   "id": "clock_tower",
+   "category": "scenery",
+   "file": "models/clock_tower.glb",
+   "format": "glb",
+   "source": {
+    "kind": "generated",
+    "tool": "tools/world3d/build-models.mjs",
+    "note": "dessiné par code, aucune donnée tierce"
+   },
+   "licence": "CC0-1.0",
+   "dimensions": {
+    "w": 3.8,
+    "h": 12.6,
+    "d": 3.8
+   },
+   "bbox": {
+    "min": [
+     -1.9,
+     0,
+     -1.9
+    ],
+    "max": [
+     1.9,
+     12.6,
+     1.9
+    ]
+   },
+   "triangles": 80,
+   "anchor": "bottom-center",
+   "scale": 1,
+   "front": "+z",
+   "materials": [
+    "stone",
+    "wall_brick",
+    "wall_cream",
+    "roof_blue",
+    "clock",
+    "door",
+    "window",
+    "metal"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": {
+    "type": "box",
+    "w": 3.6,
+    "d": 3.6
+   },
+   "instanced": true,
+   "emitsLight": false,
+   "animations": [],
+   "fallback": {
+    "shape": "box",
+    "color": "#4e9b62"
+   }
+  },
+  {
+   "id": "gate",
+   "category": "scenery",
+   "file": "models/gate.glb",
+   "format": "glb",
+   "source": {
+    "kind": "generated",
+    "tool": "tools/world3d/build-models.mjs",
+    "note": "dessiné par code, aucune donnée tierce"
+   },
+   "licence": "CC0-1.0",
+   "dimensions": {
+    "w": 5.8,
+    "h": 4,
+    "d": 1
+   },
+   "bbox": {
+    "min": [
+     -2.9,
+     0,
+     -0.5
+    ],
+    "max": [
+     2.9,
+     4,
+     0.5
+    ]
+   },
+   "triangles": 80,
+   "anchor": "bottom-center",
+   "scale": 1,
+   "front": "+z",
+   "materials": [
+    "stone",
+    "wall_stone",
+    "signboard"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": null,
+   "instanced": true,
+   "emitsLight": false,
+   "animations": [],
+   "fallback": {
+    "shape": "box",
+    "color": "#4e9b62"
+   }
+  },
+  {
+   "id": "pier",
+   "category": "scenery",
+   "file": "models/pier.glb",
+   "format": "glb",
+   "source": {
+    "kind": "generated",
+    "tool": "tools/world3d/build-models.mjs",
+    "note": "dessiné par code, aucune donnée tierce"
+   },
+   "licence": "CC0-1.0",
+   "dimensions": {
+    "w": 5.2,
+    "h": 1.2,
+    "d": 2.2
+   },
+   "bbox": {
+    "min": [
+     -2.6,
+     -0.4,
+     -1.1
+    ],
+    "max": [
+     2.6,
+     0.8,
+     1.1
+    ]
+   },
+   "triangles": 90,
+   "anchor": "bottom-center",
+   "scale": 1,
+   "front": "+z",
+   "materials": [
+    "wood",
+    "bark"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": null,
+   "instanced": true,
+   "emitsLight": false,
+   "animations": [],
+   "fallback": {
+    "shape": "box",
+    "color": "#4e9b62"
+   }
+  },
+  {
+   "id": "bridge",
+   "category": "scenery",
+   "file": "models/bridge.glb",
+   "format": "glb",
+   "source": {
+    "kind": "generated",
+    "tool": "tools/world3d/build-models.mjs",
+    "note": "dessiné par code, aucune donnée tierce"
+   },
+   "licence": "CC0-1.0",
+   "dimensions": {
+    "w": 4.6,
+    "h": 0.95,
+    "d": 2.46
+   },
+   "bbox": {
+    "min": [
+     -2.3,
+     0,
+     -1.23
+    ],
+    "max": [
+     2.3,
+     0.95,
+     1.23
+    ]
+   },
+   "triangles": 110,
+   "anchor": "bottom-center",
+   "scale": 1,
+   "front": "+z",
+   "materials": [
+    "wood",
+    "bark"
+   ],
+   "occlusion": {
+    "mode": "none"
+   },
+   "collision": null,
+   "instanced": true,
+   "emitsLight": false,
+   "animations": [],
+   "fallback": {
+    "shape": "box",
+    "color": "#4e9b62"
+   }
+  },
+  {
    "id": "crate",
    "category": "furniture",
    "file": "models/crate.glb",
@@ -1953,7 +2313,7 @@
    },
    "licence": "CC0-1.0",
    "dimensions": {
-    "w": 128,
+    "w": 192,
     "h": 16,
     "d": 0
    },
@@ -1967,7 +2327,11 @@
      "cobble_edge",
      "plaza_stone",
      "dirt",
-     "water"
+     "water",
+     "sand",
+     "tall_grass",
+     "water_b",
+     "flower_field"
     ]
    },
    "anchor": "tile",

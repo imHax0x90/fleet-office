@@ -9,7 +9,7 @@ const speckle = (img, r, base, amt, n, x0 = 0, y0 = 0, w = img.w, h = img.h) => 
 
 // ---- atlas de sol : 8 tuiles de 16 px -------------------------------------------------------------------
 {
-  const T = 16, img = new Img(T * 8, T), r = rng(11);
+  const T = 16, img = new Img(T * 12, T), r = rng(11);
   const tile = (i, f) => f(i * T);
   const grass = (x0, base, seed) => { const q = rng(seed); img.rect(x0, 0, T, T, base); speckle(img, q, base, .30, 70, x0); for (let k = 0; k < 14; k++) { const x = x0 + (q() * T | 0), y = q() * T | 0; img.px(x, y, shade(base, 1.22)); img.px(x, y + 1, shade(base, .82)); } };
   tile(0, (x) => grass(x, hex("#5fae45"), 5));
@@ -24,6 +24,10 @@ const speckle = (img, r, base, amt, n, x0 = 0, y0 = 0, w = img.w, h = img.h) => 
   tile(5, (x) => { const base = hex("#d9d2c0"), q = rng(31); img.rect(x, 0, T, T, base); speckle(img, q, base, .12, 40, x); for (let i = 0; i < T; i++) { img.px(x + i, 7, "#a79f8b"); img.px(x + i, 15, "#a79f8b"); img.px(x + 7, i < 8 ? i : 99, "#a79f8b"); img.px(x + 15, i, "#a79f8b"); img.px(x + 3, i >= 8 ? i : 99, "#a79f8b"); img.px(x + i, 0, "#efe9d9"); } });
   tile(6, (x) => { const base = hex("#c9a46a"), q = rng(41); img.rect(x, 0, T, T, base); speckle(img, q, base, .22, 80, x); for (let k = 0; k < 5; k++) img.px(x + (q() * T | 0), q() * T | 0, "#8a6a3c"); });
   tile(7, (x) => { const base = hex("#3f86d8"); img.rect(x, 0, T, T, base); const q = rng(51); for (let k = 0; k < 8; k++) { const px = x + (q() * 12 | 0), py = q() * T | 0; img.rect(px, py, 3, 1, "#8dc4ff"); } });
+  tile(8, (x) => { const base = hex("#e8d49a"), q = rng(81); img.rect(x, 0, T, T, base); speckle(img, q, base, .14, 60, x); for (let k = 0; k < 7; k++) img.px(x + (q() * T | 0), q() * T | 0, "#c9b270"); });
+  tile(9, (x) => { const base = hex("#3f8a35"), q = rng(82); img.rect(x, 0, T, T, base); speckle(img, q, base, .25, 70, x); for (let k = 0; k < 26; k++) { const px = x + (q() * 15 | 0), py = 2 + (q() * 13 | 0); img.px(px, py, "#79c457"); img.px(px, py - 1, "#79c457"); img.px(px + 1, py + 1, "#2b6b2a"); } });
+  tile(10, (x) => { const base = hex("#3f86d8"); img.rect(x, 0, T, T, base); const q = rng(52); for (let k = 0; k < 8; k++) { const px = x + (q() * 12 | 0), py = q() * T | 0; img.rect(px, py, 3, 1, "#8dc4ff"); } for (let k = 0; k < 4; k++) img.px(x + (q() * 15 | 0), q() * 15 | 0, "#ffffff"); });
+  tile(11, (x) => { grass(x, hex("#5fae45"), 91); const q = rng(92), cols = ["#fff6c8", "#ff7a8a", "#ffd24a", "#f4f4ff", "#b48cff"]; for (let k = 0; k < 22; k++) { const px = x + 1 + (q() * 14 | 0), py = 1 + (q() * 14 | 0), c = cols[k % 5]; img.px(px, py, c); img.px(px + 1, py, shade(hex(c), .85)); } });
   save("ground", img);
 }
 
@@ -134,3 +138,8 @@ const drawChar = (img, ox, oy, p, dir, f) => {
 };
 const outline = (img, ox, oy, w, h) => { const keep = []; for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { if (img.get(ox + x, oy + y)[3]) continue; let n = false; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const X = x + dx, Y = y + dy; if (X >= 0 && Y >= 0 && X < w && Y < h && img.get(ox + X, oy + Y)[3]) n = true; } if (n) keep.push([x, y]); } for (const [x, y] of keep) img.px(ox + x, oy + y, LINE); };
 PAL.forEach((p, i) => { const img = new Img(64, 96); for (let d = 0; d < 4; d++) for (let f = 0; f < 4; f++) { drawChar(img, f * 16, d * 24, p, d, f); outline(img, f * 16, d * 24, 16, 24); } save("char_" + i, img); });
+
+// ---- touffes d'herbe haute (billboard croisé), voile de moulin, cadran d'horloge
+{ const img = new Img(16, 16), q = rng(95); for (let b = 0; b < 7; b++) { const x0 = 1 + b * 2 + (q() * 2 | 0), h = 7 + (q() * 8 | 0), lean = (q() * 3 | 0) - 1; for (let y = 0; y < h; y++) { const x = x0 + Math.round(lean * y / h * 2); img.px(x, 15 - y, y > h - 3 ? "#9be06a" : y > h / 2 ? "#4aa63f" : "#2f7d3c"); img.px(x + 1, 15 - y, y > h - 3 ? "#79c457" : "#2f7d3c"); } } save("tallgrass", img); }
+{ const img = new Img(16, 32); img.rect(0, 0, 16, 32, "#f4ecd0"); for (let y = 0; y < 32; y += 4) img.rect(0, y, 16, 1, "#d9cfa8"); img.rect(0, 0, 16, 2, "#6b4a2b"); img.rect(0, 30, 16, 2, "#6b4a2b"); img.rect(0, 0, 2, 32, "#6b4a2b"); img.rect(14, 0, 2, 32, "#6b4a2b"); img.rect(7, 0, 2, 32, "#8c6a43"); for (let y = 6; y < 30; y += 8) img.rect(0, y, 16, 2, "#8c6a43"); save("sail", img); }
+{ const img = new Img(16, 16); img.rect(0, 0, 16, 16, "#2a3347"); img.rect(1, 1, 14, 14, "#f6f1dc"); for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2; img.px(8 + Math.round(Math.sin(a) * 5.5), 8 - Math.round(Math.cos(a) * 5.5), "#2a3347"); } img.rect(8, 3, 1, 5, "#2a3347"); img.rect(8, 8, 4, 1, "#2a3347"); img.rect(7, 7, 3, 3, "#d9483a"); save("clock", img); }

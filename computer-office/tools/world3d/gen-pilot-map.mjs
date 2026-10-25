@@ -15,7 +15,10 @@ rect(0, 24, W - 1, 26, "c");                 // rue de la place
 rect(0, 40, W - 1, 41, "c");                 // rue des ateliers
 for (const ys of STREETS) rect(0, ys, W - 1, ys + 1, "c");
 rect(CX - 7, 19, CX + 7, 31, "p");           // place centrale
-rect(2, 28, 6, 31, "w"); rect(57, 28, 61, 31, "w"); // deux mares
+rect(2, 27, 6, 31, "w"); rect(2, 32, 3, 44, "w"); rect(1, 43, 4, 44, "w"); // étang de l'ouest + ruisseau qui descend sous la rue des ateliers
+rect(2, 40, 3, 41, "b");                      // pont du ruisseau
+rect(57, 28, 62, 35, "w"); rect(57, 30, 59, 31, "b"); // lac de l'est + ponton
+for (const [x0, y0, x1, y1] of [[2, 16, 7, 21], [56, 17, 62, 22], [2, 35, 7, 39]]) rect(x0, y0, x1, y1, "t"); // hautes herbes
 // --- bâtiments publics autour de la place (façade vers le sud)
 const zones = [
   { id: "hq", asset: "hq", x: CX, y: 9, rot: 0, label: "Quartier général", role: "headquarters", view: "board", blurb: "Vue d'ensemble de toute la flotte d'agents." },
@@ -49,11 +52,18 @@ for (const ys of STREETS) for (let x = 3; x < W - 2; x += 8) if (Math.abs(x - CX
 for (let y = 3; y < 19; y += 8) { add("lamp", CX - 2.4, y); add("lamp", CX + 2.4, y + 4); }
 add("bench", 22, 23.4, 0); add("bench", 42, 27.6, Math.PI); add("bench", 26, 39.4, 0); add("bench", 38, 41.6, Math.PI);
 for (const z of zones) { add("lamp", z.x - 4.6, z.y + 5.2); add("lamp", z.x + 4.6, z.y + 5.2); add("bush", z.x - 7.2, z.y + 3); add("bush", z.x + 7.6, z.y + 3); add("flowerbed", z.x - 2.6, z.y + 3.6, 0); add("flowerbed", z.x + 2.6, z.y + 3.6, 0); }
+add("windmill", 5, 10.5, 0); add("clock_tower", 59, 8.5, 0);
+add("bridge", 3, 40.5, 0); add("pier", 57.5, 31, 0);
+add("gate", CX, 1.8, 0); add("gate", CX, H - 1.8, 0); add("gate", 1.8, 25, Math.PI / 2); add("gate", W - 1.8, 25, Math.PI / 2);
+for (let x = 3; x < W - 1; x += 5.5) if (Math.abs(x - CX) > 9) { add("tree_round", x, 22.7, rnd() * 6); add("tree_round", x + 2.7, 27.5, rnd() * 6); }
+for (let y = 3; y < 18; y += 5) { add("tree_round", CX - 3.6, y + 1, rnd() * 6); add("tree_round", CX + 3.6, y + 3, rnd() * 6); }
+for (let y = 32; y < 39; y += 3.5) { add("tree_round", CX - 3.6, y, rnd() * 6); add("tree_round", CX + 3.6, y + 1.5, rnd() * 6); }
 add("crate", 18.3, 36.4, 0.3); add("crate", 19.2, 36.9, 0.6);
+const patches = []; for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (g[y][x] === "t") { for (let k = 0; k < 3; k++) add("tallgrass", x + .15 + rnd() * .7, y + .15 + rnd() * .7, rnd() * 3.14); }
 // --- ceinture d'arbres (sorties aux bouts des rues) puis arbres isolés
 const paved = (x, y) => { const c = (g[Math.floor(y)] || [])[Math.floor(x)]; return c === "c" || c === "p"; };
-for (let i = 0; i < 2; i++) { for (let x = 0.8; x < W; x += 1.5) for (const y of [0.9 + i * 1.5, H - 0.9 - i * 1.5]) if (!paved(x, y) && !paved(x, y < 5 ? 3 : H - 4)) add(rnd() < .7 ? "tree_pine" : "tree_round", x + (rnd() - .5) * .4, y, rnd() * 6.28);
-  for (let y = 2.4; y < H - 2; y += 1.5) for (const x of [0.9 + i * 1.5, W - 0.9 - i * 1.5]) if (!paved(x, y) && !paved(x < 5 ? 3 : W - 4, y)) add(rnd() < .7 ? "tree_pine" : "tree_round", x, y + (rnd() - .5) * .4, rnd() * 6.28); }
+for (let i = 0; i < 2; i++) { for (let x = 0.8; x < W; x += 1.5) for (const y of [0.9 + i * 1.5, H - 0.9 - i * 1.5]) if (Math.abs(x - CX) > 4.5 && !paved(x, y) && !paved(x, y < 5 ? 3 : H - 4)) add(rnd() < .7 ? "tree_pine" : "tree_round", x + (rnd() - .5) * .4, y, rnd() * 6.28);
+  for (let y = 2.4; y < H - 2; y += 1.5) for (const x of [0.9 + i * 1.5, W - 0.9 - i * 1.5]) if (Math.abs(y - 25) > 4.5 && !paved(x, y) && !paved(x < 5 ? 3 : W - 4, y)) add(rnd() < .7 ? "tree_pine" : "tree_round", x, y + (rnd() - .5) * .4, rnd() * 6.28); }
 for (const [x, y, t] of [[CX, 2.5, "Nord"], [CX, H - 3, "Sud"], [3, 25, "Ouest"], [W - 3, 25, "Est"]]) add("signpost", x + (t === "Nord" || t === "Sud" ? 2.4 : 0), y + (t === "Ouest" || t === "Est" ? 2.2 : 0), 0, { text: t });
 const solid = zones.map((z) => ({ x: z.x, y: z.y, rx: 7.5, ry: 5 })).concat(lots.map((l) => ({ x: l.x, y: l.y, rx: 4.4, ry: 4.4 })));
 const free = (x, y, r = 0) => { for (let j = -r; j <= r; j++) for (let i = -r; i <= r; i++) if ((g[y + j] || [])[x + i] !== "g") return false; return true; };
@@ -64,5 +74,5 @@ for (let t = 0; t < 9000 && (tr < 55 || bu < 40 || fl < 50); t++) {
   const r = rnd(); if (r < .4 && tr < 55) { add(rnd() < .5 ? "tree_round" : rnd() < .5 ? "tree_autumn" : "tree_pine", x, y, rnd() * 6.28); tr++; } else if (r < .7 && bu < 40) { add("bush", x, y, rnd() * 6.28); bu++; } else if (fl < 50) { add("flowers", x, y, rnd() * 3.14); fl++; }
 }
 const rows = g.map((r) => r.join(""));
-fs.writeFileSync(OUT, JSON.stringify({ version: 2, name: "Fleet Office — ville pilote", tile: 1, size: { w: W, h: H }, spawn: { x: CX, y: 29.5 }, legend: { g: "herbe", c: "pavés", p: "dalles de plaza", d: "terre battue", w: "eau" }, rows, zones, lots, objects }).replace(/"rows":\[/, '"rows":[\n').replace(/","/g, '",\n"'));
+fs.writeFileSync(OUT, JSON.stringify({ version: 2, name: "Fleet Office — ville pilote", tile: 1, size: { w: W, h: H }, spawn: { x: CX, y: 29.5 }, legend: { g: "herbe", c: "pavés", p: "dalles de plaza", d: "terre battue", w: "eau", b: "pont / ponton (eau dessous, praticable)", t: "hautes herbes" }, rows, zones, lots, objects, animated: [{ asset: "windmill_sails", x: 5, y: 12.5, h: 5.3, rot: 0, speed: 0.7 }] }).replace(/"rows":\[/, '"rows":[\n').replace(/","/g, '",\n"'));
 console.log("carte", W + "x" + H, "objets", objects.length, "lots", lots.length, "zones", zones.length);

@@ -97,3 +97,10 @@ Chaîne validée sur un OBJ/MTL de test (`tools/world3d/fixtures/pillar.*`, cré
 `node tools/world3d/validate.mjs` (28 assets, 21 GLB, carte) · chargement headless de `/world3d/` contre l'orchestrateur réel : 20/20 assets, 9 maisons, 12 agents, 0 erreur de console ·
 marche / course / collision contre le Quartier général / clic-déplacement / rotation Q-E · clic sur chacun des 5 bâtiments (panneaux alimentés par `/api/*`) · ouverture de la console intégrée ·
 asset cassé (fallback orange + HUD rouge) · asset importé (OBJ → GLB) chargé et visible · validateur : détecte fichier absent / licence manquante (exit 1).
+
+## Ambiance « ville de RPG DS » (v3)
+
+* **Jour / nuit** selon l'heure locale (`?time=22` pour forcer, touche **N** : nuit → jour → auto) : ciel, brouillard et lumières changent, halos additifs sur les lampadaires, fenêtres éclairées, personnages assombris.
+* **Eau animée** (2 images d'atlas alternées), **berges de sable**, **lac avec ponton**, **ruisseau et pont**, **hautes herbes** (touffes en billboards croisés), **champs de fleurs**, **moulin à voiles tournantes**, **tour de l'horloge**, **portes de ville** aux quatre sorties, arbres d'alignement le long des rues.
+* Ces décors sont de catégorie `scenery` dans le registre : purs éléments d'ambiance, sans lien avec des données.
+* Cases de carte : `b` = pont/ponton (eau dessous, praticable), `t` = hautes herbes ; `animated[]` = props animés (rotation continue).
